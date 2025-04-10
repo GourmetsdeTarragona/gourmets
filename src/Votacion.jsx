@@ -1,0 +1,1 @@
+export default function Votacion() { return <div>Votación</div> }
