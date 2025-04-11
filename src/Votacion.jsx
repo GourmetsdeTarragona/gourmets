@@ -1,6 +1,7 @@
 
 import React, { useEffect, useState } from 'react'
 import { supabase } from './supabase'
+import Cabecera from './Cabecera'
 
 export default function Votacion({ usuario, nombreCompleto, modoInvitado }) {
   const [restaurantes, setRestaurantes] = useState([])
@@ -31,7 +32,8 @@ export default function Votacion({ usuario, nombreCompleto, modoInvitado }) {
 
   return (
     <div className="space-y-4">
-      <h2 className="text-xl font-bold text-center">
+      <Cabecera />
+      <h2 className="text-xl font-bold text-center mt-4">
         {modoInvitado ? 'Explorando restaurantes' : `Hola, ${nombreCompleto}`}
       </h2>
 
