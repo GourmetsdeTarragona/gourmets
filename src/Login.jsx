@@ -1,6 +1,7 @@
 
 import React, { useState } from 'react'
 import { supabase } from './supabase'
+import Cabecera from './Cabecera'
 
 export default function Login({ onSuccess }) {
   const [usuario, setUsuario] = useState('')
@@ -32,13 +33,16 @@ export default function Login({ onSuccess }) {
   }
 
   return (
-    <div className="p-4 space-y-4 max-w-xs mx-auto">
-      <h2 className="text-lg font-bold text-center">Iniciar sesión</h2>
-      <input type="text" placeholder="Usuario" value={usuario} onChange={e => setUsuario(e.target.value)} className="w-full border px-2 py-1 rounded" />
-      <input type="password" placeholder="Contraseña" value={clave} onChange={e => setClave(e.target.value)} className="w-full border px-2 py-1 rounded" />
-      <input type="text" placeholder="Tu nombre completo" value={nombre} onChange={e => setNombre(e.target.value)} className="w-full border px-2 py-1 rounded" />
-      {error && <p className="text-red-600 text-sm">{error}</p>}
-      <button onClick={handleLogin} className="w-full bg-blue-600 text-white py-2 rounded">Entrar</button>
+    <div className="min-h-screen bg-white p-4 space-y-4">
+      <Cabecera />
+      <div className="max-w-xs mx-auto space-y-4 mt-6">
+        <h2 className="text-lg font-bold text-center">Iniciar sesión</h2>
+        <input type="text" placeholder="Usuario" value={usuario} onChange={e => setUsuario(e.target.value)} className="w-full border px-2 py-1 rounded" />
+        <input type="password" placeholder="Contraseña" value={clave} onChange={e => setClave(e.target.value)} className="w-full border px-2 py-1 rounded" />
+        <input type="text" placeholder="Tu nombre completo" value={nombre} onChange={e => setNombre(e.target.value)} className="w-full border px-2 py-1 rounded" />
+        {error && <p className="text-red-600 text-sm">{error}</p>}
+        <button onClick={handleLogin} className="w-full bg-blue-600 text-white py-2 rounded">Entrar</button>
+      </div>
     </div>
   )
 }
