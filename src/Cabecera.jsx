@@ -1,31 +1,29 @@
-
 import React from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 
 export default function Cabecera() {
   const location = useLocation()
   const navigate = useNavigate()
-
   const esInicio = location.pathname === '/'
 
   return (
-    <div className="flex items-center justify-between p-4 bg-white shadow-md">
+    <div className="flex items-center justify-center bg-white shadow-md relative py-4">
       {!esInicio && (
         <button
           onClick={() => navigate(-1)}
-          className="text-blue-600 font-semibold"
+          className="absolute left-4 text-blue-600 font-semibold"
         >
           ← Atrás
         </button>
       )}
-      <div className="flex-grow text-center">
-        <img
-          src="/logo.png"
-          alt="Logo"
-          className={`mx-auto ${esInicio ? 'animate-bounce' : ''} w-20 h-20 object-contain`}
-        />
-      </div>
-      {!esInicio && <div style={{ width: '60px' }} />} {/* espacio para equilibrar */}
+      <img
+        src="/logo.png"
+        alt="Logo"
+        className={`w-24 h-24 object-contain transition-all duration-300 ${
+          esInicio ? 'animate-bounce' : ''
+        }`}
+      />
     </div>
   )
 }
+
