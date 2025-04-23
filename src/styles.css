@@ -1,0 +1,86 @@
+/* Contenedor principal de cada página */
+.page-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: start;
+  min-height: 100vh;
+  padding: 40px 20px;
+  background-color: #fefefe;
+  font-family: 'Segoe UI', sans-serif;
+}
+
+/* Títulos principales */
+.page-title {
+  font-size: 1.8rem;
+  margin: 20px 0;
+  color: #a02040;
+  text-align: center;
+}
+
+/* Secciones con fondo blanco y sombreado */
+.section {
+  width: 100%;
+  max-width: 600px;
+  background: #ffffff;
+  padding: 25px;
+  margin-top: 20px;
+  border-radius: 16px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+}
+
+/* Inputs y selects */
+input, select, textarea {
+  width: 100%;
+  margin-bottom: 15px;
+  padding: 12px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-size: 1rem;
+  box-sizing: border-box;
+}
+
+/* Botones */
+button {
+  background-color: #a02040;
+  color: white;
+  padding: 12px 20px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background-color 0.3s;
+  margin-top: 10px;
+}
+
+button:hover {
+  background-color: #801a35;
+}
+
+/* Logo centrado y animado */
+.logo {
+  width: 180px;
+  margin: 20px auto;
+  display: block;
+  animation: flotar 3s ease-in-out infinite;
+}
+
+@keyframes flotar {
+  0%   { transform: translateY(0); }
+  50%  { transform: translateY(-10px); }
+  100% { transform: translateY(0); }
+}
+
+/* Mensajes de error o éxito */
+p {
+  margin-top: 10px;
+  font-size: 0.95rem;
+}
+
+p.error {
+  color: red;
+}
+
+p.success {
+  color: green;
+}
