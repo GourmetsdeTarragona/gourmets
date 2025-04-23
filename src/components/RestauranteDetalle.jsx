@@ -1,3 +1,4 @@
+import '../styles.css';
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
