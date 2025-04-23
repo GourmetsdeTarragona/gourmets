@@ -1,3 +1,4 @@
+import '../styles.css';
 
 import React, { useState } from 'react'
 import PantallaInicio from './PantallaInicio'
