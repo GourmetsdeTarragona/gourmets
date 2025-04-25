@@ -1,64 +1,88 @@
 import React, { useEffect, useState } from 'react';
 import { supabase } from '../../lib/supabase';
-import '../../styles.css';
+import { useNavigate } from 'react-router-dom';
 
 const NuevoRestaurante = () => {
   const [nombre, setNombre] = useState('');
   const [fecha, setFecha] = useState('');
-  const [socios, setSocios] = useState([]);
-  const [seleccionados, setSeleccionados] = useState([]);
   const [fotos, setFotos] = useState([]);
+  const [usuarios, setUsuarios] = useState([]);
+  const [asistentes, setAsistentes] = useState([]);
   const [mensaje, setMensaje] = useState('');
+  const navigate = useNavigate();
 
   useEffect(() => {
-    const cargarSocios = async () => {
-      const { data } = await supabase.from('usuarios').select('*');
-      if (data) setSocios(data);
+    const cargarUsuarios = async () => {
+      const { data, error } = await supabase.from('usuarios').select('*');
+      if (!error) setUsuarios(data);
     };
-    cargarSocios();
+    cargarUsuarios();
   }, []);
 
-  const manejarSubida = async () => {
+  const subirFotos = async (files) => {
+    const urls = [];
+    for (let file of files) {
+      const nombreArchivo = `${Date.now()}-${file.name}`;
+      const { data, error } = await supabase.storage
+        .from('fotos')
+        .upload(nombreArchivo, file);
+
+      if (!error) {
+        const { data: publicUrl } = supabase
+          .storage
+          .from('fotos')
+          .getPublicUrl(nombreArchivo);
+        urls.push(publicUrl.publicUrl);
+      }
+    }
+    setFotos(urls);
+  };
+
+  const guardarRestaurante = async () => {
     if (!nombre || !fecha) {
-      setMensaje('Completa nombre y fecha.');
+      setMensaje('Nombre y fecha son obligatorios.');
       return;
     }
 
-    const urls = [];
-    for (const foto of fotos) {
-      const { data, error } = await supabase.storage
-        .from('fotos')
-        .upload(`restaurantes/${Date.now()}-${foto.name}`, foto);
-      if (data) {
-        const url = supabase.storage.from('fotos').getPublicUrl(data.path).data.publicUrl;
-        urls.push(url);
-      }
+    const { data, error } = await supabase
+      .from('restaurantes')
+      .insert([{ nombre, fecha, fotos }])
+      .select()
+      .single();
+
+    if (error || !data) {
+      setMensaje('Error al guardar restaurante.');
+      return;
     }
 
-    const { data: restaurante, error } = await supabase.from('restaurantes').insert({
-      nombre,
-      fecha,
-      fotos: urls
-    }).select().single();
+    const registrosAsistentes = asistentes.map((id) => ({
+      restaurante_id: data.id,
+      usuario_id: id
+    }));
 
-    for (const socioId of seleccionados) {
-      await supabase.from('asistentes').insert({
-        restaurante_id: restaurante.id,
-        usuario_id: socioId
-      });
+    if (registrosAsistentes.length > 0) {
+      await supabase.from('asistentes').insert(registrosAsistentes);
     }
 
-    setMensaje('Restaurante añadido.');
+    setMensaje('Restaurante registrado con éxito.');
     setNombre('');
     setFecha('');
-    setSeleccionados([]);
     setFotos([]);
+    setAsistentes([]);
+  };
+
+  const toggleAsistente = (id) => {
+    if (asistentes.includes(id)) {
+      setAsistentes(asistentes.filter((uid) => uid !== id));
+    } else {
+      setAsistentes([...asistentes, id]);
+    }
   };
 
   return (
     <div className="page-container">
       <img src="/logo.png" alt="Logo" className="logo" />
-      <h2 className="page-title">Nuevo Restaurante</h2>
+      <h2 className="page-title">Nuevo restaurante</h2>
 
       <div className="section">
         <input
@@ -72,34 +96,31 @@ const NuevoRestaurante = () => {
           value={fecha}
           onChange={(e) => setFecha(e.target.value)}
         />
-
-        <h4>Socios asistentes:</h4>
-        {socios.map((socio) => (
-          <label key={socio.id}>
-            <input
-              type="checkbox"
-              checked={seleccionados.includes(socio.id)}
-              onChange={(e) => {
-                const updated = e.target.checked
-                  ? [...seleccionados, socio.id]
-                  : seleccionados.filter((id) => id !== socio.id);
-                setSeleccionados(updated);
-              }}
-            />
-            {socio.usuario}
-          </label>
-        ))}
-
-        <h4>Subir fotos:</h4>
+        <label>Fotos (opcional):</label>
         <input
           type="file"
-          accept="image/*"
           multiple
-          onChange={(e) => setFotos([...e.target.files])}
+          accept="image/*"
+          onChange={(e) => subirFotos(e.target.files)}
         />
 
-        <button onClick={manejarSubida}>Guardar restaurante</button>
+        <h4>Seleccionar asistentes:</h4>
+        {usuarios.map((u) => (
+          <div key={u.id}>
+            <label>
+              <input
+                type="checkbox"
+                checked={asistentes.includes(u.id)}
+                onChange={() => toggleAsistente(u.id)}
+              />
+              {u.usuario}
+            </label>
+          </div>
+        ))}
+
+        <button onClick={guardarRestaurante}>Guardar restaurante</button>
         {mensaje && <p>{mensaje}</p>}
+        <button onClick={() => navigate('/admin')}>Volver</button>
       </div>
     </div>
   );
