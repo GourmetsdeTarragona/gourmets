@@ -1,70 +1,60 @@
-import '../styles.css';
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
-import '../styles.css';
 
 const RestauranteDetalle = () => {
   const { id } = useParams();
   const [restaurante, setRestaurante] = useState(null);
-  const [fotos, setFotos] = useState([]);
   const [votaciones, setVotaciones] = useState([]);
 
   useEffect(() => {
-    const obtenerDatos = async () => {
-      const { data: rest } = await supabase
+    const fetchRestaurante = async () => {
+      const { data, error } = await supabase
         .from('restaurantes')
         .select('*')
         .eq('id', id)
         .single();
-      setRestaurante(rest);
 
-      const { data: votos } = await supabase
-        .from('votaciones')
-        .select('*')
-        .eq('restaurante_id', id);
-      setVotaciones(votos || []);
-
-      if (rest && rest.fotos && rest.fotos.length > 0) {
-        setFotos(rest.fotos);
-      }
+      if (!error) setRestaurante(data);
     };
 
-    obtenerDatos();
+    const fetchVotaciones = async () => {
+      const { data, error } = await supabase
+        .from('votaciones')
+        .select('categoria, puntuacion')
+        .eq('restaurante_id', id);
+
+      if (!error) setVotaciones(data);
+    };
+
+    fetchRestaurante();
+    fetchVotaciones();
   }, [id]);
 
   return (
     <div className="page-container">
       <img src="/logo.png" alt="Logo" className="logo" />
-      <h2 className="page-title">Detalles del Restaurante</h2>
+      <h2 className="page-title">Detalle del restaurante</h2>
 
-      {restaurante ? (
+      {restaurante && (
         <div className="section">
           <h3>{restaurante.nombre}</h3>
-          <p>Fecha de la cena: {restaurante.fecha}</p>
-
-          <h4>Votaciones:</h4>
-          {votaciones.length === 0 ? (
-            <p>Aún no hay votos registrados.</p>
-          ) : (
-            <ul>
-              {votaciones.map((v, i) => (
-                <li key={i}>
-                  {v.categoria}: {v.puntuacion}
-                </li>
-              ))}
-            </ul>
-          )}
-
-          <h4>Fotos:</h4>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
-            {fotos.map((url, i) => (
-              <img key={i} src={url} alt={`Foto ${i}`} style={{ width: '100px', borderRadius: '8px' }} />
-            ))}
-          </div>
+          <p><strong>Fecha:</strong> {restaurante.fecha}</p>
+          {restaurante.fotos?.map((foto, index) => (
+            <img key={index} src={foto} alt={`Foto ${index + 1}`} style={{ width: '100%', borderRadius: '8px', margin: '10px 0' }} />
+          ))}
         </div>
-      ) : (
-        <p>Cargando...</p>
+      )}
+
+      {votaciones.length > 0 && (
+        <div className="section">
+          <h4>Puntuaciones</h4>
+          <ul>
+            {votaciones.map((v, i) => (
+              <li key={i}><strong>{v.categoria}</strong>: {v.puntuacion}/5</li>
+            ))}
+          </ul>
+        </div>
       )}
     </div>
   );
