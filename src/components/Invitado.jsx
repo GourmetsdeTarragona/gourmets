@@ -1,7 +1,5 @@
-import '../styles.css';
 import React, { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
-import '../styles.css';
 import { useNavigate } from 'react-router-dom';
 
 const Invitado = () => {
@@ -10,32 +8,35 @@ const Invitado = () => {
 
   useEffect(() => {
     const cargarRestaurantes = async () => {
-      const { data, error } = await supabase.from('restaurantes').select('*');
-      if (data) setRestaurantes(data);
+      const { data, error } = await supabase
+        .from('restaurantes')
+        .select('*')
+        .order('fecha', { ascending: false });
+
+      if (!error) setRestaurantes(data);
     };
+
     cargarRestaurantes();
   }, []);
 
   return (
     <div className="page-container">
       <img src="/logo.png" alt="Logo" className="logo" />
-      <h2 className="page-title">Explorador de Restaurantes</h2>
+      <h2 className="page-title">Restaurantes visitados</h2>
 
-      <div className="section">
-        {restaurantes.length === 0 ? (
-          <p>No hay restaurantes disponibles.</p>
-        ) : (
-          restaurantes.map((rest) => (
-            <div key={rest.id} style={{ marginBottom: '20px' }}>
-              <h3>{rest.nombre}</h3>
-              <p>Fecha de visita: {rest.fecha}</p>
-              <button onClick={() => navigate(`/restaurante/${rest.id}`)}>
-                Ver detalles
-              </button>
-            </div>
-          ))
-        )}
-      </div>
+      {restaurantes.length === 0 ? (
+        <p>No hay restaurantes disponibles aún.</p>
+      ) : (
+        restaurantes.map((r) => (
+          <div key={r.id} className="section" onClick={() => navigate(`/restaurante/${r.id}`)} style={{ cursor: 'pointer' }}>
+            <h3>{r.nombre}</h3>
+            <p><strong>Fecha:</strong> {r.fecha}</p>
+            {r.fotos?.length > 0 && (
+              <img src={r.fotos[0]} alt="Plato" style={{ width: '100%', borderRadius: '8px', marginTop: '10px' }} />
+            )}
+          </div>
+        ))
+      )}
     </div>
   );
 };
