@@ -1,81 +1,83 @@
-/* Estilo refinado - Estilo Dami */
+/* Estilos generales */
+body {
+  margin: 0;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #f9f9f9;
+  color: #333;
+}
 
+/* Contenedor de cada página */
 .page-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: start;
-  min-height: 100vh;
-  padding: 40px 20px;
-  background-color: #fefefe;
-  font-family: 'Segoe UI', sans-serif;
-}
-
-.page-title {
-  font-size: 1.8rem;
-  margin: 20px 0;
-  color: #a02040;
   text-align: center;
+  padding: 20px;
 }
 
-.section {
-  width: 100%;
-  max-width: 600px;
-  background: #ffffff;
-  padding: 25px;
+/* Logo principal */
+.logo {
+  width: 150px;
   margin-top: 20px;
-  border-radius: 16px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  margin-bottom: 20px;
 }
 
-input, select, textarea {
-  width: 100%;
-  margin-bottom: 15px;
-  padding: 12px;
-  border: 1px solid #ccc;
-  border-radius: 8px;
-  font-size: 1rem;
-  box-sizing: border-box;
+/* Cabecera */
+.cabecera {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 30px;
+  background-color: #ffffff;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  position: sticky;
+  top: 0;
+  z-index: 1000;
 }
 
+/* Logo en cabecera */
+.logo-container {
+  display: flex;
+  align-items: center;
+}
+
+.logo-pequeño {
+  height: 50px;
+}
+
+/* Navegación */
+.navegacion a {
+  margin-left: 20px;
+  text-decoration: none;
+  font-weight: bold;
+  color: #333;
+}
+
+.navegacion a:hover {
+  color: #0070f3;
+}
+
+/* Botones */
 button {
-  background-color: #a02040;
+  margin: 10px;
+  padding: 10px 20px;
+  background-color: #0070f3;
   color: white;
-  padding: 12px 20px;
   border: none;
-  border-radius: 8px;
+  border-radius: 6px;
   cursor: pointer;
-  font-size: 1rem;
-  transition: background-color 0.3s;
-  margin-top: 10px;
+  font-size: 16px;
 }
 
 button:hover {
-  background-color: #801a35;
+  background-color: #005bb5;
 }
 
-.logo {
-  width: 180px;
-  margin: 20px auto;
-  display: block;
-  animation: flotar 3s ease-in-out infinite;
+/* Estilos para los enlaces de "volver" */
+.page-container a {
+  display: inline-block;
+  margin-top: 20px;
+  color: #0070f3;
+  text-decoration: none;
 }
 
-@keyframes flotar {
-  0%   { transform: translateY(0); }
-  50%  { transform: translateY(-10px); }
-  100% { transform: translateY(0); }
-}
-
-p {
-  margin-top: 10px;
-  font-size: 0.95rem;
-}
-
-p.error {
-  color: red;
-}
-
-p.success {
-  color: green;
+.page-container a:hover {
+  text-decoration: underline;
 }
