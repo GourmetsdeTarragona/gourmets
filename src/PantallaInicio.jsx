@@ -1,4 +1,4 @@
-import '../styles.css';
+import './styles.css';
 
 import React from 'react'
 import Cabecera from './Cabecera'
