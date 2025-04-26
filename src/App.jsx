@@ -1,43 +1,46 @@
-import './styles.css';
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 
-import React, { useState } from 'react'
-import PantallaInicio from './PantallaInicio'
-import Login from './Login'
-import Votacion from './Votacion'
-import AdminPanel from './AdminPanel'
+const Home = () => (
+  <div className="page-container">
+    <img src="/logo.png" alt="Logo Gourmets Tarragona" className="logo" />
+    <h1>Bienvenidos a Gourmets Tarragona</h1>
+    <p>Explora como invitado o inicia sesión.</p>
+    <Link to="/login">
+      <button>Iniciar Sesión</button>
+    </Link>
+    <Link to="/invitado">
+      <button>Explorar como Invitado</button>
+    </Link>
+  </div>
+);
 
-export default function App() {
-  const [pantalla, setPantalla] = useState('inicio')
-  const [usuario, setUsuario] = useState(null)
-  const [nombreCompleto, setNombreCompleto] = useState('')
-  const [rol, setRol] = useState('')
+const Login = () => (
+  <div className="page-container">
+    <h2>Login (Pantalla de prueba)</h2>
+    <p>Aquí irá el formulario de login real.</p>
+    <Link to="/">Volver al Inicio</Link>
+  </div>
+);
 
-  const entrarComoInvitado = () => {
-    setUsuario('invitado')
-    setPantalla('votacion')
-  }
+const Invitado = () => (
+  <div className="page-container">
+    <h2>Modo Invitado</h2>
+    <p>Explorando restaurantes como invitado...</p>
+    <Link to="/">Volver al Inicio</Link>
+  </div>
+);
 
-  if (pantalla === 'inicio') {
-    return <PantallaInicio onLogin={() => setPantalla('login')} onInvitado={entrarComoInvitado} />
-  }
-
-  if (pantalla === 'login') {
-    return <Login onSuccess={(u, nombre, r) => {
-      setUsuario(u)
-      setNombreCompleto(nombre)
-      setRol(r)
-      setPantalla('votacion')
-    }} />
-  }
-
-  if (pantalla === 'votacion') {
-    return (
-      <div className="p-4 max-w-xl mx-auto">
-        {usuario === 'admin' && <AdminPanel usuario={usuario} />}
-        {usuario !== 'admin' && <Votacion usuario={usuario} nombreCompleto={nombreCompleto} modoInvitado={usuario === 'invitado'} />}
-      </div>
-    )
-  }
-
-  return <p>Pantalla no encontrada</p>
+function App() {
+  return (
+    <Router>
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/invitado" element={<Invitado />} />
+      </Routes>
+    </Router>
+  );
 }
+
+export default App;
