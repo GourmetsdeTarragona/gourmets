@@ -1,49 +1,58 @@
-import './styles.css';
+import React, { useState } from 'react';
+import { supabase } from '../supabaseClient';
+import { useNavigate } from 'react-router-dom';
 
-import React, { useState } from 'react'
-import { supabase } from './supabase'
-import Cabecera from './Cabecera'
+const Login = () => {
+  const [usuario, setUsuario] = useState('');
+  const [clave, setClave] = useState('');
+  const [error, setError] = useState('');
+  const navigate = useNavigate();
 
-export default function Login({ onSuccess }) {
-  const [usuario, setUsuario] = useState('')
-  const [clave, setClave] = useState('')
-  const [nombre, setNombre] = useState('')
-  const [error, setError] = useState(null)
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    setError('');
 
-  const handleLogin = async () => {
-    setError(null)
-
-    if (!usuario.trim() || !clave.trim() || !nombre.trim()) {
-      setError('Rellena todos los campos correctamente')
-      return
-    }
-
-    const { data, error: loginError } = await supabase
+    const { data, error } = await supabase
       .from('usuarios')
       .select('*')
-      .eq('usuario', usuario.trim())
-      .eq('clave', clave.trim())
-      .single()
+      .eq('usuario', usuario)
+      .eq('clave', clave)
+      .single();
 
-    if (loginError || !data) {
-      console.error('Error de login:', loginError)
-      setError('Credenciales incorrectas o usuario no existe')
+    if (error || !data) {
+      setError('Usuario o contraseña incorrectos');
     } else {
-      onSuccess(usuario.trim(), nombre.trim(), data.rol)
+      if (data.rol === 'admin') {
+        navigate('/admin');
+      } else {
+        navigate('/user');
+      }
     }
-  }
+  };
 
   return (
-    <div className="min-h-screen bg-white p-4 space-y-4">
-      <Cabecera />
-      <div className="max-w-xs mx-auto space-y-4 mt-6">
-        <h2 className="text-lg font-bold text-center">Iniciar sesión</h2>
-        <input type="text" placeholder="Usuario" value={usuario} onChange={e => setUsuario(e.target.value)} className="w-full border px-2 py-1 rounded" />
-        <input type="password" placeholder="Contraseña" value={clave} onChange={e => setClave(e.target.value)} className="w-full border px-2 py-1 rounded" />
-        <input type="text" placeholder="Tu nombre completo" value={nombre} onChange={e => setNombre(e.target.value)} className="w-full border px-2 py-1 rounded" />
-        {error && <p className="text-red-600 text-sm">{error}</p>}
-        <button onClick={handleLogin} className="w-full bg-blue-600 text-white py-2 rounded">Entrar</button>
-      </div>
+    <div className="page-container">
+      <h2>Iniciar Sesión</h2>
+      <form className="formulario-login" onSubmit={handleLogin}>
+        <input
+          type="text"
+          placeholder="Usuario"
+          value={usuario}
+          onChange={(e) => setUsuario(e.target.value)}
+          required
+        />
+        <input
+          type="password"
+          placeholder="Contraseña"
+          value={clave}
+          onChange={(e) => setClave(e.target.value)}
+          required
+        />
+        <button type="submit">Entrar</button>
+        {error && <p className="error">{error}</p>}
+      </form>
     </div>
-  )
-}
+  );
+};
+
+export default Login;
