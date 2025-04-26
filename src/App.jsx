@@ -1,4 +1,4 @@
-import Cabecera from './Cabecera';
+import Cabecera from './components/Cabecera';
 
 function App() {
   return (
