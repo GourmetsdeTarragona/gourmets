@@ -1,30 +1,22 @@
-import './styles.css';
-import React from 'react'
-import { useLocation, useNavigate } from 'react-router-dom'
+import React from 'react';
+import { Link } from 'react-router-dom';
 
-export default function Cabecera() {
-  const location = useLocation()
-  const navigate = useNavigate()
-  const esInicio = location.pathname === '/'
-
+const Cabecera = () => {
   return (
-    <div className="flex items-center justify-center bg-white shadow-md relative py-4">
-      {!esInicio && (
-        <button
-          onClick={() => navigate(-1)}
-          className="absolute left-4 text-blue-600 font-semibold"
-        >
-          ← Atrás
-        </button>
-      )}
-      <img
-        src="/logo.png"
-        alt="Logo"
-        className={`w-24 h-24 object-contain transition-all duration-300 ${
-          esInicio ? 'animate-bounce' : ''
-        }`}
-      />
-    </div>
-  )
-}
+    <header className="cabecera">
+      <div className="logo-container">
+        <Link to="/">
+          <img src="/logo.png" alt="Logo Gourmets Tarragona" className="logo-pequeño" />
+        </Link>
+      </div>
+      <nav className="navegacion">
+        <Link to="/">Inicio</Link>
+        <Link to="/login">Login</Link>
+        <Link to="/invitado">Explorar</Link>
+      </nav>
+    </header>
+  );
+};
+
+export default Cabecera;
 
