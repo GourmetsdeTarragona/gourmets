@@ -29,6 +29,11 @@ function Home() {
     }
   };
 
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    navigate('/');
+  };
+
   return (
     <div className="container" style={{ textAlign: 'center', marginTop: '5rem' }}>
       <img src="/logo.png" alt="Gourmets Tarragona" style={{ width: '150px', marginBottom: '2rem' }} />
@@ -67,7 +72,12 @@ function Home() {
           )}
         </>
       ) : (
-        <p>Ya estás logueado.</p>
+        <>
+          <p style={{ marginTop: '2rem' }}>Ya estás logueado.</p>
+          <button className="button-primary" onClick={handleLogout} style={{ marginTop: '1rem' }}>
+            Cerrar sesión
+          </button>
+        </>
       )}
     </div>
   );
