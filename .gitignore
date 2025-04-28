@@ -1,27 +1,28 @@
-# Node
+# Node modules
 node_modules/
+
+# Build output
 dist/
-.vite/
 
-# Sistemas
-.DS_Store
-Thumbs.db
-
-# Vercel
-.vercel/
-
-# Archivos de entorno (si tuvieras en futuro)
+# Environment variables
 .env
 .env.local
-.env.production
-.env.development
+.env.development.local
+.env.test.local
+.env.production.local
 
 # Logs
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-pnpm-debug.log*
+
+# Vite cache
+.vite/
 
 # IDEs
 .vscode/
 .idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
