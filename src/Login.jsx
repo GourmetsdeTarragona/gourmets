@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { supabase } from '../supabaseClient';
+import { supabase } from './supabaseClient'; // Asegúrate que el path es correcto
 import { useNavigate } from 'react-router-dom';
 
 const Login = () => {
@@ -12,21 +12,26 @@ const Login = () => {
     e.preventDefault();
     setError('');
 
-    const { data, error } = await supabase
-      .from('usuarios')
-      .select('*')
-      .eq('usuario', usuario)
-      .eq('clave', clave)
-      .single();
+    try {
+      const { data, error } = await supabase
+        .from('usuarios')
+        .select('*')
+        .eq('usuario', usuario)
+        .eq('clave', clave)
+        .single();
 
-    if (error || !data) {
-      setError('Usuario o contraseña incorrectos');
-    } else {
-      if (data.rol === 'admin') {
-        navigate('/admin');
+      if (error || !data) {
+        setError('Usuario o contraseña incorrectos.');
       } else {
-        navigate('/user');
+        if (data.rol === 'admin') {
+          navigate('/admin');
+        } else {
+          navigate('/user');
+        }
       }
+    } catch (err) {
+      console.error('Error de login:', err.message);
+      setError('Error inesperado.');
     }
   };
 
