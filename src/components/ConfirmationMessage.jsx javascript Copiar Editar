@@ -1,0 +1,11 @@
+function ConfirmationMessage({ message }) {
+  if (!message) return null;
+
+  return (
+    <div className="card" style={{ backgroundColor: '#d4edda', color: '#155724' }}>
+      {message}
+    </div>
+  );
+}
+
+export default ConfirmationMessage;
