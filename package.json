@@ -1,6 +1,9 @@
 {
+{
   "name": "gourmets-tarragona",
   "version": "1.0.0",
+  "description": "App para la asociación de Gourmets Tarragona",
+  "author": "",
   "private": true,
   "scripts": {
     "dev": "vite",
@@ -11,10 +14,9 @@
     "@supabase/supabase-js": "^2.39.5",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "react-router-dom": "^6.22.3"
+    "react-router-dom": "^6.23.0"
   },
   "devDependencies": {
-    "vite": "^4.5.0",
-    "@vitejs/plugin-react": "^4.0.4"
+    "vite": "^5.2.0"
   }
 }
