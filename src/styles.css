@@ -1,105 +1,55 @@
-/* Estilos generales */
-.formulario-login {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 15px;
-  max-width: 300px;
-  margin: 20px auto;
-}
-
-.formulario-login input {
-  width: 100%;
-  padding: 10px;
-  font-size: 16px;
-  border: 1px solid #ccc;
-  border-radius: 6px;
-}
-
-.error {
-  color: red;
-  margin-top: 10px;
-}
+/* Estilos globales básicos para Gourmets Tarragona */
 
 body {
   margin: 0;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background-color: #f9f9f9;
+  padding: 0;
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  background-color: #f8f9fa;
   color: #333;
 }
 
-/* Contenedor de cada página */
-.page-container {
-  text-align: center;
-  padding: 20px;
+h1, h2, h3, h4, h5, h6 {
+  margin: 0;
 }
 
-/* Logo principal */
-.logo {
-  width: 150px;
-  margin-top: 20px;
-  margin-bottom: 20px;
-}
-
-/* Cabecera */
-.cabecera {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 10px 30px;
-  background-color: #ffffff;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-  position: sticky;
-  top: 0;
-  z-index: 1000;
-}
-
-/* Logo en cabecera */
-.logo-container {
-  display: flex;
-  align-items: center;
-}
-
-.logo-pequeño {
-  height: 50px;
-}
-
-/* Navegación */
-.navegacion a {
-  margin-left: 20px;
+a {
   text-decoration: none;
-  font-weight: bold;
-  color: #333;
+  color: inherit;
 }
 
-.navegacion a:hover {
-  color: #0070f3;
-}
-
-/* Botones */
 button {
-  margin: 10px;
-  padding: 10px 20px;
-  background-color: #0070f3;
-  color: white;
-  border: none;
-  border-radius: 6px;
   cursor: pointer;
-  font-size: 16px;
+  font-family: inherit;
 }
 
-button:hover {
-  background-color: #005bb5;
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 1rem;
 }
 
-/* Estilos para los enlaces de "volver" */
-.page-container a {
-  display: inline-block;
-  margin-top: 20px;
-  color: #0070f3;
-  text-decoration: none;
+.card {
+  background: #fff;
+  border-radius: 1rem;
+  padding: 1.5rem;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
 }
 
-.page-container a:hover {
-  text-decoration: underline;
+.card:hover {
+  transform: translateY(-5px);
+}
+
+.button-primary {
+  background-color: #000;
+  color: #fff;
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 0.5rem;
+  font-size: 1rem;
+  transition: background-color 0.3s;
+}
+
+.button-primary:hover {
+  background-color: #333;
 }
