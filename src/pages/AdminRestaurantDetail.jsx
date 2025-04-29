@@ -30,7 +30,6 @@ function AdminRestaurantDetail() {
           .from('usuarios')
           .select('id, nombre, email')
           .in('id', rData.asistentes);
-
         setAsistentes(socios || []);
       }
 
@@ -52,38 +51,51 @@ function AdminRestaurantDetail() {
         .from('imagenes')
         .list(`${id}/`, { limit: 100 });
 
-      if (data) {
-        const urls = data.map((file) =>
-          supabase.storage
-            .from('imagenes')
-            .getPublicUrl(`${id}/${file.name}`).data.publicUrl
-        );
-        setFotos(urls);
+      if (error) {
+        console.error('Error cargando fotos:', error);
+        return;
       }
+
+      const urls = data.map((file) =>
+        supabase.storage.from('imagenes').getPublicUrl(`${id}/${file.name}`).data.publicUrl
+      );
+      setFotos(urls);
     };
 
     fetchData();
   }, [id]);
 
   const handleUpload = async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
+    const file = e.target.files?.[0];
+    if (!file) {
+      alert("No se seleccionó ningún archivo");
+      return;
+    }
+
+    const validTypes = ['image/jpeg', 'image/png', 'image/webp'];
+    if (!validTypes.includes(file.type)) {
+      alert("Tipo de archivo no válido. Usa JPG, PNG o WebP.");
+      return;
+    }
 
     const filePath = `${id}/${Date.now()}_${file.name}`;
 
     const { error } = await supabase.storage
       .from('imagenes')
-      .upload(filePath, file);
+      .upload(filePath, file, {
+        contentType: file.type
+      });
 
-    if (!error) {
-      const { data } = supabase.storage
-        .from('imagenes')
-        .getPublicUrl(filePath);
-      setFotos((prev) => [...prev, data.publicUrl]);
-    } else {
-      alert('Error subiendo imagen');
-      console.error(error);
+    if (error) {
+      console.error("🚨 Error subiendo imagen:", error);
+      alert("Error subiendo imagen: " + error.message);
+      return;
     }
+
+    const { data } = supabase.storage
+      .from('imagenes')
+      .getPublicUrl(filePath);
+    setFotos((prev) => [...prev, data.publicUrl]);
   };
 
   if (error) return <p style={{ color: 'red' }}>{error}</p>;
