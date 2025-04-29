@@ -8,6 +8,17 @@ import RegisterUser from './pages/RegisterUser';
 import CreateRestaurant from './pages/CreateRestaurant';
 import AdminRestaurants from './pages/AdminRestaurants';
 import ProtectedRoute from './components/ProtectedRoute';
+import AdminRestaurantDetail from './pages/AdminRestaurantDetail';
+
+<Route
+  path="/admin/restaurante/:id"
+  element={
+    <ProtectedRoute allowedRoles={['admin']}>
+      <AdminRestaurantDetail />
+    </ProtectedRoute>
+  }
+/>
+
 
 function App() {
   return (
