@@ -1,48 +1,70 @@
 import { useEffect, useState } from 'react';
+import { useParams } from 'react-router-dom';
 import { supabase } from '../supabase/supabase';
-import { useNavigate } from 'react-router-dom';
-const navigate = useNavigate();
 
-function AdminRestaurants() {
-  const [restaurantes, setRestaurantes] = useState([]);
+function AdminRestaurantDetail() {
+  const { id } = useParams();
+  const [restaurante, setRestaurante] = useState(null);
+  const [asistentes, setAsistentes] = useState([]);
+  const [categoriaExtra, setCategoriaExtra] = useState(null);
 
   useEffect(() => {
-    const fetchRestaurantes = async () => {
-      const { data, error } = await supabase
+    const fetchData = async () => {
+      // 1. Obtener restaurante
+      const { data: rData, error: rError } = await supabase
         .from('restaurantes')
         .select('*')
-        .order('fecha', { ascending: false });
+        .eq('id', id)
+        .single();
 
-      if (!error) setRestaurantes(data);
+      if (!rError && rData) {
+        setRestaurante(rData);
+
+        // 2. Obtener asistentes (usuarios)
+        if (rData.asistentes && rData.asistentes.length > 0) {
+          const { data: socios } = await supabase
+            .from('usuarios')
+            .select('id, nombre, email')
+            .in('id', rData.asistentes);
+          setAsistentes(socios || []);
+        }
+
+        // 3. Obtener categoría extra
+        const { data: extras } = await supabase
+          .from('categorias_extra')
+          .select('*')
+          .eq('restaurante_id', id)
+          .maybeSingle();
+
+        if (extras) {
+          setCategoriaExtra(extras.nombre_extra);
+        }
+      }
     };
 
-    fetchRestaurantes();
-  }, []);
+    fetchData();
+  }, [id]);
+
+  if (!restaurante) return <p style={{ textAlign: 'center', marginTop: '5rem' }}>Cargando...</p>;
 
   return (
-    <div className="container" style={{ maxWidth: '800px', margin: '3rem auto' }}>
-      <h2>Cenas creadas</h2>
+    <div className="container" style={{ maxWidth: '700px', margin: '3rem auto' }}>
+      <h2>Detalles del restaurante</h2>
 
-      {restaurantes.length === 0 ? (
-        <p>No hay restaurantes registrados aún.</p>
+      <div style={{ marginBottom: '2rem' }}>
+        <p><strong>Nombre:</strong> {restaurante.nombre}</p>
+        <p><strong>Fecha:</strong> {restaurante.fecha}</p>
+        <p><strong>Categoría extra:</strong> {categoriaExtra || '—'}</p>
+      </div>
+
+      <h3>Asistentes</h3>
+      {asistentes.length === 0 ? (
+        <p>No hay asistentes registrados.</p>
       ) : (
-        <ul style={{ listStyle: 'none', padding: 0 }}>
-          {restaurantes.map((r) => (
-            <li
-              key={r.id}
-              style={{
-                border: '1px solid #ddd',
-                borderRadius: '0.5rem',
-                padding: '1rem',
-                marginBottom: '1rem',
-              }}
-            >
-              <h3>{r.nombre}</h3>
-              <p><strong>Fecha:</strong> {r.fecha}</p>
-              <p><strong>Asistentes:</strong> {r.asistentes?.length ?? 0}</p>
-              <button className="button-primary" onClick={() => navigate(`/admin/restaurante/${r.id}`)}>
-  Ver detalles
-</button>
+        <ul style={{ paddingLeft: '1rem' }}>
+          {asistentes.map((socio) => (
+            <li key={socio.id}>
+              {socio.nombre} ({socio.email})
             </li>
           ))}
         </ul>
@@ -51,4 +73,4 @@ function AdminRestaurants() {
   );
 }
 
-export default AdminRestaurants;
+export default AdminRestaurantDetail;
