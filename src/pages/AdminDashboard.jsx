@@ -15,8 +15,8 @@ function AdminDashboard() {
           Crear restaurante
         </button>
         <button className="button-primary" onClick={() => navigate('/admin/restaurantes')}>
-  Ver restaurantes creados
-</button>
+          Ver restaurantes creados
+        </button>
 
         <button className="button-primary" disabled style={{ opacity: 0.5 }}>
           Gestionar cenas (próximamente)
