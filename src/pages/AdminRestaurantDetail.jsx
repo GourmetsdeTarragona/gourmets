@@ -7,6 +7,7 @@ function AdminRestaurantDetail() {
   const [restaurante, setRestaurante] = useState(null);
   const [asistentes, setAsistentes] = useState([]);
   const [categoriaExtra, setCategoriaExtra] = useState(null);
+  const [fotos, setFotos] = useState([]);
   const [error, setError] = useState('');
 
   useEffect(() => {
@@ -17,31 +18,22 @@ function AdminRestaurantDetail() {
         .eq('id', id)
         .single();
 
-      if (rError) {
-        setError('No se pudo cargar el restaurante.');
-        return;
-      }
-
-      if (!rData) {
-        setError('Restaurante no encontrado.');
+      if (rError || !rData) {
+        setError('Error cargando restaurante');
         return;
       }
 
       setRestaurante(rData);
 
-      // Obtener asistentes
-      if (rData.asistentes?.length > 0) {
-        const { data: socios, error: sociosError } = await supabase
+      if (rData.asistentes?.length) {
+        const { data: socios } = await supabase
           .from('usuarios')
           .select('id, nombre, email')
           .in('id', rData.asistentes);
 
-        if (!sociosError && socios) {
-          setAsistentes(socios);
-        }
+        setAsistentes(socios || []);
       }
 
-      // Obtener categoría extra
       const { data: extra } = await supabase
         .from('categorias_extra')
         .select('nombre_extra')
@@ -51,13 +43,51 @@ function AdminRestaurantDetail() {
       if (extra) {
         setCategoriaExtra(extra.nombre_extra);
       }
+
+      fetchFotos();
+    };
+
+    const fetchFotos = async () => {
+      const { data, error } = await supabase.storage
+        .from('imagenes')
+        .list(`${id}/`, { limit: 100 });
+
+      if (data) {
+        const urls = data.map((file) =>
+          supabase.storage
+            .from('imagenes')
+            .getPublicUrl(`${id}/${file.name}`).data.publicUrl
+        );
+        setFotos(urls);
+      }
     };
 
     fetchData();
   }, [id]);
 
-  if (error) return <p style={{ color: 'red', textAlign: 'center' }}>{error}</p>;
-  if (!restaurante) return <p style={{ textAlign: 'center' }}>Cargando...</p>;
+  const handleUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const filePath = `${id}/${Date.now()}_${file.name}`;
+
+    const { error } = await supabase.storage
+      .from('imagenes')
+      .upload(filePath, file);
+
+    if (!error) {
+      const { data } = supabase.storage
+        .from('imagenes')
+        .getPublicUrl(filePath);
+      setFotos((prev) => [...prev, data.publicUrl]);
+    } else {
+      alert('Error subiendo imagen');
+      console.error(error);
+    }
+  };
+
+  if (error) return <p style={{ color: 'red' }}>{error}</p>;
+  if (!restaurante) return <p>Cargando...</p>;
 
   return (
     <div style={{ maxWidth: '700px', margin: '3rem auto' }}>
@@ -81,6 +111,19 @@ function AdminRestaurantDetail() {
           ))}
         </ul>
       )}
+
+      <h3 style={{ marginTop: '2rem' }}>Fotos del evento</h3>
+      <input type="file" accept="image/*" onChange={handleUpload} />
+      <div style={{ display: 'flex', flexWrap: 'wrap', marginTop: '1rem', gap: '1rem' }}>
+        {fotos.map((url, idx) => (
+          <img
+            key={idx}
+            src={url}
+            alt={`foto-${idx}`}
+            style={{ width: '150px', borderRadius: '8px', objectFit: 'cover' }}
+          />
+        ))}
+      </div>
     </div>
   );
 }
