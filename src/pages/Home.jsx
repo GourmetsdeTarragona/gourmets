@@ -41,7 +41,12 @@ function Home() {
       rol: data.rol,
     });
 
-    navigate('/restaurants');
+    // Redirigir según el rol
+    if (data.rol === 'admin') {
+      navigate('/admin');
+    } else {
+      navigate('/restaurants');
+    }
   };
 
   const handleLogout = () => {
