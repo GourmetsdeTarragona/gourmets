@@ -20,7 +20,7 @@ function AdminRestaurantDetail() {
       if (!rError && rData) {
         setRestaurante(rData);
 
-        // 2. Obtener asistentes (usuarios)
+        // 2. Obtener asistentes
         if (rData.asistentes && rData.asistentes.length > 0) {
           const { data: socios } = await supabase
             .from('usuarios')
@@ -32,7 +32,7 @@ function AdminRestaurantDetail() {
         // 3. Obtener categoría extra
         const { data: extras } = await supabase
           .from('categorias_extra')
-          .select('*')
+          .select('nombre_extra')
           .eq('restaurante_id', id)
           .maybeSingle();
 
@@ -45,7 +45,9 @@ function AdminRestaurantDetail() {
     fetchData();
   }, [id]);
 
-  if (!restaurante) return <p style={{ textAlign: 'center', marginTop: '5rem' }}>Cargando...</p>;
+  if (!restaurante) {
+    return <p style={{ textAlign: 'center', marginTop: '5rem' }}>Cargando detalles...</p>;
+  }
 
   return (
     <div className="container" style={{ maxWidth: '700px', margin: '3rem auto' }}>
