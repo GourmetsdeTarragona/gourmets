@@ -11,26 +11,41 @@ function Home() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, login, logout } = useAuth();
 
   const handleLogin = async (e) => {
     e.preventDefault();
     setError('');
 
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
+    const { data, error: queryError } = await supabase
+      .from('usuarios')
+      .select('*')
+      .eq('email', email)
+      .single();
+
+    if (queryError || !data) {
+      setError('Correo no encontrado.');
+      return;
+    }
+
+    if (data.password !== password) {
+      setError('Contraseña incorrecta.');
+      return;
+    }
+
+    // Login correcto
+    login({
+      id: data.id,
+      email: data.email,
+      nombre: data.nombre,
+      rol: data.rol,
     });
 
-    if (error) {
-      setError(error.message);
-    } else if (data.user) {
-      navigate('/restaurants');
-    }
+    navigate('/restaurants');
   };
 
-  const handleLogout = async () => {
-    await supabase.auth.signOut();
+  const handleLogout = () => {
+    logout();
     navigate('/');
   };
 
@@ -73,7 +88,7 @@ function Home() {
         </>
       ) : (
         <>
-          <p style={{ marginTop: '2rem' }}>Ya estás logueado.</p>
+          <p style={{ marginTop: '2rem' }}>Hola, {user.nombre}.</p>
           <button className="button-primary" onClick={handleLogout} style={{ marginTop: '1rem' }}>
             Cerrar sesión
           </button>
