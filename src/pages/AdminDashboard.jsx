@@ -1,8 +1,4 @@
 import { useNavigate } from 'react-router-dom';
-<button className="button-primary" onClick={() => navigate('/admin/restaurantes')}>
-  Ver restaurantes creados
-</button>
-
 
 function AdminDashboard() {
   const navigate = useNavigate();
@@ -15,9 +11,13 @@ function AdminDashboard() {
         <button className="button-primary" onClick={() => navigate('/admin/register-user')}>
           Registrar nuevo usuario
         </button>
-        <button className="button-primary" onClick={() => navigate('/admin/create-restaurant')}>
+         <button className="button-primary" onClick={() => navigate('/admin/create-restaurant')}>
           Crear restaurante
         </button>
+        <button className="button-primary" onClick={() => navigate('/admin/restaurantes')}>
+  Ver restaurantes creados
+</button>
+
         <button className="button-primary" disabled style={{ opacity: 0.5 }}>
           Gestionar cenas (próximamente)
         </button>
