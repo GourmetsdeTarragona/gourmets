@@ -1,4 +1,3 @@
-
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Home from './pages/Home';
 import Restaurants from './pages/Restaurants';
@@ -7,18 +6,8 @@ import Ranking from './pages/Ranking';
 import AdminDashboard from './pages/AdminDashboard';
 import RegisterUser from './pages/RegisterUser';
 import CreateRestaurant from './pages/CreateRestaurant';
-import ProtectedRoute from './components/ProtectedRoute';
 import AdminRestaurants from './pages/AdminRestaurants';
-
-<Route
-  path="/admin/restaurantes"
-  element={
-    <ProtectedRoute allowedRoles={['admin']}>
-      <AdminRestaurants />
-    </ProtectedRoute>
-  }
-/>
-
+import ProtectedRoute from './components/ProtectedRoute';
 
 function App() {
   return (
@@ -63,6 +52,14 @@ function App() {
           element={
             <ProtectedRoute allowedRoles={['admin']}>
               <CreateRestaurant />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/restaurantes"
+          element={
+            <ProtectedRoute allowedRoles={['admin']}>
+              <AdminRestaurants />
             </ProtectedRoute>
           }
         />
