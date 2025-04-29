@@ -26,10 +26,10 @@ function AdminRestaurants() {
 
             let fotoPortada = null;
             if (fotos && fotos.length > 0) {
-              const { data: publicUrl } = supabase.storage
+              const { publicUrl } = supabase.storage
                 .from('imagenes')
-                .getPublicUrl(`${r.id}/${fotos[0].name}`);
-              fotoPortada = publicUrl.publicUrl;
+                .getPublicUrl(`${r.id}/${fotos[0].name}`).data;
+              fotoPortada = publicUrl;
             }
 
             return { ...r, fotoPortada };
