@@ -8,39 +8,44 @@ function AdminRestaurantDetail() {
   const [asistentes, setAsistentes] = useState([]);
   const [categoriaExtra, setCategoriaExtra] = useState(null);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      const { data: rData, error: rError } = await supabase
-        .from('restaurantes')
-        .select('*')
-        .eq('id', id)
-        .single();
+ useEffect(() => {
+  const fetchData = async () => {
+    console.log('ID recibido:', id); // DEBUG
 
-      if (!rError && rData) {
-        setRestaurante(rData);
+    const { data: rData, error: rError } = await supabase
+      .from('restaurantes')
+      .select('*')
+      .eq('id', id)
+      .single();
 
-        if (rData.asistentes && rData.asistentes.length > 0) {
-          const { data: socios } = await supabase
-            .from('usuarios')
-            .select('id, nombre, email')
-            .in('id', rData.asistentes);
-          setAsistentes(socios || []);
-        }
+    console.log('Restaurante recibido:', rData); // DEBUG
+    if (rError) console.error('Error restaurante:', rError);
 
-        const { data: extras } = await supabase
-          .from('categorias_extra')
-          .select('nombre_extra')
-          .eq('restaurante_id', id)
-          .maybeSingle();
+    if (!rError && rData) {
+      setRestaurante(rData);
 
-        if (extras) {
-          setCategoriaExtra(extras.nombre_extra);
-        }
+      if (rData.asistentes?.length) {
+        const { data: socios } = await supabase
+          .from('usuarios')
+          .select('id, nombre, email')
+          .in('id', rData.asistentes);
+        setAsistentes(socios || []);
       }
-    };
 
-    fetchData();
-  }, [id]);
+      const { data: extras } = await supabase
+        .from('categorias_extra')
+        .select('nombre_extra')
+        .eq('restaurante_id', id)
+        .maybeSingle();
+
+      if (extras) {
+        setCategoriaExtra(extras.nombre_extra);
+      }
+    }
+  };
+
+  fetchData();
+}, [id]);
 
   if (!restaurante) {
     return <p style={{ textAlign: 'center', marginTop: '5rem' }}>Cargando detalles...</p>;
