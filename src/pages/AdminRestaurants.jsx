@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '../supabase/supabase';
+import { useNavigate } from 'react-router-dom';
+const navigate = useNavigate();
 
 function AdminRestaurants() {
   const [restaurantes, setRestaurantes] = useState([]);
@@ -38,9 +40,9 @@ function AdminRestaurants() {
               <h3>{r.nombre}</h3>
               <p><strong>Fecha:</strong> {r.fecha}</p>
               <p><strong>Asistentes:</strong> {r.asistentes?.length ?? 0}</p>
-              <button className="button-primary" disabled>
-                Ver detalles (próximamente)
-              </button>
+              <button className="button-primary" onClick={() => navigate(`/admin/restaurante/${r.id}`)}>
+  Ver detalles
+</button>
             </li>
           ))}
         </ul>
