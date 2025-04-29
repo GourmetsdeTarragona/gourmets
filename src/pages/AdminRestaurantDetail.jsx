@@ -4,43 +4,83 @@ import { supabase } from '../supabase/supabase';
 
 function AdminRestaurantDetail() {
   const { id } = useParams();
-  const [estado, setEstado] = useState('inicial');
   const [restaurante, setRestaurante] = useState(null);
+  const [asistentes, setAsistentes] = useState([]);
+  const [categoriaExtra, setCategoriaExtra] = useState(null);
+  const [error, setError] = useState('');
 
   useEffect(() => {
-    console.log("CARGANDO DETALLE: id =", id);
-    setEstado('consultando');
-
     const fetchData = async () => {
-      const { data, error } = await supabase
+      const { data: rData, error: rError } = await supabase
         .from('restaurantes')
         .select('*')
         .eq('id', id)
         .single();
 
-      if (error) {
-        console.error("❌ Error Supabase:", error);
-        setEstado('error');
-      } else {
-        console.log("✅ Restaurante encontrado:", data);
-        setRestaurante(data);
-        setEstado('ok');
+      if (rError) {
+        setError('No se pudo cargar el restaurante.');
+        return;
+      }
+
+      if (!rData) {
+        setError('Restaurante no encontrado.');
+        return;
+      }
+
+      setRestaurante(rData);
+
+      // Obtener asistentes
+      if (rData.asistentes?.length > 0) {
+        const { data: socios, error: sociosError } = await supabase
+          .from('usuarios')
+          .select('id, nombre, email')
+          .in('id', rData.asistentes);
+
+        if (!sociosError && socios) {
+          setAsistentes(socios);
+        }
+      }
+
+      // Obtener categoría extra
+      const { data: extra } = await supabase
+        .from('categorias_extra')
+        .select('nombre_extra')
+        .eq('restaurante_id', id)
+        .maybeSingle();
+
+      if (extra) {
+        setCategoriaExtra(extra.nombre_extra);
       }
     };
 
     fetchData();
   }, [id]);
 
-  if (estado === 'inicial') return <p>Preparando...</p>;
-  if (estado === 'consultando') return <p>Consultando Supabase...</p>;
-  if (estado === 'error') return <p style={{ color: 'red' }}>Error cargando datos.</p>;
-  if (estado === 'ok' && !restaurante) return <p>No se encontró el restaurante.</p>;
+  if (error) return <p style={{ color: 'red', textAlign: 'center' }}>{error}</p>;
+  if (!restaurante) return <p style={{ textAlign: 'center' }}>Cargando...</p>;
 
   return (
-    <div style={{ margin: '4rem auto', maxWidth: '600px' }}>
-      <h2>Detalle del restaurante</h2>
-      <p><strong>Nombre:</strong> {restaurante.nombre}</p>
-      <p><strong>Fecha:</strong> {restaurante.fecha}</p>
+    <div style={{ maxWidth: '700px', margin: '3rem auto' }}>
+      <h2>Detalles del restaurante</h2>
+
+      <div style={{ marginBottom: '2rem' }}>
+        <p><strong>Nombre:</strong> {restaurante.nombre}</p>
+        <p><strong>Fecha:</strong> {restaurante.fecha}</p>
+        <p><strong>Categoría extra:</strong> {categoriaExtra || '—'}</p>
+      </div>
+
+      <h3>Asistentes</h3>
+      {asistentes.length === 0 ? (
+        <p>No hay asistentes registrados.</p>
+      ) : (
+        <ul style={{ paddingLeft: '1rem' }}>
+          {asistentes.map((socio) => (
+            <li key={socio.id}>
+              {socio.nombre} ({socio.email})
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   );
 }
