@@ -1,4 +1,5 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+
 import Home from './pages/Home';
 import Restaurants from './pages/Restaurants';
 import RestaurantVoting from './pages/RestaurantVoting';
@@ -7,18 +8,19 @@ import AdminDashboard from './pages/AdminDashboard';
 import RegisterUser from './pages/RegisterUser';
 import CreateRestaurant from './pages/CreateRestaurant';
 import AdminRestaurants from './pages/AdminRestaurants';
-import ProtectedRoute from './components/ProtectedRoute';
 import AdminRestaurantDetail from './pages/AdminRestaurantDetail';
 
-
-
+import ProtectedRoute from './components/ProtectedRoute';
 
 function App() {
   return (
     <Router>
       <Routes>
+        {/* Invitado o cualquiera */}
         <Route path="/" element={<Home />} />
         <Route path="/ranking" element={<Ranking />} />
+
+        {/* Usuario socio */}
         <Route
           path="/restaurants"
           element={
@@ -28,14 +30,6 @@ function App() {
           }
         />
         <Route
-  path="/admin/restaurante/:id"
-  element={
-    <ProtectedRoute allowedRoles={['admin']}>
-      <AdminRestaurantDetail />
-    </ProtectedRoute>
-  }
-/>
-        <Route
           path="/vote/:restaurantId"
           element={
             <ProtectedRoute allowedRoles={['socio']}>
@@ -43,6 +37,8 @@ function App() {
             </ProtectedRoute>
           }
         />
+
+        {/* Administrador */}
         <Route
           path="/admin"
           element={
@@ -72,6 +68,14 @@ function App() {
           element={
             <ProtectedRoute allowedRoles={['admin']}>
               <AdminRestaurants />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/restaurante/:id"
+          element={
+            <ProtectedRoute allowedRoles={['admin']}>
+              <AdminRestaurantDetail />
             </ProtectedRoute>
           }
         />
