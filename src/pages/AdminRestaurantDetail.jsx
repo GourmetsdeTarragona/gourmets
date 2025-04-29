@@ -10,7 +10,6 @@ function AdminRestaurantDetail() {
 
   useEffect(() => {
     const fetchData = async () => {
-      // 1. Obtener restaurante
       const { data: rData, error: rError } = await supabase
         .from('restaurantes')
         .select('*')
@@ -20,7 +19,6 @@ function AdminRestaurantDetail() {
       if (!rError && rData) {
         setRestaurante(rData);
 
-        // 2. Obtener asistentes (usuarios)
         if (rData.asistentes && rData.asistentes.length > 0) {
           const { data: socios } = await supabase
             .from('usuarios')
@@ -29,10 +27,9 @@ function AdminRestaurantDetail() {
           setAsistentes(socios || []);
         }
 
-        // 3. Obtener categoría extra
         const { data: extras } = await supabase
           .from('categorias_extra')
-          .select('*')
+          .select('nombre_extra')
           .eq('restaurante_id', id)
           .maybeSingle();
 
@@ -45,10 +42,34 @@ function AdminRestaurantDetail() {
     fetchData();
   }, [id]);
 
-  if (!restaurante) return <p style={{ textAlign: 'center', marginTop: '5rem' }}>Cargando...</p>;
+  if (!restaurante) {
+    return <p style={{ textAlign: 'center', marginTop: '5rem' }}>Cargando detalles...</p>;
+  }
 
   return (
     <div className="container" style={{ maxWidth: '700px', margin: '3rem auto' }}>
       <h2>Detalles del restaurante</h2>
 
-      <div style={{ marginBottom
+      <div style={{ marginBottom: '2rem' }}>
+        <p><strong>Nombre:</strong> {restaurante.nombre}</p>
+        <p><strong>Fecha:</strong> {restaurante.fecha}</p>
+        <p><strong>Categoría extra:</strong> {categoriaExtra || '—'}</p>
+      </div>
+
+      <h3>Asistentes</h3>
+      {asistentes.length === 0 ? (
+        <p>No hay asistentes registrados.</p>
+      ) : (
+        <ul style={{ paddingLeft: '1rem' }}>
+          {asistentes.map((socio) => (
+            <li key={socio.id}>
+              {socio.nombre} ({socio.email})
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
+
+export default AdminRestaurantDetail;
