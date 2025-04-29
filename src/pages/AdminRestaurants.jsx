@@ -37,7 +37,7 @@ function AdminRestaurants() {
             >
               <h3>{r.nombre}</h3>
               <p><strong>Fecha:</strong> {r.fecha}</p>
-              <p><strong>Asistentes:</strong> {r.asistentes.length}</p>
+              <p><strong>Asistentes:</strong> {r.asistentes?.length ?? 0}</p>
               <button className="button-primary" disabled>
                 Ver detalles (próximamente)
               </button>
