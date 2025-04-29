@@ -7,29 +7,43 @@ function AdminRestaurantDetail() {
   const [restaurante, setRestaurante] = useState(null);
   const [asistentes, setAsistentes] = useState([]);
   const [categoriaExtra, setCategoriaExtra] = useState(null);
+  const [error, setError] = useState('');
 
- useEffect(() => {
-  const fetchData = async () => {
-    console.log('ID recibido:', id); // DEBUG
+  useEffect(() => {
+    const fetchData = async () => {
+      console.log("ID recibido:", id);
 
-    const { data: rData, error: rError } = await supabase
-      .from('restaurantes')
-      .select('*')
-      .eq('id', id)
-      .single();
+      const { data: rData, error: rError } = await supabase
+        .from('restaurantes')
+        .select('*')
+        .eq('id', id)
+        .single();
 
-    console.log('Restaurante recibido:', rData); // DEBUG
-    if (rError) console.error('Error restaurante:', rError);
+      if (rError) {
+        console.error('Error restaurante:', rError);
+        setError('No se pudo cargar el restaurante.');
+        return;
+      }
 
-    if (!rError && rData) {
+      if (!rData) {
+        setError('Restaurante no encontrado.');
+        return;
+      }
+
       setRestaurante(rData);
+      console.log('Restaurante:', rData);
 
       if (rData.asistentes?.length) {
-        const { data: socios } = await supabase
+        const { data: socios, error: sociosError } = await supabase
           .from('usuarios')
           .select('id, nombre, email')
           .in('id', rData.asistentes);
-        setAsistentes(socios || []);
+
+        if (!sociosError) {
+          setAsistentes(socios);
+        } else {
+          console.error('Error asistentes:', sociosError);
+        }
       }
 
       const { data: extras } = await supabase
@@ -41,14 +55,17 @@ function AdminRestaurantDetail() {
       if (extras) {
         setCategoriaExtra(extras.nombre_extra);
       }
-    }
-  };
+    };
 
-  fetchData();
-}, [id]);
+    fetchData();
+  }, [id]);
+
+  if (error) {
+    return <p style={{ textAlign: 'center', marginTop: '5rem', color: 'red' }}>{error}</p>;
+  }
 
   if (!restaurante) {
-    return <p style={{ textAlign: 'center', marginTop: '5rem' }}>Cargando detalles...</p>;
+    return <p style={{ textAlign: 'center', marginTop: '5rem' }}>Cargando detalles del restaurante...</p>;
   }
 
   return (
