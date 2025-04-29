@@ -1,4 +1,8 @@
 import { useNavigate } from 'react-router-dom';
+<button className="button-primary" onClick={() => navigate('/admin/restaurantes')}>
+  Ver restaurantes creados
+</button>
+
 
 function AdminDashboard() {
   const navigate = useNavigate();
