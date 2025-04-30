@@ -1,10 +1,9 @@
 import { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { supabase } from '../supabase/supabase';
 
 function AdminRestaurantDetail() {
   const { id } = useParams();
-  const navigate = useNavigate();
   const [restaurante, setRestaurante] = useState(null);
   const [asistentes, setAsistentes] = useState([]);
   const [categoriaExtra, setCategoriaExtra] = useState(null);
@@ -98,38 +97,27 @@ function AdminRestaurantDetail() {
     alert("Imagen subida correctamente");
   };
 
- const handleDelete = async (url) => {
-  try {
-    // Extraer la ruta desde la URL pública
-    const match = url.match(/\/imagenes\/(.+)$/);
-    if (!match) {
-      alert("No se pudo identificar la ruta del archivo");
+  const handleDelete = async (url) => {
+    const filePath = url.split('/imagenes/')[1];
+
+    if (!filePath) {
+      alert("No se pudo determinar la ruta del archivo");
       return;
     }
-
-    const filePath = match[1]; // ejemplo: 123e4567.../archivo.jpg
 
     const { error } = await supabase.storage
       .from('imagenes')
       .remove([filePath]);
 
     if (error) {
-      alert("Error al eliminar imagen");
+      alert("Error al eliminar imagen en Supabase");
       console.error(error);
       return;
     }
 
-    // Eliminar también del estado local
     setFotos((prev) => prev.filter((foto) => foto !== url));
     alert("Imagen eliminada correctamente");
-
-  } catch (err) {
-    console.error("Error inesperado:", err);
-    alert("Ocurrió un error al intentar eliminar la imagen");
-  }
-};
-
-
+  };
 
   if (error) return <p style={{ color: 'red' }}>{error}</p>;
   if (!restaurante) return <p>Cargando...</p>;
