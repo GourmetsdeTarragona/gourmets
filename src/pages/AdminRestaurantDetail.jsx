@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '../supabase/supabase';
 
 function AdminRestaurantDetail() {
   const { id } = useParams();
+  const navigate = useNavigate();
   const [restaurante, setRestaurante] = useState(null);
   const [asistentes, setAsistentes] = useState([]);
   const [categoriaExtra, setCategoriaExtra] = useState(null);
@@ -11,60 +12,60 @@ function AdminRestaurantDetail() {
   const [error, setError] = useState('');
 
   useEffect(() => {
-    const fetchData = async () => {
-      const { data: rData, error: rError } = await supabase
-        .from('restaurantes')
-        .select('*')
-        .eq('id', id)
-        .single();
-
-      if (rError || !rData) {
-        setError('Error cargando restaurante');
-        return;
-      }
-
-      setRestaurante(rData);
-
-      if (rData.asistentes?.length) {
-        const { data: socios } = await supabase
-          .from('usuarios')
-          .select('id, nombre, email')
-          .in('id', rData.asistentes);
-
-        setAsistentes(socios || []);
-      }
-
-      const { data: extra } = await supabase
-        .from('categorias_extra')
-        .select('nombre_extra')
-        .eq('restaurante_id', id)
-        .maybeSingle();
-
-      if (extra) {
-        setCategoriaExtra(extra.nombre_extra);
-      }
-
-      fetchFotos();
-    };
-
-    const fetchFotos = async () => {
-      const { data, error } = await supabase.storage
-        .from('imagenes')
-        .list(`${id}/`, { limit: 100 });
-
-      if (error) {
-        console.error('Error cargando fotos:', error);
-        return;
-      }
-
-      const urls = data.map((file) =>
-        supabase.storage.from('imagenes').getPublicUrl(`${id}/${file.name}`).data.publicUrl
-      );
-      setFotos(urls);
-    };
-
     fetchData();
   }, [id]);
+
+  const fetchData = async () => {
+    const { data: rData, error: rError } = await supabase
+      .from('restaurantes')
+      .select('*')
+      .eq('id', id)
+      .single();
+
+    if (rError || !rData) {
+      setError('Error cargando restaurante');
+      return;
+    }
+
+    setRestaurante(rData);
+
+    if (rData.asistentes?.length) {
+      const { data: socios } = await supabase
+        .from('usuarios')
+        .select('id, nombre, email')
+        .in('id', rData.asistentes);
+
+      setAsistentes(socios || []);
+    }
+
+    const { data: extra } = await supabase
+      .from('categorias_extra')
+      .select('nombre_extra')
+      .eq('restaurante_id', id)
+      .maybeSingle();
+
+    if (extra) {
+      setCategoriaExtra(extra.nombre_extra);
+    }
+
+    fetchFotos();
+  };
+
+  const fetchFotos = async () => {
+    const { data, error } = await supabase.storage
+      .from('imagenes')
+      .list(`${id}/`, { limit: 100 });
+
+    if (error) {
+      console.error('Error cargando fotos:', error);
+      return;
+    }
+
+    const urls = data.map((file) =>
+      supabase.storage.from('imagenes').getPublicUrl(`${id}/${file.name}`).data.publicUrl
+    );
+    setFotos(urls);
+  };
 
   const handleUpload = async (e) => {
     const file = e.target.files?.[0];
@@ -93,10 +94,8 @@ function AdminRestaurantDetail() {
       return;
     }
 
-    const { data } = supabase.storage
-      .from('imagenes')
-      .getPublicUrl(filePath);
-    setFotos((prev) => [...prev, data.publicUrl]);
+    await fetchFotos();
+    alert("Imagen subida correctamente");
   };
 
   const handleDelete = async (url) => {
@@ -114,7 +113,8 @@ function AdminRestaurantDetail() {
       alert('Error al eliminar imagen');
       console.error(error);
     } else {
-      setFotos((prev) => prev.filter((foto) => foto !== url));
+      await fetchFotos();
+      alert("Imagen eliminada");
     }
   };
 
