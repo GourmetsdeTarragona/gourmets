@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '../supabase/supabase';
-import { useUser } from '../context/UserContext';
+import { useUser } from '../contexts/UserContext';
 
 function RestaurantVoting() {
   const { restaurantId } = useParams();
