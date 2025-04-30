@@ -10,6 +10,14 @@ import AdminRestaurants from './pages/AdminRestaurants';
 import AdminRestaurantDetail from './pages/AdminRestaurantDetail';
 
 import ProtectedRoute from './components/ProtectedRoute';
+import { UserProvider } from './context/UserContext';
+
+<React.StrictMode>
+  <UserProvider>
+    <App />
+  </UserProvider>
+</React.StrictMode>
+
 
 function App() {
   return (
