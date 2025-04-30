@@ -7,38 +7,36 @@ export const UserProvider = ({ children }) => {
   const [user, setUser] = useState(null);
 
   useEffect(() => {
-    const getUser = async () => {
-      console.log('🔍 Buscando sesión de usuario...');
-      const { data, error } = await supabase.auth.getUser();
+    const cargarUsuario = async () => {
+      try {
+        const { data, error } = await supabase.auth.getUser();
+        if (error) {
+          console.warn('⚠️ No se pudo obtener usuario:', error.message);
+          return;
+        }
 
-      if (error) {
-        console.error('❌ Error al obtener usuario:', error);
-        return;
+        if (data?.user?.id) {
+          const { data: perfil, error: errPerfil } = await supabase
+            .from('usuarios')
+            .select('*')
+            .eq('id', data.user.id)
+            .single();
+
+          if (errPerfil) {
+            console.warn('⚠️ Error al cargar perfil:', errPerfil.message);
+            return;
+          }
+
+          setUser(perfil);
+        } else {
+          console.log('ℹ️ Usuario no logueado');
+        }
+      } catch (err) {
+        console.error('❌ Error general en UserContext:', err);
       }
-
-      if (!data?.user) {
-        console.log('⚠️ No hay sesión activa');
-        return;
-      }
-
-      console.log('✅ Usuario autenticado:', data.user);
-
-      const { data: perfil, error: perfilError } = await supabase
-        .from('usuarios')
-        .select('*')
-        .eq('id', data.user.id)
-        .single();
-
-      if (perfilError) {
-        console.error('❌ Error cargando perfil desde "usuarios":', perfilError);
-        return;
-      }
-
-      console.log('✅ Perfil cargado:', perfil);
-      setUser(perfil);
     };
 
-    getUser();
+    cargarUsuario();
   }, []);
 
   return (
