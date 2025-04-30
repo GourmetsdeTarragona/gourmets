@@ -1,14 +1,11 @@
-import React from 'react';
-import ReactDOM from 'react-dom/client';
-import App from './App';
-import './styles.css';
-import { UserProvider } from './contexts/UserContext';
+function App() {
+  return (
+    <div style={{ textAlign: 'center', marginTop: '5rem' }}>
+      <h1>🟢 App cargada correctamente</h1>
+      <p>Desde aquí podemos reactivar rutas y login.</p>
+    </div>
+  );
+}
 
-ReactDOM.createRoot(document.getElementById('root')).render(
-  <React.StrictMode>
-    <UserProvider>
-      <App />
-    </UserProvider>
-  </React.StrictMode>
-);
+export default App;
 
