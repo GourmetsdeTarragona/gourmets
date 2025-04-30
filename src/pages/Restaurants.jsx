@@ -13,36 +13,46 @@ function Restaurants() {
 
   useEffect(() => {
     if (!user) return;
+    fetchData();
+  }, [user]);
 
-    const fetchData = async () => {
-      setLoading(true);
+  const fetchData = async () => {
+    setLoading(true);
 
-      // Restaurantes donde este socio fue asistente
+    if (!user?.id) {
+      console.error("Usuario no disponible");
+      setLoading(false);
+      return;
+    }
+
+    try {
+      // Traemos todos los restaurantes
       const { data: rData, error: rError } = await supabase
         .from('restaurantes')
-        .select('*')
-        .contains('asistentes', [user.id]);
+        .select('*');
 
-      if (rError) {
-        console.error('Error cargando restaurantes:', rError);
-        setLoading(false);
-        return;
-      }
+      if (rError) throw rError;
 
-      setRestaurantes(rData || []);
+      // Filtramos los que tengan al socio como asistente
+      const filtrados = (rData || []).filter(r =>
+        Array.isArray(r.asistentes) && r.asistentes.includes(user.id)
+      );
 
-      // Votos ya emitidos por este socio
+      setRestaurantes(filtrados);
+
+      // Traemos los votos ya emitidos
       const { data: votosData } = await supabase
         .from('votos')
         .select('restaurante_id')
         .eq('socio_id', user.id);
 
-      setVotos(votosData.map(v => v.restaurante_id));
-      setLoading(false);
-    };
+      setVotos((votosData || []).map(v => v.restaurante_id));
+    } catch (err) {
+      console.error('Error cargando datos:', err.message);
+    }
 
-    fetchData();
-  }, [user]);
+    setLoading(false);
+  };
 
   const haVotado = (restauranteId) => votos.includes(restauranteId);
 
@@ -60,7 +70,7 @@ function Restaurants() {
         {restaurantes.map((r) => (
           <li key={r.id} style={{ marginBottom: '1.5rem', borderBottom: '1px solid #ccc', paddingBottom: '1rem' }}>
             <h3>{r.nombre}</h3>
-            <p><strong>Fecha:</strong> {r.fecha}</p>
+            <p><strong>Fecha:</strong> {r.fecha || 'Sin fecha'}</p>
             {haVotado(r.id) ? (
               <p style={{ color: 'green' }}>✅ Ya has votado</p>
             ) : (
