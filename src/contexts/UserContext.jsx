@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useState } from 'react';
-import { supabase } from '../supabase/supabase';
+import { supabase } from '../lib/supabase';
 
 const UserContext = createContext();
 
@@ -8,28 +8,28 @@ export const UserProvider = ({ children }) => {
 
   useEffect(() => {
     const cargarUsuario = async () => {
-      const { data, error } = await supabase.auth.getUser();
-      if (error) {
-        console.error('❌ Error al obtener usuario:', error.message);
+      const { data: authData, error: authError } = await supabase.auth.getUser();
+
+      if (authError) {
+        console.error('Error al obtener sesión:', authError.message);
         return;
       }
 
-      if (data?.user?.id) {
-        const { data: perfil, error: errPerfil } = await supabase
-          .from('usuarios')
-          .select('*')
-          .eq('id', data.user.id)
-          .single();
+      const authUser = authData?.user;
+      if (!authUser?.id) return;
 
-        if (errPerfil) {
-          console.warn('⚠️ Error cargando perfil:', errPerfil.message);
-          return;
-        }
+      const { data: perfil, error: perfilError } = await supabase
+        .from('usuarios')
+        .select('*')
+        .eq('id', authUser.id)
+        .single();
 
-        setUser(perfil);
-      } else {
-        console.log('ℹ️ Usuario no logueado');
+      if (perfilError) {
+        console.error('Error al cargar perfil:', perfilError.message);
+        return;
       }
+
+      setUser(perfil);
     };
 
     cargarUsuario();
