@@ -1,5 +1,5 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-
+import Votacion from "./pages/Votacion";
 import Home from './pages/Home';
 import Restaurants from './pages/Restaurants';
 import RestaurantVoting from './pages/RestaurantVoting';
@@ -19,6 +19,8 @@ function App() {
         {/* Invitado o cualquiera */}
         <Route path="/" element={<Home />} />
         <Route path="/ranking" element={<Ranking />} />
+        <Route path="/votar/:restauranteId" element={<Votacion />} />
+
 
         {/* Usuario socio */}
         <Route
