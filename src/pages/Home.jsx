@@ -13,30 +13,30 @@ function Home() {
     e.preventDefault();
     setErrorMsg('');
 
-    const { error, data } = await supabase.auth.signInWithPassword({ email, password });
+    const { data: usuario, error } = await supabase
+      .from('usuarios')
+      .select('*')
+      .eq('email', email)
+      .eq('password', password)
+      .single();
 
-    if (error) {
+    if (error || !usuario) {
       setErrorMsg('Correo o contraseña incorrectos.');
       return;
     }
 
-    // Buscar el perfil y redirigir según rol
-    const { data: perfil, error: perfilError } = await supabase
-      .from('usuarios')
-      .select('rol')
-      .eq('id', data.user.id)
-      .single();
+    // Guardar el perfil en localStorage o donde prefieras (opcional)
+    localStorage.setItem('usuario_id', usuario.id);
+    localStorage.setItem('usuario_rol', usuario.rol);
 
-    if (perfilError || !perfil) {
-      setErrorMsg('Error al cargar el perfil del usuario.');
-      return;
+    // Redirigir por rol
+    if (usuario.rol === 'admin') {
+      navigate('/admin');
+    } else if (usuario.rol === 'socio') {
+      navigate('/restaurants');
+    } else {
+      navigate('/ranking');
     }
-
-    const rol = perfil.rol;
-
-    if (rol === 'admin') navigate('/admin');
-    else if (rol === 'socio') navigate('/restaurants');
-    else navigate('/ranking');
   };
 
   return (
