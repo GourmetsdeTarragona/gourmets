@@ -8,31 +8,27 @@ export const UserProvider = ({ children }) => {
 
   useEffect(() => {
     const cargarUsuario = async () => {
-      try {
-        const { data, error } = await supabase.auth.getUser();
-        if (error) {
-          console.warn('⚠️ No se pudo obtener usuario:', error.message);
+      const { data, error } = await supabase.auth.getUser();
+      if (error) {
+        console.error('❌ Error al obtener usuario:', error.message);
+        return;
+      }
+
+      if (data?.user?.id) {
+        const { data: perfil, error: errPerfil } = await supabase
+          .from('usuarios')
+          .select('*')
+          .eq('id', data.user.id)
+          .single();
+
+        if (errPerfil) {
+          console.warn('⚠️ Error cargando perfil:', errPerfil.message);
           return;
         }
 
-        if (data?.user?.id) {
-          const { data: perfil, error: errPerfil } = await supabase
-            .from('usuarios')
-            .select('*')
-            .eq('id', data.user.id)
-            .single();
-
-          if (errPerfil) {
-            console.warn('⚠️ Error al cargar perfil:', errPerfil.message);
-            return;
-          }
-
-          setUser(perfil);
-        } else {
-          console.log('ℹ️ Usuario no logueado');
-        }
-      } catch (err) {
-        console.error('❌ Error general en UserContext:', err);
+        setUser(perfil);
+      } else {
+        console.log('ℹ️ Usuario no logueado');
       }
     };
 
