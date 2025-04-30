@@ -12,35 +12,27 @@ function Restaurants() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!user) return;
-    fetchData();
+    if (user?.id) {
+      fetchData();
+    }
   }, [user]);
 
   const fetchData = async () => {
     setLoading(true);
 
-    if (!user?.id) {
-      console.error("Usuario no disponible");
-      setLoading(false);
-      return;
-    }
-
     try {
-      // Traemos todos los restaurantes
       const { data: rData, error: rError } = await supabase
         .from('restaurantes')
         .select('*');
 
       if (rError) throw rError;
 
-      // Filtramos los que tengan al socio como asistente
       const filtrados = (rData || []).filter(r =>
         Array.isArray(r.asistentes) && r.asistentes.includes(user.id)
       );
 
       setRestaurantes(filtrados);
 
-      // Traemos los votos ya emitidos
       const { data: votosData } = await supabase
         .from('votos')
         .select('restaurante_id')
@@ -56,6 +48,7 @@ function Restaurants() {
 
   const haVotado = (restauranteId) => votos.includes(restauranteId);
 
+  if (!user) return <p>Cargando perfil de usuario...</p>;
   if (loading) return <p>Cargando restaurantes...</p>;
 
   return (
