@@ -30,6 +30,7 @@ function AdminRestaurantDetail() {
           .from('usuarios')
           .select('id, nombre, email')
           .in('id', rData.asistentes);
+
         setAsistentes(socios || []);
       }
 
@@ -98,6 +99,25 @@ function AdminRestaurantDetail() {
     setFotos((prev) => [...prev, data.publicUrl]);
   };
 
+  const handleDelete = async (url) => {
+    const [_, bucketPath] = supabase.storage
+      .from('imagenes')
+      .getPublicUrl('').data.publicUrl.split('/storage/v1/object/public/');
+
+    const filePath = url.split(`${bucketPath}`)[1];
+
+    const { error } = await supabase.storage
+      .from('imagenes')
+      .remove([filePath]);
+
+    if (error) {
+      alert('Error al eliminar imagen');
+      console.error(error);
+    } else {
+      setFotos((prev) => prev.filter((foto) => foto !== url));
+    }
+  };
+
   if (error) return <p style={{ color: 'red' }}>{error}</p>;
   if (!restaurante) return <p>Cargando...</p>;
 
@@ -128,12 +148,30 @@ function AdminRestaurantDetail() {
       <input type="file" accept="image/*" onChange={handleUpload} />
       <div style={{ display: 'flex', flexWrap: 'wrap', marginTop: '1rem', gap: '1rem' }}>
         {fotos.map((url, idx) => (
-          <img
-            key={idx}
-            src={url}
-            alt={`foto-${idx}`}
-            style={{ width: '150px', borderRadius: '8px', objectFit: 'cover' }}
-          />
+          <div key={idx} style={{ position: 'relative' }}>
+            <img
+              src={url}
+              alt={`foto-${idx}`}
+              style={{ width: '150px', borderRadius: '8px', objectFit: 'cover' }}
+            />
+            <button
+              onClick={() => handleDelete(url)}
+              style={{
+                position: 'absolute',
+                top: '5px',
+                right: '5px',
+                background: 'red',
+                color: 'white',
+                border: 'none',
+                borderRadius: '50%',
+                width: '24px',
+                height: '24px',
+                cursor: 'pointer',
+              }}
+            >
+              ×
+            </button>
+          </div>
         ))}
       </div>
     </div>
