@@ -8,39 +8,42 @@ function AdminRestaurants() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const fetchRestaurantes = async () => {
-      const { data, error } = await supabase
-        .from('restaurantes')
-        .select('*')
-        .order('fecha', { ascending: false });
-
-      if (error) {
-        setError('Error al obtener restaurantes.');
-        console.error(error);
-      } else {
-        const restaurantesConFotos = await Promise.all(
-          (data || []).map(async (r) => {
-            const { data: fotos } = await supabase.storage
-              .from('imagenes')
-              .list(`${r.id}/`, { limit: 1 });
-
-            let fotoPortada = null;
-            if (fotos && fotos.length > 0) {
-              const { publicUrl } = supabase.storage
-                .from('imagenes')
-                .getPublicUrl(`${r.id}/${fotos[0].name}`).data;
-              fotoPortada = publicUrl;
-            }
-
-            return { ...r, fotoPortada };
-          })
-        );
-        setRestaurantes(restaurantesConFotos);
-      }
-    };
-
     fetchRestaurantes();
   }, []);
+
+  const fetchRestaurantes = async () => {
+    const { data, error } = await supabase
+      .from('restaurantes')
+      .select('*')
+      .order('fecha', { ascending: false });
+
+    if (error) {
+      setError('Error al obtener restaurantes.');
+      console.error(error);
+      return;
+    }
+
+    const restaurantesConFotos = await Promise.all(
+      data.map(async (r) => {
+        let fotoPortada = null;
+
+        const { data: fotos, error: errorFotos } = await supabase.storage
+          .from('imagenes')
+          .list(`${r.id}/`, { limit: 1 });
+
+        if (!errorFotos && fotos.length > 0) {
+          const { publicUrl } = supabase.storage
+            .from('imagenes')
+            .getPublicUrl(`${r.id}/${fotos[0].name}`).data;
+          fotoPortada = publicUrl;
+        }
+
+        return { ...r, fotoPortada };
+      })
+    );
+
+    setRestaurantes(restaurantesConFotos);
+  };
 
   return (
     <div className="container" style={{ maxWidth: '900px', margin: '3rem auto' }}>
