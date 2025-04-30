@@ -1,4 +1,3 @@
-// src/contexts/UserContext.jsx
 import { createContext, useContext, useEffect, useState } from 'react';
 import { supabase } from '../supabase/supabase';
 
@@ -9,17 +8,25 @@ export const UserProvider = ({ children }) => {
 
   useEffect(() => {
     const getUser = async () => {
-      const { data } = await supabase.auth.getUser();
+      const { data, error } = await supabase.auth.getUser();
+      if (error) {
+        console.error('Error al obtener usuario:', error);
+        return;
+      }
+
       if (data?.user) {
-        const { data: perfil } = await supabase
+        const { data: perfil, error: perfilError } = await supabase
           .from('usuarios')
           .select('*')
           .eq('id', data.user.id)
           .single();
 
-        if (perfil) {
-          setUser(perfil);
+        if (perfilError) {
+          console.error('Error cargando perfil:', perfilError);
+          return;
         }
+
+        setUser(perfil);
       }
     };
 
