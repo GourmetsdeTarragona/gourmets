@@ -99,25 +99,36 @@ function AdminRestaurantDetail() {
   };
 
  const handleDelete = async (url) => {
-  // Extraer el path real después de '/imagenes/' en la URL pública
-  const parts = url.split('/imagenes/');
-  if (parts.length < 2) {
-    alert("No se pudo determinar la ruta de la imagen");
-    return;
-  }
-  const filePath = parts[1]; // ejemplo: 123e4567.../foto.jpg
+  try {
+    // Extraer la ruta desde la URL pública
+    const match = url.match(/\/imagenes\/(.+)$/);
+    if (!match) {
+      alert("No se pudo identificar la ruta del archivo");
+      return;
+    }
 
-  const { error } = await supabase.storage
-    .from('imagenes')
-    .remove([filePath]);
+    const filePath = match[1]; // ejemplo: 123e4567.../archivo.jpg
 
-  if (error) {
-    alert('Error al eliminar imagen');
-    console.error(error);
-  } else {
+    const { error } = await supabase.storage
+      .from('imagenes')
+      .remove([filePath]);
+
+    if (error) {
+      alert("Error al eliminar imagen");
+      console.error(error);
+      return;
+    }
+
+    // Eliminar también del estado local
     setFotos((prev) => prev.filter((foto) => foto !== url));
+    alert("Imagen eliminada correctamente");
+
+  } catch (err) {
+    console.error("Error inesperado:", err);
+    alert("Ocurrió un error al intentar eliminar la imagen");
   }
 };
+
 
 
   if (error) return <p style={{ color: 'red' }}>{error}</p>;
