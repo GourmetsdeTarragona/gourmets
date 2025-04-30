@@ -98,25 +98,27 @@ function AdminRestaurantDetail() {
     alert("Imagen subida correctamente");
   };
 
-  const handleDelete = async (url) => {
-    const [_, bucketPath] = supabase.storage
-      .from('imagenes')
-      .getPublicUrl('').data.publicUrl.split('/storage/v1/object/public/');
+ const handleDelete = async (url) => {
+  // Extraer el path real después de '/imagenes/' en la URL pública
+  const parts = url.split('/imagenes/');
+  if (parts.length < 2) {
+    alert("No se pudo determinar la ruta de la imagen");
+    return;
+  }
+  const filePath = parts[1]; // ejemplo: 123e4567.../foto.jpg
 
-    const filePath = url.split(`${bucketPath}`)[1];
+  const { error } = await supabase.storage
+    .from('imagenes')
+    .remove([filePath]);
 
-    const { error } = await supabase.storage
-      .from('imagenes')
-      .remove([filePath]);
+  if (error) {
+    alert('Error al eliminar imagen');
+    console.error(error);
+  } else {
+    setFotos((prev) => prev.filter((foto) => foto !== url));
+  }
+};
 
-    if (error) {
-      alert('Error al eliminar imagen');
-      console.error(error);
-    } else {
-      await fetchFotos();
-      alert("Imagen eliminada");
-    }
-  };
 
   if (error) return <p style={{ color: 'red' }}>{error}</p>;
   if (!restaurante) return <p>Cargando...</p>;
