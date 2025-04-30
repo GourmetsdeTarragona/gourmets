@@ -7,6 +7,7 @@ import AdminDashboard from './pages/AdminDashboard';
 import RegisterUser from './pages/RegisterUser';
 import CreateRestaurant from './pages/CreateRestaurant';
 import AdminRestaurants from './pages/AdminRestaurants';
+import AdminRestaurantDetail from './pages/AdminRestaurantDetail';
 import ProtectedRoute from './components/ProtectedRoute';
 import { UserProvider } from './contexts/UserContext';
 
@@ -15,9 +16,11 @@ function App() {
     <UserProvider>
       <Router>
         <Routes>
+          {/* Acceso público */}
           <Route path="/" element={<Home />} />
           <Route path="/ranking" element={<Ranking />} />
 
+          {/* Zona socios */}
           <Route
             path="/restaurants"
             element={
@@ -35,6 +38,7 @@ function App() {
             }
           />
 
+          {/* Zona administrador */}
           <Route
             path="/admin"
             element={
@@ -64,6 +68,14 @@ function App() {
             element={
               <ProtectedRoute allowedRoles={['admin']}>
                 <AdminRestaurants />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/restaurante/:id"
+            element={
+              <ProtectedRoute allowedRoles={['admin']}>
+                <AdminRestaurantDetail />
               </ProtectedRoute>
             }
           />
