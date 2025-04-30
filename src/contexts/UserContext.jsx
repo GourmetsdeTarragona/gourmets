@@ -8,11 +8,9 @@ export const UserProvider = ({ children }) => {
   const [user, setUser] = useState(null);
 
   useEffect(() => {
-    // Obtener sesión inicial
     const getUser = async () => {
       const { data } = await supabase.auth.getUser();
       if (data?.user) {
-        // Opcional: fetch de perfil desde tabla usuarios
         const { data: perfil } = await supabase
           .from('usuarios')
           .select('*')
@@ -20,7 +18,7 @@ export const UserProvider = ({ children }) => {
           .single();
 
         if (perfil) {
-          setUser(perfil); // contiene id, nombre, rol, etc.
+          setUser(perfil); // Guarda perfil completo
         }
       }
     };
