@@ -8,7 +8,7 @@ import RegisterUser from './pages/RegisterUser';
 import CreateRestaurant from './pages/CreateRestaurant';
 import AdminRestaurants from './pages/AdminRestaurants';
 import ProtectedRoute from './components/ProtectedRoute';
-import { UserProvider } from './context/UserContext';
+import { UserProvider } from './contexts/UserContext';
 
 function App() {
   return (
