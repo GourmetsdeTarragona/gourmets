@@ -1,4 +1,8 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { UserProvider } from './contexts/UserContext';
+import ProtectedRoute from './components/ProtectedRoute';
+import Navbar from './components/Navbar';
+
 import Home from './pages/Home';
 import Restaurants from './pages/Restaurants';
 import RestaurantVoting from './pages/RestaurantVoting';
@@ -7,13 +11,7 @@ import AdminDashboard from './pages/AdminDashboard';
 import RegisterUser from './pages/RegisterUser';
 import CreateRestaurant from './pages/CreateRestaurant';
 import AdminRestaurants from './pages/AdminRestaurants';
-import AdminRestaurantDetail from './pages/AdminRestaurantDetail';
-import ProtectedRoute from './components/ProtectedRoute';
 import AccessDenied from './pages/AccessDenied';
-import { UserProvider } from './contexts/UserContext';
-import Navbar from './components/Navbar';
-
-// ...
 
 function App() {
   return (
@@ -21,24 +19,10 @@ function App() {
       <Navbar />
       <Router>
         <Routes>
-          {/* tus rutas aquí */}
-        </Routes>
-      </Router>
-    </UserProvider>
-  );
-}
-
-
-function App() {
-  return (
-    <UserProvider>
-      <Router>
-        <Routes>
-          {/* Pantallas públicas */}
           <Route path="/" element={<Home />} />
           <Route path="/ranking" element={<Ranking />} />
+          <Route path="/access-denied" element={<AccessDenied />} />
 
-          {/* Rutas protegidas para socios */}
           <Route
             path="/restaurants"
             element={
@@ -56,7 +40,6 @@ function App() {
             }
           />
 
-          {/* Rutas protegidas para admins */}
           <Route
             path="/admin"
             element={
@@ -89,17 +72,6 @@ function App() {
               </ProtectedRoute>
             }
           />
-          <Route
-            path="/admin/restaurantes/:id"
-            element={
-              <ProtectedRoute allowedRoles={['admin']}>
-                <AdminRestaurantDetail />
-              </ProtectedRoute>
-            }
-          />
-
-          {/* Página de acceso denegado */}
-          <Route path="/access-denied" element={<AccessDenied />} />
         </Routes>
       </Router>
     </UserProvider>
