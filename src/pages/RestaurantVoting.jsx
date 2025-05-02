@@ -13,36 +13,50 @@ function RestaurantVoting() {
   const [categorias, setCategorias] = useState([]);
   const [puntuaciones, setPuntuaciones] = useState({});
   const [yaVotado, setYaVotado] = useState(false);
+  const [asiste, setAsiste] = useState(false);
   const [confirmacion, setConfirmacion] = useState('');
 
   useEffect(() => {
     if (!user) return;
 
     const cargarDatos = async () => {
-      const { data: restaurante, error: err1 } = await supabase
+      const { data: restaurante } = await supabase
         .from('restaurantes')
         .select('id, nombre')
         .eq('id', restaurantId)
         .single();
+      setRestaurant(restaurante);
 
-      const { data: cats, error: err2 } = await supabase
-        .from('categorias')
+      const { data: fijas } = await supabase.from('categorias_fijas').select('*');
+      const { data: extras } = await supabase
+        .from('categorias_extra')
         .select('*')
         .eq('restaurante_id', restaurantId);
 
-      const { data: votoExistente } = await supabase
-        .from('votaciones')
+      const { data: asistencia } = await supabase
+        .from('asistencias')
         .select('*')
         .eq('usuario_id', user.id)
         .eq('restaurante_id', restaurantId)
         .maybeSingle();
 
-      if (votoExistente) {
-        setYaVotado(true);
-      }
+      const { data: votoExistente } = await supabase
+        .from('votaciones')
+        .select('id')
+        .eq('usuario_id', user.id)
+        .eq('restaurante_id', restaurantId)
+        .maybeSingle();
 
-      if (restaurante) setRestaurant(restaurante);
-      if (cats) setCategorias(cats);
+      if (votoExistente) setYaVotado(true);
+      if (asistencia) setAsiste(true);
+
+      if (fijas && extras) {
+        const todas = [
+          ...fijas.map(cat => ({ ...cat, tipo: 'fija' })),
+          ...extras.map(cat => ({ ...cat, tipo: 'extra' }))
+        ];
+        setCategorias(todas);
+      }
     };
 
     cargarDatos();
@@ -58,7 +72,8 @@ function RestaurantVoting() {
     const votos = categorias.map((cat) => ({
       usuario_id: user.id,
       restaurante_id: restaurantId,
-      categoria_id: cat.id,
+      categoria_fija_id: cat.tipo === 'fija' ? cat.id : null,
+      categoria_extra_id: cat.tipo === 'extra' ? cat.id : null,
       valor: puntuaciones[cat.id] || 0,
     }));
 
@@ -72,16 +87,13 @@ function RestaurantVoting() {
     }
   };
 
-  if (!restaurant) return <p style={{ padding: '2rem' }}>Cargando detalles del restaurante...</p>;
-
-  if (yaVotado) {
-    return <p style={{ padding: '2rem' }}>Ya has votado en este restaurante. Puedes ver los resultados en el ranking.</p>;
-  }
+  if (!restaurant) return <p className="container">Cargando datos del restaurante...</p>;
+  if (!asiste) return <p className="container">Solo los asistentes pueden votar en este restaurante.</p>;
+  if (yaVotado) return <p className="container">Ya has votado. Puedes ver los resultados en el ranking.</p>;
 
   return (
     <div className="container">
-      <h2 style={{ marginBottom: '1rem' }}>Votación: {restaurant.nombre}</h2>
-
+      <h2>Votación: {restaurant.nombre}</h2>
       <form onSubmit={handleSubmit}>
         {categorias.map((categoria) => (
           <div key={categoria.id} style={{ marginBottom: '1.5rem' }}>
