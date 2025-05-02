@@ -11,6 +11,23 @@ import AdminRestaurantDetail from './pages/AdminRestaurantDetail';
 import ProtectedRoute from './components/ProtectedRoute';
 import AccessDenied from './pages/AccessDenied';
 import { UserProvider } from './contexts/UserContext';
+import Navbar from './components/Navbar';
+
+// ...
+
+function App() {
+  return (
+    <UserProvider>
+      <Navbar />
+      <Router>
+        <Routes>
+          {/* tus rutas aquí */}
+        </Routes>
+      </Router>
+    </UserProvider>
+  );
+}
+
 
 function App() {
   return (
