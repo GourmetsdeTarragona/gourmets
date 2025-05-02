@@ -20,25 +20,23 @@ function RestaurantVoting() {
     if (!user) return;
 
     const cargarDatos = async () => {
-      const { data: restaurante } = await supabase
+      const { data: restaurante, error: errorRest } = await supabase
         .from('restaurantes')
-        .select('id, nombre')
+        .select('id, nombre, asistentes')
         .eq('id', restaurantId)
         .single();
+
+      if (errorRest || !restaurante) return;
+
       setRestaurant(restaurante);
+      const esAsistente = restaurante.asistentes?.includes(user.id);
+      setAsiste(esAsistente);
 
       const { data: fijas } = await supabase.from('categorias_fijas').select('*');
       const { data: extras } = await supabase
         .from('categorias_extra')
         .select('*')
         .eq('restaurante_id', restaurantId);
-
-      const { data: asistencia } = await supabase
-        .from('asistencias')
-        .select('*')
-        .eq('usuario_id', user.id)
-        .eq('restaurante_id', restaurantId)
-        .maybeSingle();
 
       const { data: votoExistente } = await supabase
         .from('votaciones')
@@ -48,12 +46,11 @@ function RestaurantVoting() {
         .maybeSingle();
 
       if (votoExistente) setYaVotado(true);
-      if (asistencia) setAsiste(true);
 
       if (fijas && extras) {
         const todas = [
-          ...fijas.map(cat => ({ ...cat, tipo: 'fija' })),
-          ...extras.map(cat => ({ ...cat, tipo: 'extra' }))
+          ...fijas.map((cat) => ({ ...cat, tipo: 'fija' })),
+          ...extras.map((cat) => ({ ...cat, tipo: 'extra' }))
         ];
         setCategorias(todas);
       }
@@ -97,7 +94,7 @@ function RestaurantVoting() {
       <form onSubmit={handleSubmit}>
         {categorias.map((categoria) => (
           <div key={categoria.id} style={{ marginBottom: '1.5rem' }}>
-            <h4 style={{ marginBottom: '0.5rem' }}>{categoria.nombre}</h4>
+            <h4>{categoria.nombre}</h4>
             <div style={{ display: 'flex', gap: '0.5rem' }}>
               {[5, 6, 7, 8, 9, 10].map((num) => (
                 <button
@@ -119,7 +116,6 @@ function RestaurantVoting() {
             </div>
           </div>
         ))}
-
         <button type="submit" className="button-primary" style={{ width: '100%' }}>
           Enviar votación
         </button>
