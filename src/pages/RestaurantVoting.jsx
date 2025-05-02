@@ -29,8 +29,7 @@ function RestaurantVoting() {
       if (errorRest || !restaurante) return;
 
       setRestaurant(restaurante);
-      const esAsistente = restaurante.asistentes?.includes(user.id);
-      setAsiste(esAsistente);
+      setAsiste(restaurante.asistentes?.includes(user.id));
 
       const { data: fijas } = await supabase.from('categorias_fijas').select('*');
       const { data: extras } = await supabase
@@ -47,13 +46,11 @@ function RestaurantVoting() {
 
       if (votoExistente) setYaVotado(true);
 
-      if (fijas && extras) {
-        const todas = [
-          ...fijas.map((cat) => ({ ...cat, tipo: 'fija' })),
-          ...extras.map((cat) => ({ ...cat, tipo: 'extra' }))
-        ];
-        setCategorias(todas);
-      }
+      const todas = [
+        ...fijas.map((cat) => ({ ...cat, tipo: 'fija' })),
+        ...extras.map((cat) => ({ ...cat, tipo: 'extra' }))
+      ];
+      setCategorias(todas);
     };
 
     cargarDatos();
@@ -90,32 +87,31 @@ function RestaurantVoting() {
 
   return (
     <div className="container">
-      <h2>Votación: {restaurant.nombre}</h2>
+      <h2 style={{ marginBottom: '2rem' }}>Votación: {restaurant.nombre}</h2>
       <form onSubmit={handleSubmit}>
         {categorias.map((categoria) => (
-          <div key={categoria.id} style={{ marginBottom: '1.5rem' }}>
-            <h4>{categoria.nombre}</h4>
-            <div style={{ display: 'flex', gap: '0.5rem' }}>
-              {[5, 6, 7, 8, 9, 10].map((num) => (
-                <button
-                  key={num}
-                  type="button"
-                  onClick={() => handleVoteChange(categoria.id, num)}
-                  style={{
-                    padding: '0.5rem 1rem',
-                    borderRadius: '0.5rem',
-                    backgroundColor: puntuaciones[categoria.id] === num ? '#000' : '#eee',
-                    color: puntuaciones[categoria.id] === num ? '#fff' : '#000',
-                    border: 'none',
-                    cursor: 'pointer'
-                  }}
-                >
-                  {num}
-                </button>
+          <div key={categoria.id} style={{ marginBottom: '2rem' }}>
+            <h4 style={{ marginBottom: '1rem' }}>
+              {categoria.nombre || categoria.titulo || 'Categoría'}
+            </h4>
+            <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center' }}>
+              {[5, 6, 7, 8, 9, 10].map((valor) => (
+                <label key={valor} style={{ textAlign: 'center' }}>
+                  <input
+                    type="radio"
+                    name={`categoria-${categoria.id}`}
+                    value={valor}
+                    checked={puntuaciones[categoria.id] === valor}
+                    onChange={() => handleVoteChange(categoria.id, valor)}
+                    style={{ marginBottom: '0.5rem' }}
+                  />
+                  <div>{valor}</div>
+                </label>
               ))}
             </div>
           </div>
         ))}
+
         <button type="submit" className="button-primary" style={{ width: '100%' }}>
           Enviar votación
         </button>
