@@ -4,8 +4,8 @@ import { useUser } from '../contexts/UserContext';
 function ProtectedRoute({ children, allowedRoles }) {
   const { user } = useUser();
 
-  if (!user) {
-    return <p>Cargando...</p>;
+  if (user === null) {
+    return <p>Cargando perfil de usuario...</p>;
   }
 
   if (!allowedRoles.includes(user.rol)) {
@@ -16,4 +16,3 @@ function ProtectedRoute({ children, allowedRoles }) {
 }
 
 export default ProtectedRoute;
-
