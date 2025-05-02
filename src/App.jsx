@@ -1,5 +1,5 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { UserProvider } from './contexts/UserContext';
+import { UserProvider, useUser } from './contexts/UserContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import Navbar from './components/Navbar';
 
@@ -13,66 +13,76 @@ import CreateRestaurant from './pages/CreateRestaurant';
 import AdminRestaurants from './pages/AdminRestaurants';
 import AccessDenied from './pages/AccessDenied';
 
+function AppContent() {
+  const { user } = useUser();
+
+  return (
+    <>
+      {user && <Navbar />}
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/ranking" element={<Ranking />} />
+        <Route path="/access-denied" element={<AccessDenied />} />
+
+        <Route
+          path="/restaurants"
+          element={
+            <ProtectedRoute allowedRoles={['socio']}>
+              <Restaurants />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/vote/:restaurantId"
+          element={
+            <ProtectedRoute allowedRoles={['socio']}>
+              <RestaurantVoting />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/admin"
+          element={
+            <ProtectedRoute allowedRoles={['admin']}>
+              <AdminDashboard />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/register-user"
+          element={
+            <ProtectedRoute allowedRoles={['admin']}>
+              <RegisterUser />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/create-restaurant"
+          element={
+            <ProtectedRoute allowedRoles={['admin']}>
+              <CreateRestaurant />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/restaurantes"
+          element={
+            <ProtectedRoute allowedRoles={['admin']}>
+              <AdminRestaurants />
+            </ProtectedRoute>
+          }
+        />
+      </Routes>
+    </>
+  );
+}
+
 function App() {
   return (
     <UserProvider>
-      <Navbar />
       <Router>
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/ranking" element={<Ranking />} />
-          <Route path="/access-denied" element={<AccessDenied />} />
-
-          <Route
-            path="/restaurants"
-            element={
-              <ProtectedRoute allowedRoles={['socio']}>
-                <Restaurants />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/vote/:restaurantId"
-            element={
-              <ProtectedRoute allowedRoles={['socio']}>
-                <RestaurantVoting />
-              </ProtectedRoute>
-            }
-          />
-
-          <Route
-            path="/admin"
-            element={
-              <ProtectedRoute allowedRoles={['admin']}>
-                <AdminDashboard />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/admin/register-user"
-            element={
-              <ProtectedRoute allowedRoles={['admin']}>
-                <RegisterUser />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/admin/create-restaurant"
-            element={
-              <ProtectedRoute allowedRoles={['admin']}>
-                <CreateRestaurant />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/admin/restaurantes"
-            element={
-              <ProtectedRoute allowedRoles={['admin']}>
-                <AdminRestaurants />
-              </ProtectedRoute>
-            }
-          />
-        </Routes>
+        <AppContent />
       </Router>
     </UserProvider>
   );
