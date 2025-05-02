@@ -25,17 +25,17 @@ function Home() {
       return;
     }
 
-    // Guardar el perfil en localStorage o donde prefieras (opcional)
+    // Guardamos datos mínimos del usuario
     localStorage.setItem('usuario_id', usuario.id);
     localStorage.setItem('usuario_rol', usuario.rol);
 
-    // Redirigir por rol
+    // Redirección segura por rol
     if (usuario.rol === 'admin') {
-      navigate('/admin');
+      navigate('/admin'); // AdminDashboard.jsx
     } else if (usuario.rol === 'socio') {
-      navigate('/restaurants');
+      navigate('/restaurants'); // Restaurants.jsx
     } else {
-      navigate('/ranking');
+      navigate('/ranking'); // fallback
     }
   };
 
