@@ -1,13 +1,49 @@
 import { useNavigate } from 'react-router-dom';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
 import logo from '/logo.png';
+
+const IMAGEN_DEFECTO = 'https://redojogbxdtqxqzxvyhp.supabase.co/storage/v1/object/public/imagenes/ef2f188f-ad15-45b1-9bff-639f9546502c/1746031063124_IMG-20250420-WA0009.jpg';
 
 function Home() {
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [errorMsg, setErrorMsg] = useState('');
+  const [imagenes, setImagenes] = useState([IMAGEN_DEFECTO]);
+  const [imagenActual, setImagenActual] = useState(IMAGEN_DEFECTO);
+
+  useEffect(() => {
+    const obtenerImagenes = async () => {
+      const { data, error } = await supabase
+        .storage
+        .from('imagenes')
+        .list('', { limit: 100, sortBy: { column: 'created_at', order: 'desc' } });
+
+      if (!error && data.length > 0) {
+        const urls = data
+          .filter(item => item.name.endsWith('.jpg') || item.name.endsWith('.png'))
+          .map(item =>
+            supabase.storage.from('imagenes').getPublicUrl(item.name).data.publicUrl
+          );
+        setImagenes(urls);
+        setImagenActual(urls[0]);
+      }
+    };
+
+    obtenerImagenes();
+  }, []);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setImagenActual(prev => {
+        const idx = imagenes.indexOf(prev);
+        return imagenes[(idx + 1) % imagenes.length] || IMAGEN_DEFECTO;
+      });
+    }, 6000);
+
+    return () => clearInterval(interval);
+  }, [imagenes]);
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -25,11 +61,9 @@ function Home() {
       return;
     }
 
-    // Guardamos datos mínimos del usuario
     localStorage.setItem('usuario_id', usuario.id);
     localStorage.setItem('usuario_rol', usuario.rol);
 
-    // Redirige inmediatamente según rol
     if (usuario.rol === 'admin') {
       navigate('/admin', { replace: true });
     } else if (usuario.rol === 'socio') {
@@ -38,27 +72,26 @@ function Home() {
       navigate('/ranking', { replace: true });
     }
 
-    // Forzamos recarga del contexto (por si acaso)
     window.location.reload();
   };
 
   return (
     <div style={{
-      backgroundImage:
-        'url(https://redojogbxdtqxqzxvyhp.supabase.co/storage/v1/object/public/imagenes/ef2f188f-ad15-45b1-9bff-639f9546502c/1746031063124_IMG-20250420-WA0009.jpg)',
+      backgroundImage: `url(${imagenActual})`,
       backgroundSize: 'cover',
       backgroundPosition: 'center',
+      transition: 'background-image 1.5s ease-in-out',
       minHeight: '100vh',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
-      position: 'relative',
+      position: 'relative'
     }}>
       <div style={{
         position: 'absolute',
         inset: 0,
         backgroundColor: 'rgba(0, 0, 0, 0.6)',
-        zIndex: 1,
+        zIndex: 1
       }}></div>
 
       <div style={{
@@ -69,7 +102,7 @@ function Home() {
         maxWidth: '400px',
         width: '100%',
         boxShadow: '0 8px 24px rgba(0,0,0,0.2)',
-        textAlign: 'center',
+        textAlign: 'center'
       }}>
         <img src={logo} alt="Logo Gourmets" style={{ width: '120px', marginBottom: '1.5rem' }} />
         <h2 style={{ marginBottom: '1rem' }}>Iniciar sesión</h2>
