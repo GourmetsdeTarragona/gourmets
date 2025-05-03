@@ -13,19 +13,24 @@ function Home() {
   const [imagenes, setImagenes] = useState([IMAGEN_DEFECTO]);
   const [imagenActual, setImagenActual] = useState(IMAGEN_DEFECTO);
 
+  // Obtener imágenes desde carpeta 'genericas'
   useEffect(() => {
     const obtenerImagenes = async () => {
       const { data, error } = await supabase
         .storage
         .from('imagenes')
-        .list('', { limit: 100, sortBy: { column: 'created_at', order: 'desc' } });
+        .list('genericas', {
+          limit: 100,
+          sortBy: { column: 'name', order: 'asc' }
+        });
 
       if (!error && data.length > 0) {
         const urls = data
-          .filter(item => item.name.endsWith('.jpg') || item.name.endsWith('.png'))
+          .filter(item => item.name.match(/\.(jpg|jpeg|png)$/i))
           .map(item =>
-            supabase.storage.from('imagenes').getPublicUrl(item.name).data.publicUrl
+            supabase.storage.from('imagenes').getPublicUrl(`genericas/${item.name}`).data.publicUrl
           );
+
         setImagenes(urls);
         setImagenActual(urls[0]);
       }
@@ -34,13 +39,14 @@ function Home() {
     obtenerImagenes();
   }, []);
 
+  // Rotación de fondo cada 5 segundos
   useEffect(() => {
     const interval = setInterval(() => {
       setImagenActual(prev => {
         const idx = imagenes.indexOf(prev);
         return imagenes[(idx + 1) % imagenes.length] || IMAGEN_DEFECTO;
       });
-    }, 6000);
+    }, 5000);
 
     return () => clearInterval(interval);
   }, [imagenes]);
