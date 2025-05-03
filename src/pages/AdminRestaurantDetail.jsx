@@ -1,180 +1,105 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { supabase } from '../supabase/supabase';
+import { supabase } from '../lib/supabase';
 
 function AdminRestaurantDetail() {
   const { id } = useParams();
   const [restaurante, setRestaurante] = useState(null);
+  const [socios, setSocios] = useState([]);
   const [asistentes, setAsistentes] = useState([]);
-  const [categoriaExtra, setCategoriaExtra] = useState(null);
-  const [fotos, setFotos] = useState([]);
-  const [error, setError] = useState('');
+  const [votantes, setVotantes] = useState([]);
+  const [mensaje, setMensaje] = useState('');
 
   useEffect(() => {
-    fetchData();
-  }, [id]);
+    fetchDatos();
+  }, []);
 
-  const fetchData = async () => {
-    const { data: rData, error: rError } = await supabase
+  const fetchDatos = async () => {
+    const { data: rest, error: errRest } = await supabase
       .from('restaurantes')
       .select('*')
       .eq('id', id)
       .single();
 
-    if (rError || !rData) {
-      setError('Error cargando restaurante');
-      return;
-    }
+    if (errRest) return console.error('Error restaurante:', errRest);
 
-    setRestaurante(rData);
+    setRestaurante(rest);
+    setAsistentes(rest.asistentes || []);
 
-    if (rData.asistentes?.length) {
-      const { data: socios } = await supabase
-        .from('usuarios')
-        .select('id, nombre, email')
-        .in('id', rData.asistentes);
+    const { data: allSocios } = await supabase
+      .from('usuarios')
+      .select('id, nombre')
+      .eq('rol', 'socio');
 
-      setAsistentes(socios || []);
-    }
+    setSocios(allSocios);
 
-    const { data: extra } = await supabase
-      .from('categorias_extra')
-      .select('nombre_extra')
-      .eq('restaurante_id', id)
-      .maybeSingle();
+    const { data: votos } = await supabase
+      .from('votaciones')
+      .select('usuario_id')
+      .eq('restaurante_id', id);
 
-    if (extra) {
-      setCategoriaExtra(extra.nombre_extra);
-    }
-
-    fetchFotos();
+    setVotantes(votos.map(v => v.usuario_id));
   };
 
-  const fetchFotos = async () => {
-    const { data, error } = await supabase.storage
-      .from('imagenes')
-      .list(`${id}/`, { limit: 100 });
+  const toggleAsistente = (socioId) => {
+    const yaHaVotado = votantes.includes(socioId);
+    const estaSeleccionado = asistentes.includes(socioId);
 
-    if (error) {
-      console.error('Error cargando fotos:', error);
+    if (estaSeleccionado && yaHaVotado) {
+      setMensaje('No puedes quitar asistentes que ya han votado.');
+      setTimeout(() => setMensaje(''), 3000);
       return;
     }
 
-    const urls = data.map((file) =>
-      supabase.storage.from('imagenes').getPublicUrl(`${id}/${file.name}`).data.publicUrl
-    );
-    setFotos(urls);
+    const nuevos = estaSeleccionado
+      ? asistentes.filter(id => id !== socioId)
+      : [...asistentes, socioId];
+
+    setAsistentes(nuevos);
   };
 
-  const handleUpload = async (e) => {
-    const file = e.target.files?.[0];
-    if (!file) {
-      alert("No se seleccionó ningún archivo");
-      return;
-    }
+  const guardarAsistentes = async () => {
+    const { error } = await supabase
+      .from('restaurantes')
+      .update({ asistentes })
+      .eq('id', id);
 
-    const validTypes = ['image/jpeg', 'image/png', 'image/webp'];
-    if (!validTypes.includes(file.type)) {
-      alert("Tipo de archivo no válido. Usa JPG, PNG o WebP.");
-      return;
-    }
-
-    const filePath = `${id}/${Date.now()}_${file.name}`;
-
-    const { error } = await supabase.storage
-      .from('imagenes')
-      .upload(filePath, file, {
-        contentType: file.type
-      });
-
-    if (error) {
-      console.error("🚨 Error subiendo imagen:", error);
-      alert("Error subiendo imagen: " + error.message);
-      return;
-    }
-
-    await fetchFotos();
-    alert("Imagen subida correctamente");
-  };
-
-  const handleDelete = async (url) => {
-    const filePath = url.split('/imagenes/')[1];
-
-    if (!filePath) {
-      alert("No se pudo determinar la ruta del archivo");
-      return;
-    }
-
-    const { error } = await supabase.storage
-      .from('imagenes')
-      .remove([filePath]);
-
-    if (error) {
-      alert("Error al eliminar imagen en Supabase");
+    if (!error) {
+      setMensaje('Asistentes actualizados correctamente.');
+      setTimeout(() => setMensaje(''), 3000);
+    } else {
       console.error(error);
-      return;
     }
-
-    setFotos((prev) => prev.filter((foto) => foto !== url));
-    alert("Imagen eliminada correctamente");
   };
 
-  if (error) return <p style={{ color: 'red' }}>{error}</p>;
-  if (!restaurante) return <p>Cargando...</p>;
+  if (!restaurante) return <p>Cargando detalles...</p>;
 
   return (
-    <div style={{ maxWidth: '700px', margin: '3rem auto' }}>
-      <h2>Detalles del restaurante</h2>
-
-      <div style={{ marginBottom: '2rem' }}>
-        <p><strong>Nombre:</strong> {restaurante.nombre}</p>
-        <p><strong>Fecha:</strong> {restaurante.fecha}</p>
-        <p><strong>Categoría extra:</strong> {categoriaExtra || '—'}</p>
-      </div>
+    <div className="container">
+      <h2>Restaurante: {restaurante.nombre}</h2>
+      <p><strong>Fecha:</strong> {restaurante.fecha || 'No asignada'}</p>
 
       <h3>Asistentes</h3>
-      {asistentes.length === 0 ? (
-        <p>No hay asistentes registrados.</p>
-      ) : (
-        <ul style={{ paddingLeft: '1rem' }}>
-          {asistentes.map((socio) => (
-            <li key={socio.id}>
-              {socio.nombre} ({socio.email})
-            </li>
-          ))}
-        </ul>
-      )}
-
-      <h3 style={{ marginTop: '2rem' }}>Fotos del evento</h3>
-      <input type="file" accept="image/*" onChange={handleUpload} />
-      <div style={{ display: 'flex', flexWrap: 'wrap', marginTop: '1rem', gap: '1rem' }}>
-        {fotos.map((url, idx) => (
-          <div key={idx} style={{ position: 'relative' }}>
-            <img
-              src={url}
-              alt={`foto-${idx}`}
-              style={{ width: '150px', borderRadius: '8px', objectFit: 'cover' }}
+      <div style={{ marginBottom: '1rem' }}>
+        {socios.map((socio) => (
+          <label key={socio.id} style={{ display: 'block', marginBottom: '0.5rem' }}>
+            <input
+              type="checkbox"
+              checked={asistentes.includes(socio.id)}
+              onChange={() => toggleAsistente(socio.id)}
+              disabled={votantes.includes(socio.id) && asistentes.includes(socio.id)}
             />
-            <button
-              onClick={() => handleDelete(url)}
-              style={{
-                position: 'absolute',
-                top: '5px',
-                right: '5px',
-                background: 'red',
-                color: 'white',
-                border: 'none',
-                borderRadius: '50%',
-                width: '24px',
-                height: '24px',
-                cursor: 'pointer',
-              }}
-            >
-              ×
-            </button>
-          </div>
+            {` ${socio.nombre}`}
+            {votantes.includes(socio.id) && asistentes.includes(socio.id) && ' (ya votó)'}
+          </label>
         ))}
       </div>
+
+      <button className="button-primary" onClick={guardarAsistentes}>
+        Guardar cambios
+      </button>
+
+      {mensaje && <p style={{ marginTop: '1rem', color: 'green' }}>{mensaje}</p>}
     </div>
   );
 }
