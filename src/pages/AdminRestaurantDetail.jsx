@@ -1,209 +1,70 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
-import { useState, useEffect } from 'react';
-import { supabase } from '../lib/supabase';
-<ImagenesCarrusel restauranteId={restaurante.id} />
-
-
-function ImagenesCarrusel({ restauranteId }) {
-  const [imagenes, setImagenes] = useState([]);
-  const [indiceActivo, setIndiceActivo] = useState(0);
-  const [subiendo, setSubiendo] = useState(false);
-
-  useEffect(() => {
-    cargarImagenes();
-  }, [restauranteId]);
-
-  const cargarImagenes = async () => {
-    const { data, error } = await supabase
-      .storage
-      .from('imagenes')
-      .list(`${restauranteId}/`, { limit: 100, sortBy: { column: 'name', order: 'asc' } });
-
-    if (data) {
-      const urls = await Promise.all(
-        data.map(async (file) => {
-          const { data: url } = await supabase
-            .storage
-            .from('imagenes')
-            .getPublicUrl(`${restauranteId}/${file.name}`);
-          return { nombre: file.name, url: url.publicUrl };
-        })
-      );
-      setImagenes(urls);
-      setIndiceActivo(0);
-    } else {
-      console.error('Error cargando imágenes:', error.message);
-    }
-  };
-
-  const manejarSubida = async (e) => {
-    const archivo = e.target.files[0];
-    if (!archivo) return;
-
-    setSubiendo(true);
-    const { error } = await supabase
-      .storage
-      .from('imagenes')
-      .upload(`${restauranteId}/${Date.now()}_${archivo.name}`, archivo);
-
-    setSubiendo(false);
-    if (error) {
-      alert('Error subiendo imagen');
-    } else {
-      await cargarImagenes();
-    }
-  };
-
-  const eliminarImagen = async (nombreArchivo) => {
-    const confirmacion = confirm('¿Eliminar esta imagen?');
-    if (!confirmacion) return;
-
-    const { error } = await supabase
-      .storage
-      .from('imagenes')
-      .remove([`${restauranteId}/${nombreArchivo}`]);
-
-    if (error) {
-      alert('Error al eliminar imagen');
-    } else {
-      await cargarImagenes();
-    }
-  };
-
-  return (
-    <div style={{ marginTop: '2rem' }}>
-      <h3>Galería de Imágenes</h3>
-
-      <div style={{ textAlign: 'center', marginBottom: '1rem' }}>
-        <input type="file" accept="image/*" onChange={manejarSubida} disabled={subiendo} />
-      </div>
-
-      {imagenes.length > 0 ? (
-        <div style={{ position: 'relative', textAlign: 'center' }}>
-          <div style={{ position: 'relative', display: 'inline-block' }}>
-            <img
-              src={imagenes[indiceActivo].url}
-              alt="imagen"
-              style={{ width: '100%', maxWidth: '500px', borderRadius: '1rem' }}
-            />
-            <button
-              onClick={() => eliminarImagen(imagenes[indiceActivo].nombre)}
-              style={{
-                position: 'absolute',
-                top: '10px',
-                right: '10px',
-                background: '#c00',
-                color: '#fff',
-                border: 'none',
-                borderRadius: '50%',
-                width: '30px',
-                height: '30px',
-                cursor: 'pointer',
-              }}
-            >
-              ×
-            </button>
-          </div>
-
-          <div style={{ marginTop: '1rem', display: 'flex', justifyContent: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
-            {imagenes.map((img, i) => (
-              <img
-                key={i}
-                src={img.url}
-                alt="miniatura"
-                onClick={() => setIndiceActivo(i)}
-                style={{
-                  width: '60px',
-                  height: '60px',
-                  objectFit: 'cover',
-                  border: i === indiceActivo ? '3px solid #007bff' : '1px solid #ccc',
-                  borderRadius: '0.5rem',
-                  cursor: 'pointer',
-                  transition: 'border 0.2s',
-                }}
-              />
-            ))}
-          </div>
-        </div>
-      ) : (
-        <p>No hay imágenes disponibles.</p>
-      )}
-    </div>
-  );
-}
-
-export default ImagenesCarrusel;
-
 
 function AdminRestaurantDetail() {
   const { id } = useParams();
   const [restaurante, setRestaurante] = useState(null);
-  const [socios, setSocios] = useState([]);
-  const [asistentes, setAsistentes] = useState([]);
-  const [votantes, setVotantes] = useState([]);
-  const [mensaje, setMensaje] = useState('');
+  const [usuarios, setUsuarios] = useState([]);
+  const [imagenes, setImagenes] = useState([]);
+  const [imagenActiva, setImagenActiva] = useState('');
+  const [usuariosConVoto, setUsuariosConVoto] = useState([]);
 
   useEffect(() => {
     fetchDatos();
   }, []);
 
   const fetchDatos = async () => {
-    const { data: rest, error: errRest } = await supabase
-      .from('restaurantes')
-      .select('*')
-      .eq('id', id)
-      .single();
-
-    if (errRest) return console.error('Error restaurante:', errRest);
-
+    const { data: rest } = await supabase.from('restaurantes').select('*').eq('id', id).single();
     setRestaurante(rest);
-    setAsistentes(rest.asistentes || []);
 
-    const { data: allSocios } = await supabase
-      .from('usuarios')
-      .select('id, nombre')
-      .eq('rol', 'socio');
+    const { data: allUsers } = await supabase.from('usuarios').select('id, nombre');
+    setUsuarios(allUsers || []);
 
-    setSocios(allSocios);
+    const { data: votos } = await supabase.from('votaciones').select('usuario_id').eq('restaurante_id', id);
+    setUsuariosConVoto(votos?.map(v => v.usuario_id) || []);
 
-    const { data: votos } = await supabase
-      .from('votaciones')
-      .select('usuario_id')
-      .eq('restaurante_id', id);
-
-    setVotantes(votos.map(v => v.usuario_id));
-  };
-
-  const toggleAsistente = (socioId) => {
-    const yaHaVotado = votantes.includes(socioId);
-    const estaSeleccionado = asistentes.includes(socioId);
-
-    if (estaSeleccionado && yaHaVotado) {
-      setMensaje('No puedes quitar asistentes que ya han votado.');
-      setTimeout(() => setMensaje(''), 3000);
-      return;
+    const { data: imageList } = await supabase.storage.from('imagenes').list(`imagenes/${id}`);
+    if (imageList?.length) {
+      const urls = await Promise.all(
+        imageList.map(img =>
+          supabase.storage.from('imagenes').getPublicUrl(`imagenes/${id}/${img.name}`).data.publicUrl
+        )
+      );
+      setImagenes(urls);
+      setImagenActiva(urls[0]);
     }
-
-    const nuevos = estaSeleccionado
-      ? asistentes.filter(id => id !== socioId)
-      : [...asistentes, socioId];
-
-    setAsistentes(nuevos);
   };
 
-  const guardarAsistentes = async () => {
-    const { error } = await supabase
-      .from('restaurantes')
-      .update({ asistentes })
-      .eq('id', id);
+  const toggleAsistente = async (userId) => {
+    if (usuariosConVoto.includes(userId)) return;
+    const nuevosAsistentes = restaurante.asistentes.includes(userId)
+      ? restaurante.asistentes.filter(id => id !== userId)
+      : [...restaurante.asistentes, userId];
 
+    await supabase.from('restaurantes').update({ asistentes: nuevosAsistentes }).eq('id', restaurante.id);
+    setRestaurante({ ...restaurante, asistentes: nuevosAsistentes });
+  };
+
+  const handleImagenChange = (img) => setImagenActiva(img);
+
+  const handleEliminarImagen = async () => {
+    const nombreArchivo = imagenActiva.split('/').pop();
+    const { error } = await supabase.storage.from('imagenes').remove([`imagenes/${id}/${nombreArchivo}`]);
     if (!error) {
-      setMensaje('Asistentes actualizados correctamente.');
-      setTimeout(() => setMensaje(''), 3000);
-    } else {
-      console.error(error);
+      const nuevas = imagenes.filter(img => img !== imagenActiva);
+      setImagenes(nuevas);
+      setImagenActiva(nuevas[0] || '');
+    }
+  };
+
+  const handleSubida = async (e) => {
+    const archivo = e.target.files[0];
+    if (!archivo) return;
+
+    const { error } = await supabase.storage.from('imagenes').upload(`imagenes/${id}/${Date.now()}_${archivo.name}`, archivo);
+    if (!error) {
+      fetchDatos();
     }
   };
 
@@ -211,30 +72,56 @@ function AdminRestaurantDetail() {
 
   return (
     <div className="container">
-      <h2>Restaurante: {restaurante.nombre}</h2>
-      <p><strong>Fecha:</strong> {restaurante.fecha || 'No asignada'}</p>
+      <h1>{restaurante.nombre}</h1>
 
-      <h3>Asistentes</h3>
-      <div style={{ marginBottom: '1rem' }}>
-        {socios.map((socio) => (
-          <label key={socio.id} style={{ display: 'block', marginBottom: '0.5rem' }}>
-            <input
-              type="checkbox"
-              checked={asistentes.includes(socio.id)}
-              onChange={() => toggleAsistente(socio.id)}
-              disabled={votantes.includes(socio.id) && asistentes.includes(socio.id)}
-            />
-            {` ${socio.nombre}`}
-            {votantes.includes(socio.id) && asistentes.includes(socio.id) && ' (ya votó)'}
-          </label>
+      <h2>Asistentes</h2>
+      <ul>
+        {usuarios.map(user => (
+          <li key={user.id}>
+            <label>
+              <input
+                type="checkbox"
+                checked={restaurante.asistentes.includes(user.id)}
+                disabled={usuariosConVoto.includes(user.id)}
+                onChange={() => toggleAsistente(user.id)}
+              />
+              {user.nombre}
+            </label>
+            {usuariosConVoto.includes(user.id) && <span style={{ color: 'gray' }}> (ya votó)</span>}
+          </li>
+        ))}
+      </ul>
+
+      <h2>Imágenes</h2>
+      {imagenActiva && (
+        <div style={{ marginBottom: '1rem' }}>
+          <img src={imagenActiva} alt="Principal" style={{ width: '100%', maxHeight: '300px', objectFit: 'cover' }} />
+          <button onClick={handleEliminarImagen} className="button-primary" style={{ marginTop: '0.5rem' }}>
+            Eliminar esta imagen
+          </button>
+        </div>
+      )}
+
+      <div style={{ display: 'flex', gap: '0.5rem', overflowX: 'auto', marginBottom: '1rem' }}>
+        {imagenes.map((img, idx) => (
+          <img
+            key={idx}
+            src={img}
+            alt={`Miniatura ${idx}`}
+            onClick={() => handleImagenChange(img)}
+            style={{
+              width: '80px',
+              height: '80px',
+              objectFit: 'cover',
+              border: img === imagenActiva ? '3px solid #007bff' : '1px solid #ccc',
+              borderRadius: '0.25rem',
+              cursor: 'pointer',
+            }}
+          />
         ))}
       </div>
 
-      <button className="button-primary" onClick={guardarAsistentes}>
-        Guardar cambios
-      </button>
-
-      {mensaje && <p style={{ marginTop: '1rem', color: 'green' }}>{mensaje}</p>}
+      <input type="file" accept="image/*" onChange={handleSubida} />
     </div>
   );
 }
