@@ -1,22 +1,41 @@
-import { useNavigate } from 'react-router-dom';
-
-function RankingList({ restaurantes }) {
-  const navigate = useNavigate();
-
+function RankingList({ restaurantes, titulo }) {
   return (
-    <div className="container">
-      <h2>Ranking Gourmet</h2>
-      {restaurantes.map((restaurante) => (
-        <div
-          key={restaurante.id}
-          className="card"
-          style={{ marginBottom: '1rem', cursor: 'pointer' }}
-          onClick={() => navigate(`/vote/${restaurante.id}`)}
-        >
-          <h3>{restaurante.nombre}</h3>
-          <p>Nota global: {restaurante.nota_global?.toFixed(2) || 'Sin datos'}</p>
-        </div>
-      ))}
+    <div style={{ marginBottom: '3rem' }}>
+      <h2 style={{
+        marginBottom: '1rem',
+        fontSize: '1.5rem',
+        borderBottom: '2px solid #ccc',
+        paddingBottom: '0.5rem'
+      }}>
+        {titulo}
+      </h2>
+
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+        gap: '1.5rem'
+      }}>
+        {restaurantes.map((rest, index) => (
+          <div
+            key={rest.restaurante_id}
+            className="card"
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'space-between',
+              borderLeft: '5px solid #000',
+              padding: '1.5rem'
+            }}
+          >
+            <h3 style={{ fontSize: '1.25rem', marginBottom: '0.5rem' }}>
+              #{index + 1} – {rest.nombre}
+            </h3>
+            <p style={{ fontSize: '1.1rem', fontWeight: 'bold', color: '#007bff' }}>
+              Nota media: <span style={{ fontSize: '1.2rem' }}>{rest.promedio}</span>
+            </p>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
