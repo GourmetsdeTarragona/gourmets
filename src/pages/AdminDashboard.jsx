@@ -1,5 +1,4 @@
 import { useNavigate } from 'react-router-dom';
-import { Plus, UserPlus, ListOrdered } from 'lucide-react';
 
 function AdminDashboard() {
   const navigate = useNavigate();
@@ -36,27 +35,15 @@ function AdminDashboard() {
       }}>
         <h2 style={{ marginBottom: '1.5rem', fontSize: '1.5rem' }}>Panel del Administrador</h2>
 
-        <button
-          onClick={() => navigate('/admin/register-user')}
-          style={buttonStyle}
-        >
-          <UserPlus size={18} style={{ marginRight: '0.5rem' }} />
-          Registrar nuevo socio o admin
+        <button onClick={() => navigate('/admin/register-user')} style={buttonStyle}>
+          Registrar nuevo socio o administrador
         </button>
 
-        <button
-          onClick={() => navigate('/admin/create-restaurant')}
-          style={buttonStyle}
-        >
-          <Plus size={18} style={{ marginRight: '0.5rem' }} />
+        <button onClick={() => navigate('/admin/create-restaurant')} style={buttonStyle}>
           Crear nuevo restaurante
         </button>
 
-        <button
-          onClick={() => navigate('/admin/restaurantes')}
-          style={buttonStyle}
-        >
-          <ListOrdered size={18} style={{ marginRight: '0.5rem' }} />
+        <button onClick={() => navigate('/admin/restaurantes')} style={buttonStyle}>
           Gestionar restaurantes
         </button>
       </div>
@@ -68,9 +55,6 @@ const buttonStyle = {
   width: '100%',
   padding: '0.75rem 1rem',
   marginBottom: '1rem',
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
   border: 'none',
   borderRadius: '0.5rem',
   backgroundColor: '#000',
