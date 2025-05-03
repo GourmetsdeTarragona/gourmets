@@ -1,26 +1,52 @@
 import { useNavigate } from 'react-router-dom';
+import { Card, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Plus, UserPlus, ListOrdered } from 'lucide-react';
 
 function AdminDashboard() {
   const navigate = useNavigate();
 
   return (
-    <div className="container" style={{ textAlign: 'center', marginTop: '5rem' }}>
-      <h1>Panel de Administración</h1>
+    <div
+      className="min-h-screen flex items-center justify-center"
+      style={{
+        backgroundImage: 'url(https://redojogbxdtqxqzxvyhp.supabase.co/storage/v1/object/public/imagenes/imagenes/foto-defecto.jpg)',
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        position: 'relative',
+      }}
+    >
+      <div className="absolute inset-0 bg-black/60 z-0" />
+      <div className="z-10 w-full max-w-md px-4">
+        <Card className="bg-white/90 rounded-2xl shadow-lg p-6">
+          <CardContent className="flex flex-col gap-5">
+            <h2 className="text-2xl font-semibold text-center mb-4 text-black">Panel del Administrador</h2>
 
-      <div style={{ marginTop: '3rem', display: 'flex', flexDirection: 'column', gap: '1.5rem', alignItems: 'center' }}>
-        <button className="button-primary" onClick={() => navigate('/admin/register-user')}>
-          Registrar nuevo usuario
-        </button>
-         <button className="button-primary" onClick={() => navigate('/admin/create-restaurant')}>
-          Crear restaurante
-        </button>
-        <button className="button-primary" onClick={() => navigate('/admin/restaurantes')}>
-          Ver restaurantes creados
-        </button>
+            <Button
+              className="w-full flex gap-2 justify-center"
+              onClick={() => navigate('/admin/register-user')}
+            >
+              <UserPlus className="w-5 h-5" />
+              Registrar nuevo socio o administrador
+            </Button>
 
-        <button className="button-primary" disabled style={{ opacity: 0.5 }}>
-          Gestionar cenas (próximamente)
-        </button>
+            <Button
+              className="w-full flex gap-2 justify-center"
+              onClick={() => navigate('/admin/create-restaurant')}
+            >
+              <Plus className="w-5 h-5" />
+              Crear nuevo restaurante
+            </Button>
+
+            <Button
+              className="w-full flex gap-2 justify-center"
+              onClick={() => navigate('/admin/restaurantes')}
+            >
+              <ListOrdered className="w-5 h-5" />
+              Gestionar restaurantes existentes
+            </Button>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );
