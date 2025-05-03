@@ -95,6 +95,7 @@ function Home() {
         justifyContent: 'center',
         position: 'relative',
         transition: 'background-image 1s ease-in-out',
+        padding: '1rem',
       }}
     >
       <div
@@ -109,16 +110,16 @@ function Home() {
       <div
         style={{
           zIndex: 2,
-          backgroundColor: 'rgba(255,255,255,0.9)',
-          padding: '2rem',
+          backgroundColor: 'rgba(255,255,255,0.92)',
+          padding: '1.5rem',
           borderRadius: '1rem',
-          maxWidth: '400px',
+          maxWidth: '90%',
           width: '100%',
-          boxShadow: '0 8px 24px rgba(0,0,0,0.2)',
+          boxShadow: '0 6px 18px rgba(0,0,0,0.15)',
           textAlign: 'center',
         }}
       >
-        <img src={logo} alt="Logo Gourmets" style={{ width: '120px', marginBottom: '1.5rem' }} />
+        <img src={logo} alt="Logo Gourmets" style={{ width: '100px', marginBottom: '1rem' }} />
         <h2 style={{ marginBottom: '1rem' }}>Iniciar sesión</h2>
 
         <form onSubmit={handleLogin}>
@@ -134,8 +135,10 @@ function Home() {
               marginBottom: '1rem',
               borderRadius: '0.5rem',
               border: '1px solid #ccc',
+              fontSize: '1rem',
             }}
           />
+
           <input
             type="password"
             placeholder="Contraseña"
@@ -148,11 +151,18 @@ function Home() {
               marginBottom: '1.5rem',
               borderRadius: '0.5rem',
               border: '1px solid #ccc',
+              fontSize: '1rem',
             }}
           />
-          <button type="submit" className="button-primary" style={{ width: '100%' }}>
+
+          <button
+            type="submit"
+            className="button-primary"
+            style={{ width: '100%' }}
+          >
             Entrar
           </button>
+
           {errorMsg && (
             <p style={{ color: 'red', marginTop: '1rem' }}>{errorMsg}</p>
           )}
@@ -161,7 +171,15 @@ function Home() {
         <button
           onClick={() => navigate('/ranking')}
           className="button-light"
-          style={{ marginTop: '1.5rem', width: '100%' }}
+          style={{
+            marginTop: '1.5rem',
+            width: '100%',
+            backgroundColor: '#f0f0f0',
+            border: '1px solid #ccc',
+            padding: '0.75rem',
+            borderRadius: '0.5rem',
+            fontSize: '1rem',
+          }}
         >
           Explorar como invitado
         </button>
