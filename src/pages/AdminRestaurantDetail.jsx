@@ -1,4 +1,3 @@
-// src/pages/AdminRestaurantDetail.jsx
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
@@ -6,55 +5,69 @@ import { supabase } from '../lib/supabase';
 function AdminRestaurantDetail() {
   const { id } = useParams();
   const [restaurante, setRestaurante] = useState(null);
-  const [usuarios, setUsuarios] = useState([]);
+  const [socios, setSocios] = useState([]);
   const [asistentes, setAsistentes] = useState([]);
-  const [fecha, setFecha] = useState('');
+  const [votantes, setVotantes] = useState([]);
+  const [mensaje, setMensaje] = useState('');
 
   useEffect(() => {
-    const fetchData = async () => {
-      const { data: restData } = await supabase
-        .from('restaurantes')
-        .select('*')
-        .eq('id', id)
-        .single();
+    fetchDatos();
+  }, []);
 
-      const { data: usersData } = await supabase
-        .from('usuarios')
-        .select('id, nombre')
-        .order('nombre');
+  const fetchDatos = async () => {
+    const { data: rest, error: errRest } = await supabase
+      .from('restaurantes')
+      .select('*')
+      .eq('id', id)
+      .single();
 
-      if (restData) {
-        setRestaurante(restData);
-        setAsistentes(restData.asistentes || []);
-        setFecha(restData.fecha || '');
-      }
+    if (errRest) return console.error('Error restaurante:', errRest);
 
-      if (usersData) {
-        setUsuarios(usersData);
-      }
-    };
+    setRestaurante(rest);
+    setAsistentes(rest.asistentes || []);
 
-    fetchData();
-  }, [id]);
+    const { data: allSocios } = await supabase
+      .from('usuarios')
+      .select('id, nombre')
+      .eq('rol', 'socio');
 
-  const handleCheckboxChange = (userId) => {
-    if (asistentes.includes(userId)) {
-      setAsistentes(asistentes.filter((id) => id !== userId));
-    } else {
-      setAsistentes([...asistentes, userId]);
-    }
+    setSocios(allSocios);
+
+    const { data: votos } = await supabase
+      .from('votaciones')
+      .select('usuario_id')
+      .eq('restaurante_id', id);
+
+    setVotantes(votos.map(v => v.usuario_id));
   };
 
-  const handleGuardar = async () => {
+  const toggleAsistente = (socioId) => {
+    const yaHaVotado = votantes.includes(socioId);
+    const estaSeleccionado = asistentes.includes(socioId);
+
+    if (estaSeleccionado && yaHaVotado) {
+      setMensaje('No puedes quitar asistentes que ya han votado.');
+      setTimeout(() => setMensaje(''), 3000);
+      return;
+    }
+
+    const nuevos = estaSeleccionado
+      ? asistentes.filter(id => id !== socioId)
+      : [...asistentes, socioId];
+
+    setAsistentes(nuevos);
+  };
+
+  const guardarAsistentes = async () => {
     const { error } = await supabase
       .from('restaurantes')
-      .update({ asistentes, fecha })
+      .update({ asistentes })
       .eq('id', id);
 
     if (!error) {
-      alert('Datos actualizados correctamente');
+      setMensaje('Asistentes actualizados correctamente.');
+      setTimeout(() => setMensaje(''), 3000);
     } else {
-      alert('Error al guardar cambios');
       console.error(error);
     }
   };
@@ -63,34 +76,30 @@ function AdminRestaurantDetail() {
 
   return (
     <div className="container">
-      <h2>{restaurante.nombre}</h2>
-
-      <div style={{ marginBottom: '1rem' }}>
-        <label>Fecha de la cena: </label>
-        <input
-          type="date"
-          value={fecha}
-          onChange={(e) => setFecha(e.target.value)}
-        />
-      </div>
+      <h2>Restaurante: {restaurante.nombre}</h2>
+      <p><strong>Fecha:</strong> {restaurante.fecha || 'No asignada'}</p>
 
       <h3>Asistentes</h3>
-      <ul>
-        {usuarios.map((user) => (
-          <li key={user.id}>
-            <label>
-              <input
-                type="checkbox"
-                checked={asistentes.includes(user.id)}
-                onChange={() => handleCheckboxChange(user.id)}
-              />
-              {user.nombre}
-            </label>
-          </li>
+      <div style={{ marginBottom: '1rem' }}>
+        {socios.map((socio) => (
+          <label key={socio.id} style={{ display: 'block', marginBottom: '0.5rem' }}>
+            <input
+              type="checkbox"
+              checked={asistentes.includes(socio.id)}
+              onChange={() => toggleAsistente(socio.id)}
+              disabled={votantes.includes(socio.id) && asistentes.includes(socio.id)}
+            />
+            {` ${socio.nombre}`}
+            {votantes.includes(socio.id) && asistentes.includes(socio.id) && ' (ya votó)'}
+          </label>
         ))}
-      </ul>
+      </div>
 
-      <button onClick={handleGuardar}>Guardar cambios</button>
+      <button className="button-primary" onClick={guardarAsistentes}>
+        Guardar cambios
+      </button>
+
+      {mensaje && <p style={{ marginTop: '1rem', color: 'green' }}>{mensaje}</p>}
     </div>
   );
 }
