@@ -30,33 +30,26 @@ function RankingList({ restaurantes, titulo }) {
             <h3 style={{ fontSize: '1.25rem', marginBottom: '0.5rem' }}>
               #{index + 1} – {rest.nombre}
             </h3>
-            <p style={{
-              fontSize: '1.1rem',
-              fontWeight: 'bold',
-              color: rest.promedio > 0 ? '#007bff' : '#999'
-            }}>
-              {rest.promedio > 0
-                ? <>Nota media: <span style={{ fontSize: '1.2rem' }}>{rest.promedio}</span></>
-                : <>Sin votos aún</>}
-            </p>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
 
-export default RankingList;
-
-            <h3 style={{ fontSize: '1.25rem', marginBottom: '0.5rem' }}>
-              #{index + 1} – {rest.nombre}
-            </h3>
-            <p style={{ fontSize: '1.1rem', fontWeight: 'bold', color: '#007bff' }}>
-              Nota media: <span style={{ fontSize: '1.2rem' }}>
-  {rest.promedio ? parseFloat(rest.promedio).toFixed(2) : '—'}
-</span>
-
-            </p>
+            {rest.promedio > 0 ? (
+              <p style={{
+                fontSize: '1.1rem',
+                fontWeight: 'bold',
+                color: '#007bff'
+              }}>
+                Nota media: <span style={{ fontSize: '1.2rem' }}>
+                  {parseFloat(rest.promedio).toFixed(2)}
+                </span>
+              </p>
+            ) : (
+              <p style={{
+                fontSize: '1.1rem',
+                fontWeight: 'bold',
+                color: '#999'
+              }}>
+                Sin votos aún
+              </p>
+            )}
           </div>
         ))}
       </div>
