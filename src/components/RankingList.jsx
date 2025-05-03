@@ -1,4 +1,6 @@
 function RankingList({ restaurantes, titulo }) {
+  console.log("Datos ranking:", restaurantes);
+
   return (
     <div style={{ marginBottom: '3rem' }}>
       <h2 style={{
