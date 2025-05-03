@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
+import { useNavigate } from 'react-router-dom';
 
 function AdminRestaurants() {
   const [restaurantes, setRestaurantes] = useState([]);
+  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -11,42 +12,35 @@ function AdminRestaurants() {
   }, []);
 
   const fetchRestaurantes = async () => {
+    setLoading(true);
     const { data, error } = await supabase.from('restaurantes').select('*');
-    if (error) {
-      console.error('Error al obtener restaurantes:', error.message);
-    } else {
+    if (!error) {
       setRestaurantes(data);
     }
+    setLoading(false);
   };
 
   return (
     <div className="container">
-      <h1>Restaurantes Registrados</h1>
-      {restaurantes.length === 0 ? (
-        <p>No hay restaurantes registrados aún.</p>
-      ) : (
-        <ul style={{ listStyle: 'none', padding: 0 }}>
+      <h2>Gestionar Restaurantes</h2>
+      <button onClick={() => navigate('/admin/create-restaurant')} className="button-primary" style={{ marginBottom: '1rem' }}>
+        + Crear nuevo restaurante
+      </button>
+      {loading ? (
+        <p>Cargando restaurantes...</p>
+      ) : restaurantes.length > 0 ? (
+        <ul>
           {restaurantes.map((rest) => (
-            <li
-              key={rest.id}
-              className="card"
-              style={{ marginBottom: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
-            >
-              <div>
-                <h3 style={{ marginBottom: '0.5rem' }}>{rest.nombre}</h3>
-                <p style={{ margin: 0 }}>
-                  {rest.fecha ? `Cena prevista: ${new Date(rest.fecha).toLocaleDateString()}` : 'Fecha no asignada'}
-                </p>
-              </div>
-              <button
-                className="button-primary"
-                onClick={() => navigate(`/admin/restaurante/${rest.id}`)}
-              >
+            <li key={rest.id} style={{ marginBottom: '1rem' }}>
+              <strong>{rest.nombre}</strong>{' '}
+              <button onClick={() => navigate(`/admin/restaurante/${rest.id}`)}>
                 Ver detalles
               </button>
             </li>
           ))}
         </ul>
+      ) : (
+        <p>No hay restaurantes registrados.</p>
       )}
     </div>
   );
