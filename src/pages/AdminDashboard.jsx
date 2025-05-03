@@ -1,6 +1,4 @@
 import { useNavigate } from 'react-router-dom';
-import { Card, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { Plus, UserPlus, ListOrdered } from 'lucide-react';
 
 function AdminDashboard() {
@@ -8,48 +6,77 @@ function AdminDashboard() {
 
   return (
     <div
-      className="min-h-screen flex items-center justify-center"
       style={{
+        minHeight: '100vh',
         backgroundImage: 'url(https://redojogbxdtqxqzxvyhp.supabase.co/storage/v1/object/public/imagenes/imagenes/foto-defecto.jpg)',
         backgroundSize: 'cover',
         backgroundPosition: 'center',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
         position: 'relative',
       }}
     >
-      <div className="absolute inset-0 bg-black/60 z-0" />
-      <div className="z-10 w-full max-w-md px-4">
-        <Card className="bg-white/90 rounded-2xl shadow-lg p-6">
-          <CardContent className="flex flex-col gap-5">
-            <h2 className="text-2xl font-semibold text-center mb-4 text-black">Panel del Administrador</h2>
+      <div style={{
+        position: 'absolute',
+        inset: 0,
+        backgroundColor: 'rgba(0, 0, 0, 0.6)',
+        zIndex: 1,
+      }} />
 
-            <Button
-              className="w-full flex gap-2 justify-center"
-              onClick={() => navigate('/admin/register-user')}
-            >
-              <UserPlus className="w-5 h-5" />
-              Registrar nuevo socio o administrador
-            </Button>
+      <div style={{
+        zIndex: 2,
+        backgroundColor: 'rgba(255,255,255,0.9)',
+        padding: '2rem',
+        borderRadius: '1rem',
+        width: '100%',
+        maxWidth: '400px',
+        boxShadow: '0 8px 24px rgba(0,0,0,0.2)',
+        textAlign: 'center',
+      }}>
+        <h2 style={{ marginBottom: '1.5rem', fontSize: '1.5rem' }}>Panel del Administrador</h2>
 
-            <Button
-              className="w-full flex gap-2 justify-center"
-              onClick={() => navigate('/admin/create-restaurant')}
-            >
-              <Plus className="w-5 h-5" />
-              Crear nuevo restaurante
-            </Button>
+        <button
+          onClick={() => navigate('/admin/register-user')}
+          style={buttonStyle}
+        >
+          <UserPlus size={18} style={{ marginRight: '0.5rem' }} />
+          Registrar nuevo socio o admin
+        </button>
 
-            <Button
-              className="w-full flex gap-2 justify-center"
-              onClick={() => navigate('/admin/restaurantes')}
-            >
-              <ListOrdered className="w-5 h-5" />
-              Gestionar restaurantes existentes
-            </Button>
-          </CardContent>
-        </Card>
+        <button
+          onClick={() => navigate('/admin/create-restaurant')}
+          style={buttonStyle}
+        >
+          <Plus size={18} style={{ marginRight: '0.5rem' }} />
+          Crear nuevo restaurante
+        </button>
+
+        <button
+          onClick={() => navigate('/admin/restaurantes')}
+          style={buttonStyle}
+        >
+          <ListOrdered size={18} style={{ marginRight: '0.5rem' }} />
+          Gestionar restaurantes
+        </button>
       </div>
     </div>
   );
 }
+
+const buttonStyle = {
+  width: '100%',
+  padding: '0.75rem 1rem',
+  marginBottom: '1rem',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  border: 'none',
+  borderRadius: '0.5rem',
+  backgroundColor: '#000',
+  color: '#fff',
+  fontSize: '1rem',
+  cursor: 'pointer',
+};
 
 export default AdminDashboard;
