@@ -1,6 +1,4 @@
 function RankingList({ restaurantes, titulo }) {
-  console.log("Datos ranking:", restaurantes);
-
   return (
     <div style={{ marginBottom: '3rem' }}>
       <h2 style={{
@@ -29,6 +27,27 @@ function RankingList({ restaurantes, titulo }) {
               padding: '1.5rem'
             }}
           >
+            <h3 style={{ fontSize: '1.25rem', marginBottom: '0.5rem' }}>
+              #{index + 1} – {rest.nombre}
+            </h3>
+            <p style={{
+              fontSize: '1.1rem',
+              fontWeight: 'bold',
+              color: rest.promedio > 0 ? '#007bff' : '#999'
+            }}>
+              {rest.promedio > 0
+                ? <>Nota media: <span style={{ fontSize: '1.2rem' }}>{rest.promedio}</span></>
+                : <>Sin votos aún</>}
+            </p>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+export default RankingList;
+
             <h3 style={{ fontSize: '1.25rem', marginBottom: '0.5rem' }}>
               #{index + 1} – {rest.nombre}
             </h3>
