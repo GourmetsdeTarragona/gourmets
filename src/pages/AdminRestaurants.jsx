@@ -13,37 +13,42 @@ function AdminRestaurants() {
 
   const fetchRestaurantes = async () => {
     setLoading(true);
-    const { data, error } = await supabase.from('restaurantes').select('*');
-    if (!error) {
+    const { data, error } = await supabase.from('restaurantes').select('*').order('fecha', { ascending: false });
+    if (error) {
+      console.error('Error al cargar restaurantes:', error.message);
+    } else {
       setRestaurantes(data);
     }
     setLoading(false);
   };
 
+  const handleVerDetalle = (id) => {
+    navigate(`/admin/restaurante/${id}`);
+  };
+
   return (
     <div className="container">
-      <h2>Gestionar Restaurantes</h2>
-      <button onClick={() => navigate('/admin/create-restaurant')} className="button-primary" style={{ marginBottom: '1rem' }}>
-        + Crear nuevo restaurante
-      </button>
+      <h1>Gestionar Restaurantes</h1>
       {loading ? (
         <p>Cargando restaurantes...</p>
-      ) : restaurantes.length > 0 ? (
-        <ul>
-          {restaurantes.map((rest) => (
-            <li key={rest.id} style={{ marginBottom: '1rem' }}>
-              <strong>{rest.nombre}</strong>{' '}
-              <button onClick={() => navigate(`/admin/restaurante/${rest.id}`)}>
-                Ver detalles
-              </button>
-            </li>
-          ))}
-        </ul>
-      ) : (
+      ) : restaurantes.length === 0 ? (
         <p>No hay restaurantes registrados.</p>
-      )}
-    </div>
-  );
-}
-
-export default AdminRestaurants;
+      ) : (
+        <ul style={{ listStyle: 'none', padding: 0 }}>
+          {restaurantes.map((r) => (
+            <li
+              key={r.id}
+              style={{
+                background: '#fff',
+                padding: '1rem',
+                borderRadius: '1rem',
+                boxShadow: '0 2px 6px rgba(0,0,0,0.1)',
+                marginBottom: '1rem',
+              }}
+            >
+              <strong>{r.nombre}</strong> – {r.fecha ? new Date(r.fecha).toLocaleDateString() : 'Sin fecha'}
+              <br />
+              <button
+                className="button-primary"
+                style={{ marginTop: '0.5rem' }}
+                onClick={() => handleVerDetalle
