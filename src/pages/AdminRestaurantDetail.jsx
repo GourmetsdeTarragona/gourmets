@@ -1,6 +1,141 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
+import { useState, useEffect } from 'react';
+import { supabase } from '../lib/supabase';
+<ImagenesCarrusel restauranteId={restaurante.id} />
+
+
+function ImagenesCarrusel({ restauranteId }) {
+  const [imagenes, setImagenes] = useState([]);
+  const [indiceActivo, setIndiceActivo] = useState(0);
+  const [subiendo, setSubiendo] = useState(false);
+
+  useEffect(() => {
+    cargarImagenes();
+  }, [restauranteId]);
+
+  const cargarImagenes = async () => {
+    const { data, error } = await supabase
+      .storage
+      .from('imagenes')
+      .list(`${restauranteId}/`, { limit: 100, sortBy: { column: 'name', order: 'asc' } });
+
+    if (data) {
+      const urls = await Promise.all(
+        data.map(async (file) => {
+          const { data: url } = await supabase
+            .storage
+            .from('imagenes')
+            .getPublicUrl(`${restauranteId}/${file.name}`);
+          return { nombre: file.name, url: url.publicUrl };
+        })
+      );
+      setImagenes(urls);
+      setIndiceActivo(0);
+    } else {
+      console.error('Error cargando imágenes:', error.message);
+    }
+  };
+
+  const manejarSubida = async (e) => {
+    const archivo = e.target.files[0];
+    if (!archivo) return;
+
+    setSubiendo(true);
+    const { error } = await supabase
+      .storage
+      .from('imagenes')
+      .upload(`${restauranteId}/${Date.now()}_${archivo.name}`, archivo);
+
+    setSubiendo(false);
+    if (error) {
+      alert('Error subiendo imagen');
+    } else {
+      await cargarImagenes();
+    }
+  };
+
+  const eliminarImagen = async (nombreArchivo) => {
+    const confirmacion = confirm('¿Eliminar esta imagen?');
+    if (!confirmacion) return;
+
+    const { error } = await supabase
+      .storage
+      .from('imagenes')
+      .remove([`${restauranteId}/${nombreArchivo}`]);
+
+    if (error) {
+      alert('Error al eliminar imagen');
+    } else {
+      await cargarImagenes();
+    }
+  };
+
+  return (
+    <div style={{ marginTop: '2rem' }}>
+      <h3>Galería de Imágenes</h3>
+
+      <div style={{ textAlign: 'center', marginBottom: '1rem' }}>
+        <input type="file" accept="image/*" onChange={manejarSubida} disabled={subiendo} />
+      </div>
+
+      {imagenes.length > 0 ? (
+        <div style={{ position: 'relative', textAlign: 'center' }}>
+          <div style={{ position: 'relative', display: 'inline-block' }}>
+            <img
+              src={imagenes[indiceActivo].url}
+              alt="imagen"
+              style={{ width: '100%', maxWidth: '500px', borderRadius: '1rem' }}
+            />
+            <button
+              onClick={() => eliminarImagen(imagenes[indiceActivo].nombre)}
+              style={{
+                position: 'absolute',
+                top: '10px',
+                right: '10px',
+                background: '#c00',
+                color: '#fff',
+                border: 'none',
+                borderRadius: '50%',
+                width: '30px',
+                height: '30px',
+                cursor: 'pointer',
+              }}
+            >
+              ×
+            </button>
+          </div>
+
+          <div style={{ marginTop: '1rem', display: 'flex', justifyContent: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
+            {imagenes.map((img, i) => (
+              <img
+                key={i}
+                src={img.url}
+                alt="miniatura"
+                onClick={() => setIndiceActivo(i)}
+                style={{
+                  width: '60px',
+                  height: '60px',
+                  objectFit: 'cover',
+                  border: i === indiceActivo ? '3px solid #007bff' : '1px solid #ccc',
+                  borderRadius: '0.5rem',
+                  cursor: 'pointer',
+                  transition: 'border 0.2s',
+                }}
+              />
+            ))}
+          </div>
+        </div>
+      ) : (
+        <p>No hay imágenes disponibles.</p>
+      )}
+    </div>
+  );
+}
+
+export default ImagenesCarrusel;
+
 
 function AdminRestaurantDetail() {
   const { id } = useParams();
