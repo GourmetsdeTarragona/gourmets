@@ -1,7 +1,7 @@
 // src/pages/AdminRestaurants.jsx
 import { useEffect, useState } from 'react';
-import { supabase } from '../lib/supabase';
 import { useNavigate } from 'react-router-dom';
+import { supabase } from '../lib/supabase';
 
 function AdminRestaurants() {
   const [restaurantes, setRestaurantes] = useState([]);
@@ -10,13 +10,9 @@ function AdminRestaurants() {
 
   useEffect(() => {
     const fetchRestaurantes = async () => {
-      const { data, error } = await supabase
-        .from('restaurantes')
-        .select('id, nombre, fecha')
-        .order('fecha', { ascending: false });
-
+      const { data, error } = await supabase.from('restaurantes').select('*').order('fecha', { ascending: false });
       if (error) {
-        console.error('Error cargando restaurantes:', error);
+        console.error('Error al cargar restaurantes:', error.message);
       } else {
         setRestaurantes(data);
       }
@@ -32,24 +28,6 @@ function AdminRestaurants() {
 
   return (
     <div className="container">
-      <h2>Restaurantes Registrados</h2>
-      {loading ? (
-        <p>Cargando restaurantes...</p>
-      ) : restaurantes.length === 0 ? (
-        <p>No hay restaurantes registrados.</p>
-      ) : (
-        <ul>
-          {restaurantes.map((rest) => (
-            <li key={rest.id} style={{ marginBottom: '1rem' }}>
-              <strong>{rest.nombre}</strong> – {rest.fecha || 'Sin fecha'}
-              <br />
-              <button onClick={() => handleVerDetalle(rest.id)}>Ver detalle</button>
-            </li>
-          ))}
-        </ul>
-      )}
-    </div>
-  );
-}
+      <h2>Gestionar Restaurantes</h2>
 
-export default AdminRestaurants;
+      {
