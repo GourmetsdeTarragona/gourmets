@@ -1,8 +1,4 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { UserProvider, useUser } from './contexts/UserContext';
-import ProtectedRoute from './components/ProtectedRoute';
-import Navbar from './components/Navbar';
-
 import Home from './pages/Home';
 import Restaurants from './pages/Restaurants';
 import RestaurantVoting from './pages/RestaurantVoting';
@@ -11,78 +7,76 @@ import AdminDashboard from './pages/AdminDashboard';
 import RegisterUser from './pages/RegisterUser';
 import CreateRestaurant from './pages/CreateRestaurant';
 import AdminRestaurants from './pages/AdminRestaurants';
-import AccessDenied from './pages/AccessDenied';
-
-function AppContent() {
-  const { user } = useUser();
-
-  return (
-    <>
-      {user && <Navbar />}
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/ranking" element={<Ranking />} />
-        <Route path="/access-denied" element={<AccessDenied />} />
-
-        <Route
-          path="/restaurants"
-          element={
-            <ProtectedRoute allowedRoles={['socio']}>
-              <Restaurants />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/vote/:restaurantId"
-          element={
-            <ProtectedRoute allowedRoles={['socio']}>
-              <RestaurantVoting />
-            </ProtectedRoute>
-          }
-        />
-
-        <Route
-          path="/admin"
-          element={
-            <ProtectedRoute allowedRoles={['admin']}>
-              <AdminDashboard />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/admin/register-user"
-          element={
-            <ProtectedRoute allowedRoles={['admin']}>
-              <RegisterUser />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/admin/create-restaurant"
-          element={
-            <ProtectedRoute allowedRoles={['admin']}>
-              <CreateRestaurant />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/admin/restaurantes"
-          element={
-            <ProtectedRoute allowedRoles={['admin']}>
-              <AdminRestaurants />
-            </ProtectedRoute>
-          }
-        />
-      </Routes>
-    </>
-  );
-}
+import AdminRestaurantDetail from './pages/AdminRestaurantDetail';
+import ProtectedRoute from './components/ProtectedRoute';
+import { UserProvider } from './contexts/UserContext';
 
 function App() {
   return (
     <UserProvider>
       <Router>
-        <AppContent />
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/ranking" element={<Ranking />} />
+
+          <Route
+            path="/restaurants"
+            element={
+              <ProtectedRoute allowedRoles={['socio']}>
+                <Restaurants />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/vote/:restaurantId"
+            element={
+              <ProtectedRoute allowedRoles={['socio']}>
+                <RestaurantVoting />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/admin"
+            element={
+              <ProtectedRoute allowedRoles={['admin']}>
+                <AdminDashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/register-user"
+            element={
+              <ProtectedRoute allowedRoles={['admin']}>
+                <RegisterUser />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/create-restaurant"
+            element={
+              <ProtectedRoute allowedRoles={['admin']}>
+                <CreateRestaurant />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/restaurantes"
+            element={
+              <ProtectedRoute allowedRoles={['admin']}>
+                <AdminRestaurants />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/restaurante/:id"
+            element={
+              <ProtectedRoute allowedRoles={['admin']}>
+                <AdminRestaurantDetail />
+              </ProtectedRoute>
+            }
+          />
+        </Routes>
       </Router>
     </UserProvider>
   );
