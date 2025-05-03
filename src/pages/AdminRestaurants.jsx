@@ -30,4 +30,25 @@ function AdminRestaurants() {
     <div className="container">
       <h2>Gestionar Restaurantes</h2>
 
-      {
+      {loading ? (
+        <p>Cargando restaurantes...</p>
+      ) : restaurantes.length === 0 ? (
+        <p>No hay restaurantes registrados.</p>
+      ) : (
+        <ul style={{ listStyle: 'none', padding: 0 }}>
+          {restaurantes.map((rest) => (
+            <li key={rest.id} style={{ marginBottom: '1rem', background: '#fff', padding: '1rem', borderRadius: '0.5rem', boxShadow: '0 2px 5px rgba(0,0,0,0.1)' }}>
+              <h3>{rest.nombre}</h3>
+              <p>Fecha: {rest.fecha || 'Sin fecha asignada'}</p>
+              <button className="button-primary" onClick={() => handleVerDetalle(rest.id)}>
+                Ver detalle
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
+
+export default AdminRestaurants;
