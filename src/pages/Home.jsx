@@ -8,11 +8,12 @@ const IMAGEN_DEFECTO =
 
 function Home() {
   const navigate = useNavigate();
+  const [imagenes, setImagenes] = useState([IMAGEN_DEFECTO]);
+  const [imagenActual, setImagenActual] = useState(IMAGEN_DEFECTO);
+  const [mostrarLogin, setMostrarLogin] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [errorMsg, setErrorMsg] = useState('');
-  const [imagenes, setImagenes] = useState([IMAGEN_DEFECTO]);
-  const [imagenActual, setImagenActual] = useState(IMAGEN_DEFECTO);
 
   useEffect(() => {
     const obtenerImagenes = async () => {
@@ -95,7 +96,7 @@ function Home() {
         justifyContent: 'center',
         position: 'relative',
         transition: 'background-image 1s ease-in-out',
-        padding: '1rem',
+        flexDirection: 'column',
       }}
     >
       <div
@@ -105,85 +106,123 @@ function Home() {
           backgroundColor: 'rgba(0, 0, 0, 0.6)',
           zIndex: 1,
         }}
-      ></div>
+      />
 
-      <div
-        style={{
-          zIndex: 2,
-          backgroundColor: 'rgba(255,255,255,0.92)',
-          padding: '1.5rem',
-          borderRadius: '1rem',
-          maxWidth: '90%',
-          width: '100%',
-          boxShadow: '0 6px 18px rgba(0,0,0,0.15)',
-          textAlign: 'center',
-        }}
-      >
-        <img src={logo} alt="Logo Gourmets" style={{ width: '100px', marginBottom: '1rem' }} />
-        <h2 style={{ marginBottom: '1rem' }}>Iniciar sesión</h2>
-
-        <form onSubmit={handleLogin}>
-          <input
-            type="email"
-            placeholder="Correo electrónico"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-            style={{
-              width: '100%',
-              padding: '0.75rem',
-              marginBottom: '1rem',
-              borderRadius: '0.5rem',
-              border: '1px solid #ccc',
-              fontSize: '1rem',
-            }}
-          />
-
-          <input
-            type="password"
-            placeholder="Contraseña"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-            style={{
-              width: '100%',
-              padding: '0.75rem',
-              marginBottom: '1.5rem',
-              borderRadius: '0.5rem',
-              border: '1px solid #ccc',
-              fontSize: '1rem',
-            }}
-          />
-
+      <div style={{ zIndex: 2, textAlign: 'center' }}>
+        <img src={logo} alt="Logo Gourmets" style={{ width: '140px', marginBottom: '1.5rem' }} />
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
           <button
-            type="submit"
             className="button-primary"
-            style={{ width: '100%' }}
+            style={{ padding: '0.75rem 2rem', fontSize: '1.1rem' }}
+            onClick={() => setMostrarLogin(true)}
           >
-            Entrar
+            Iniciar sesión
           </button>
-
-          {errorMsg && (
-            <p style={{ color: 'red', marginTop: '1rem' }}>{errorMsg}</p>
-          )}
-        </form>
-
-        <button
-          onClick={() => navigate('/ranking')}
-          className="button-light"
-          style={{
-            marginTop: '1.5rem',
-            width: '100%',
-            backgroundColor: '#f0f0f0',
-            border: '1px solid #ccc',
-            padding: '0.75rem',
-            borderRadius: '0.5rem',
-            fontSize: '1rem',
-          }}
-        >
-          Explorar como invitado
-        </button>
+          <button
+            onClick={() => navigate('/ranking')}
+            className="button-light"
+            style={{
+              backgroundColor: '#eee',
+              border: '1px solid #ccc',
+              padding: '0.75rem 2rem',
+              fontSize: '1.1rem',
+              borderRadius: '0.5rem',
+            }}
+          >
+            Explorar como invitado
+          </button>
+        </div>
       </div>
+
+      {/* Modal login */}
+      {mostrarLogin && (
+        <div
+          style={{
+            zIndex: 3,
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            width: '100vw',
+            height: '100vh',
+            backgroundColor: 'rgba(0,0,0,0.75)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+          onClick={() => setMostrarLogin(false)}
+        >
+          <div
+            style={{
+              backgroundColor: '#fff',
+              borderRadius: '1rem',
+              padding: '2rem',
+              width: '90%',
+              maxWidth: '400px',
+              textAlign: 'center',
+              position: 'relative',
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              onClick={() => setMostrarLogin(false)}
+              style={{
+                position: 'absolute',
+                top: '1rem',
+                right: '1rem',
+                fontSize: '1.2rem',
+                background: 'none',
+                border: 'none',
+                cursor: 'pointer',
+              }}
+            >
+              ✕
+            </button>
+            <h2>Iniciar sesión</h2>
+            <form onSubmit={handleLogin}>
+              <input
+                type="email"
+                placeholder="Correo electrónico"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                style={{
+                  width: '100%',
+                  padding: '0.75rem',
+                  marginBottom: '1rem',
+                  borderRadius: '0.5rem',
+                  border: '1px solid #ccc',
+                  fontSize: '1rem',
+                }}
+              />
+              <input
+                type="password"
+                placeholder="Contraseña"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                style={{
+                  width: '100%',
+                  padding: '0.75rem',
+                  marginBottom: '1.5rem',
+                  borderRadius: '0.5rem',
+                  border: '1px solid #ccc',
+                  fontSize: '1rem',
+                }}
+              />
+              <button
+                type="submit"
+                className="button-primary"
+                style={{ width: '100%' }}
+              >
+                Entrar
+              </button>
+            </form>
+            {errorMsg && (
+              <p style={{ color: 'red', marginTop: '1rem' }}>{errorMsg}</p>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
