@@ -31,7 +31,10 @@ function RankingList({ restaurantes, titulo }) {
               #{index + 1} – {rest.nombre}
             </h3>
             <p style={{ fontSize: '1.1rem', fontWeight: 'bold', color: '#007bff' }}>
-              Nota media: <span style={{ fontSize: '1.2rem' }}>{rest.promedio}</span>
+              Nota media: <span style={{ fontSize: '1.2rem' }}>
+  {rest.promedio ? parseFloat(rest.promedio).toFixed(2) : '—'}
+</span>
+
             </p>
           </div>
         ))}
