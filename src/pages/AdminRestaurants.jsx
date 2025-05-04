@@ -51,4 +51,16 @@ function AdminRestaurants() {
               <button
                 className="button-primary"
                 style={{ marginTop: '0.5rem' }}
-                onClick={() => handleVerDetalle
+                onClick={() => handleVerDetalle(r.id)}
+              >
+                Ver detalle
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
+
+export default AdminRestaurants;
