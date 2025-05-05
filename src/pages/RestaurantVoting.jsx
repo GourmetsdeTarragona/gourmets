@@ -31,10 +31,13 @@ function RestaurantVoting() {
       setRestaurant(restaurante);
       setAsiste(restaurante.asistentes?.includes(user.id));
 
-      const { data: fijas } = await supabase.from('categorias_fijas').select('id, nombre_categoria');
+      const { data: fijas } = await supabase
+        .from('categorias_fijas')
+        .select('id, nombre_categoria');
+
       const { data: extras } = await supabase
         .from('categorias_extra')
-        .select('id, nombre_extra')
+        .select('id, nombre_categoria')
         .eq('restaurante_id', restaurantId);
 
       const { data: votoExistente } = await supabase
@@ -49,9 +52,10 @@ function RestaurantVoting() {
       }
 
       const todas = [
-        ...fijas.map((cat) => ({ ...cat, tipo: 'fija' })),
-        ...extras.map((cat) => ({ ...cat, tipo: 'extra' }))
+        ...(fijas || []).map((cat) => ({ ...cat, tipo: 'fija' })),
+        ...(extras || []).map((cat) => ({ ...cat, tipo: 'extra' }))
       ];
+
       setCategorias(todas);
     };
 
@@ -99,20 +103,24 @@ function RestaurantVoting() {
         {categorias.map((categoria) => (
           <div key={categoria.id} style={{ marginBottom: '2rem' }}>
             <h4 style={{ marginBottom: '1rem' }}>
-              {categoria.nombre_categoria || 'Categoría'}
+              {categoria.nombre_categoria}
             </h4>
-            <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center' }}>
+            <div style={{ display: 'flex', justifyContent: 'center', gap: '0.75rem' }}>
               {[5, 6, 7, 8, 9, 10].map((valor) => (
-                <label key={valor} style={{ textAlign: 'center' }}>
+                <label key={valor} style={{ cursor: 'pointer' }}>
                   <input
                     type="radio"
-                    name={`categoria-${categoria.id}`}
+                    name={`cat-${categoria.id}`}
                     value={valor}
                     checked={puntuaciones[categoria.id] === valor}
                     onChange={() => handleVoteChange(categoria.id, valor)}
-                    style={{ marginBottom: '0.5rem' }}
+                    style={{ display: 'none' }}
                   />
-                  <div>{valor}</div>
+                  <span style={{
+                    fontSize: '1.8rem',
+                    color: puntuaciones[categoria.id] >= valor ? '#f5a623' : '#ccc'
+                  }}>★</span>
+                  <div style={{ textAlign: 'center', fontSize: '0.9rem' }}>{valor}</div>
                 </label>
               ))}
             </div>
