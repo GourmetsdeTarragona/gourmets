@@ -20,13 +20,13 @@ function RestaurantVoting() {
     if (!user) return;
 
     const cargarDatos = async () => {
-      const { data: restaurante } = await supabase
+      const { data: restaurante, error: errorRest } = await supabase
         .from('restaurantes')
         .select('id, nombre, asistentes')
         .eq('id', restaurantId)
         .single();
 
-      if (!restaurante) return;
+      if (errorRest || !restaurante) return;
 
       setRestaurant(restaurante);
       setAsiste(restaurante.asistentes?.includes(user.id));
@@ -44,14 +44,11 @@ function RestaurantVoting() {
         .eq('restaurante_id', restaurantId)
         .maybeSingle();
 
-      if (votoExistente) {
-        setYaVotado(true);
-        return;
-      }
+      if (votoExistente) setYaVotado(true);
 
       const todas = [
-        ...fijas.map((c) => ({ id: c.id, nombre: c.nombre_categoria, tipo: 'fija' })),
-        ...extras.map((c) => ({ id: c.id, nombre: c.nombre_extra, tipo: 'extra' })),
+        ...fijas.map((cat) => ({ ...cat, tipo: 'fija', nombre: cat.nombre_categoria })),
+        ...extras.map((cat) => ({ ...cat, tipo: 'extra', nombre: cat.nombre_extra }))
       ];
       setCategorias(todas);
     };
@@ -65,6 +62,8 @@ function RestaurantVoting() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (yaVotado || !asiste) return;
 
     const votos = categorias.map((cat) => ({
       usuario_id: user.id,
@@ -80,6 +79,7 @@ function RestaurantVoting() {
       setConfirmacion('¡Gracias por votar! Redirigiendo al ranking...');
       setTimeout(() => navigate('/ranking'), 2000);
     } else {
+      console.error(error);
       setConfirmacion('Ocurrió un error al guardar los votos.');
     }
   };
@@ -95,29 +95,33 @@ function RestaurantVoting() {
         {categorias.map((categoria) => (
           <div key={categoria.id} style={{ marginBottom: '2rem' }}>
             <h4 style={{ marginBottom: '1rem' }}>{categoria.nombre}</h4>
-            <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+            <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'center' }}>
               {[5, 6, 7, 8, 9, 10].map((valor) => (
-                <span
-                  key={valor}
-                  onClick={() => handleVoteChange(categoria.id, valor)}
-                  style={{
-                    cursor: 'pointer',
-                    fontSize: '1.5rem',
-                    color: puntuaciones[categoria.id] >= valor ? '#FFD700' : '#ccc',
-                    transition: 'color 0.3s',
-                  }}
-                >
-                  ★
-                </span>
+                <label key={valor} style={{ textAlign: 'center', cursor: 'pointer' }}>
+                  <input
+                    type="radio"
+                    name={`categoria-${categoria.id}`}
+                    value={valor}
+                    checked={puntuaciones[categoria.id] === valor}
+                    onChange={() => handleVoteChange(categoria.id, valor)}
+                    style={{ display: 'none' }}
+                  />
+                  <div style={{ fontSize: '1.8rem', color: puntuaciones[categoria.id] >= valor ? '#f5b301' : '#ccc' }}>
+                    ★
+                  </div>
+                  <div style={{ fontSize: '0.9rem' }}>{valor}</div>
+                </label>
               ))}
-              <span style={{ marginLeft: '1rem', fontWeight: 'bold' }}>
-                {puntuaciones[categoria.id] || '—'} puntos
-              </span>
             </div>
           </div>
         ))}
 
-        <button type="submit" className="button-primary" style={{ width: '100%' }}>
+        <button
+          type="submit"
+          className="button-primary"
+          style={{ width: '100%', marginTop: '2rem' }}
+          disabled={yaVotado}
+        >
           Enviar votación
         </button>
       </form>
