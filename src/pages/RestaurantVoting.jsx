@@ -20,13 +20,13 @@ function RestaurantVoting() {
     if (!user) return;
 
     const cargarDatos = async () => {
-      const { data: restaurante, error: errorRest } = await supabase
+      const { data: restaurante } = await supabase
         .from('restaurantes')
         .select('id, nombre, asistentes')
         .eq('id', restaurantId)
         .single();
 
-      if (errorRest || !restaurante) return;
+      if (!restaurante) return;
 
       setRestaurant(restaurante);
       setAsiste(restaurante.asistentes?.includes(user.id));
@@ -63,14 +63,33 @@ function RestaurantVoting() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (yaVotado || !asiste) return;
+    // Validación: todas las categorías puntuadas
+    const faltan = categorias.some(cat => !puntuaciones[cat.id]);
+    if (faltan) {
+      setConfirmacion('Por favor, puntúa todas las categorías antes de enviar.');
+      return;
+    }
+
+    // Doble check por si acaso
+    const { data: yaVoto } = await supabase
+      .from('votaciones')
+      .select('id')
+      .eq('usuario_id', user.id)
+      .eq('restaurante_id', restaurantId)
+      .maybeSingle();
+
+    if (yaVoto) {
+      setYaVotado(true);
+      setConfirmacion('Ya has votado en este restaurante.');
+      return;
+    }
 
     const votos = categorias.map((cat) => ({
       usuario_id: user.id,
       restaurante_id: restaurantId,
       categoria_fija_id: cat.tipo === 'fija' ? cat.id : null,
       categoria_extra_id: cat.tipo === 'extra' ? cat.id : null,
-      valor: puntuaciones[cat.id] || 0,
+      valor: puntuaciones[cat.id],
     }));
 
     const { error } = await supabase.from('votaciones').insert(votos);
@@ -80,13 +99,15 @@ function RestaurantVoting() {
       setTimeout(() => navigate('/ranking'), 2000);
     } else {
       console.error(error);
-      setConfirmacion('Ocurrió un error al guardar los votos.');
+      setConfirmacion('Error al guardar los votos.');
     }
   };
 
-  if (!restaurant) return <p className="container">Cargando datos del restaurante...</p>;
-  if (!asiste) return <p className="container">Solo los asistentes pueden votar en este restaurante.</p>;
-  if (yaVotado) return <p className="container">Ya has votado. Puedes ver los resultados en el ranking.</p>;
+  if (!restaurant) return <p className="container">Cargando restaurante...</p>;
+  if (!asiste) return <p className="container">Solo los asistentes pueden votar.</p>;
+  if (yaVotado) return <p className="container">Ya has votado. Puedes ver el ranking.</p>;
+
+  const faltanVotos = categorias.some(cat => !puntuaciones[cat.id]);
 
   return (
     <div className="container">
@@ -120,7 +141,7 @@ function RestaurantVoting() {
           type="submit"
           className="button-primary"
           style={{ width: '100%', marginTop: '2rem' }}
-          disabled={yaVotado}
+          disabled={yaVotado || faltanVotos}
         >
           Enviar votación
         </button>
