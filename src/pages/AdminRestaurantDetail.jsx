@@ -1,129 +1,124 @@
-import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
+import { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
 
 function AdminRestaurantDetail() {
   const { id } = useParams();
   const [restaurante, setRestaurante] = useState(null);
-  const [socios, setSocios] = useState([]);
   const [imagenes, setImagenes] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [file, setFile] = useState(null);
 
   useEffect(() => {
-    fetchData();
+    fetchRestaurante();
+    fetchImagenes();
   }, []);
 
-  const fetchData = async () => {
-    setLoading(true);
-
-    const { data: rest, error } = await supabase
+  const fetchRestaurante = async () => {
+    const { data, error } = await supabase
       .from('restaurantes')
       .select('*')
       .eq('id', id)
       .single();
 
-    const { data: sociosData } = await supabase.from('usuarios').select('id, nombre, rol');
-    const { data: votosData } = await supabase
-      .from('votaciones')
-      .select('usuario_id')
-      .eq('restaurante_id', id);
+    if (error) {
+      console.error('Error al cargar restaurante:', error.message);
+    } else {
+      setRestaurante(data);
+    }
+  };
 
-    const yaHanVotado = votosData?.map(v => v.usuario_id) || [];
-
-    setRestaurante(rest);
-    setSocios(
-      sociosData.map(s => ({
-        ...s,
-        seleccionado: rest.asistentes?.includes(s.id) || false,
-        yaHaVotado: yaHanVotado.includes(s.id),
-      }))
-    );
-
-    const { data: files } = await supabase.storage
+  const fetchImagenes = async () => {
+    const { data, error } = await supabase
+      .storage
       .from('imagenes')
-      .list(`${id}`, { limit: 100 });
+      .list(`${id}`);
 
-    const urls = await Promise.all(
-      (files || []).map(async (file) => {
-        const { data } = await supabase.storage
-          .from('imagenes')
-          .getPublicUrl(`${id}/${file.name}`);
-        return { url: data.publicUrl, name: file.name };
-      })
-    );
-
-    setImagenes(urls);
-    setLoading(false);
+    if (error) {
+      console.error('Error al listar imágenes:', error.message);
+    } else {
+      setImagenes(data || []);
+    }
   };
 
-  const handleCheckboxChange = async (userId) => {
-    const nuevosAsistentes = restaurante.asistentes.includes(userId)
-      ? restaurante.asistentes.filter(id => id !== userId)
-      : [...restaurante.asistentes, userId];
+  const handleUpload = async () => {
+    if (!file) return;
 
-    await supabase
-      .from('restaurantes')
-      .update({ asistentes: nuevosAsistentes })
-      .eq('id', restaurante.id);
+    const filename = `${Date.now()}_${file.name}`;
+    const { error } = await supabase
+      .storage
+      .from('imagenes')
+      .upload(`${id}/${filename}`, file);
 
-    fetchData();
+    if (error) {
+      console.error('Error subiendo imagen:', error.message);
+    } else {
+      setFile(null);
+      fetchImagenes();
+    }
   };
 
-  const handleDeleteImage = async (fileName) => {
-    await supabase.storage.from('imagenes').remove([`${id}/${fileName}`]);
-    fetchData();
+  const handleDelete = async (filename) => {
+    const { error } = await supabase
+      .storage
+      .from('imagenes')
+      .remove([`${id}/${filename}`]);
+
+    if (error) {
+      console.error('Error al eliminar imagen:', error.message);
+    } else {
+      fetchImagenes();
+    }
   };
 
-  if (loading) return <p>Cargando detalles...</p>;
+  if (!restaurante) return <p>Cargando detalles...</p>;
 
   return (
     <div className="container">
       <h2>{restaurante.nombre}</h2>
-
-      <h3>Socios asistentes</h3>
-      <ul>
-        {socios.map(socio => (
-          <li key={socio.id}>
-            <label>
-              <input
-                type="checkbox"
-                checked={socio.seleccionado}
-                disabled={socio.yaHaVotado}
-                onChange={() => handleCheckboxChange(socio.id)}
-              />
-              {socio.nombre} {socio.yaHaVotado && '(ya ha votado)'}
-            </label>
-          </li>
-        ))}
-      </ul>
+      <p>Fecha: {restaurante.fecha ? new Date(restaurante.fecha).toLocaleDateString() : 'Sin asignar'}</p>
 
       <h3>Imágenes del restaurante</h3>
-      <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
-        {imagenes.map((img) => (
-          <div key={img.name} style={{ position: 'relative' }}>
-            <img
-              src={img.url}
-              alt={img.name}
-              style={{ width: '120px', borderRadius: '8px' }}
-            />
-            <button
-              onClick={() => handleDeleteImage(img.name)}
-              style={{
-                position: 'absolute',
-                top: 0,
-                right: 0,
-                background: 'red',
-                color: 'white',
-                border: 'none',
-                borderRadius: '0 0 0 5px',
-                cursor: 'pointer',
-                padding: '0.25rem 0.5rem',
-              }}
-            >
-              X
-            </button>
-          </div>
-        ))}
+      <input
+        type="file"
+        accept="image/*"
+        onChange={(e) => setFile(e.target.files[0])}
+      />
+      <button
+        onClick={handleUpload}
+        className="button-primary"
+        style={{ marginLeft: '1rem' }}
+      >
+        Subir imagen
+      </button>
+
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem', marginTop: '1rem' }}>
+        {imagenes.length === 0 ? (
+          <p>No hay imágenes disponibles.</p>
+        ) : (
+          imagenes.map((img) => (
+            <div key={img.name} style={{ textAlign: 'center' }}>
+              <img
+                src={`https://redojogbxdtqxqzxvyhp.supabase.co/storage/v1/object/public/imagenes/${id}/${img.name}`}
+                alt={img.name}
+                style={{ width: '150px', height: '100px', objectFit: 'cover', borderRadius: '0.5rem' }}
+              />
+              <button
+                onClick={() => handleDelete(img.name)}
+                style={{
+                  marginTop: '0.5rem',
+                  backgroundColor: '#dc3545',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '4px',
+                  padding: '0.3rem 0.6rem',
+                  cursor: 'pointer',
+                }}
+              >
+                Eliminar
+              </button>
+            </div>
+          ))
+        )}
       </div>
     </div>
   );
