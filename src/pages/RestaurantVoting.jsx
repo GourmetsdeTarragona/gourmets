@@ -20,24 +20,21 @@ function RestaurantVoting() {
     if (!user) return;
 
     const cargarDatos = async () => {
-      const { data: restaurante, error: errorRest } = await supabase
+      const { data: restaurante } = await supabase
         .from('restaurantes')
         .select('id, nombre, asistentes')
         .eq('id', restaurantId)
         .single();
 
-      if (errorRest || !restaurante) return;
-
+      if (!restaurante) return;
       setRestaurant(restaurante);
+
       setAsiste(restaurante.asistentes?.includes(user.id));
 
-      const { data: fijas } = await supabase
-        .from('categorias_fijas')
-        .select('id, nombre_categoria');
-
+      const { data: fijas } = await supabase.from('categorias_fijas').select('*');
       const { data: extras } = await supabase
         .from('categorias_extra')
-        .select('id, nombre_categoria')
+        .select('*')
         .eq('restaurante_id', restaurantId);
 
       const { data: votoExistente } = await supabase
@@ -47,15 +44,12 @@ function RestaurantVoting() {
         .eq('restaurante_id', restaurantId)
         .maybeSingle();
 
-      if (votoExistente) {
-        setYaVotado(true);
-      }
+      if (votoExistente) setYaVotado(true);
 
       const todas = [
-        ...(fijas || []).map((cat) => ({ ...cat, tipo: 'fija' })),
-        ...(extras || []).map((cat) => ({ ...cat, tipo: 'extra' }))
+        ...fijas.map((cat) => ({ ...cat, tipo: 'fija', nombre: cat.nombre_categoria })),
+        ...extras.map((cat) => ({ ...cat, tipo: 'extra', nombre: cat.nombre_categoria })),
       ];
-
       setCategorias(todas);
     };
 
@@ -69,11 +63,6 @@ function RestaurantVoting() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (yaVotado) {
-      setConfirmacion('Ya has votado. Puedes ver los resultados en el ranking.');
-      return;
-    }
-
     const votos = categorias.map((cat) => ({
       usuario_id: user.id,
       restaurante_id: restaurantId,
@@ -86,7 +75,7 @@ function RestaurantVoting() {
 
     if (!error) {
       setConfirmacion('¡Gracias por votar! Redirigiendo al ranking...');
-      setTimeout(() => navigate('/ranking'), 2000);
+      setTimeout(() => navigate('/ranking'), 2500);
     } else {
       setConfirmacion('Ocurrió un error al guardar los votos.');
     }
@@ -101,26 +90,31 @@ function RestaurantVoting() {
       <h2 style={{ marginBottom: '2rem' }}>Votación: {restaurant.nombre}</h2>
       <form onSubmit={handleSubmit}>
         {categorias.map((categoria) => (
-          <div key={categoria.id} style={{ marginBottom: '2rem' }}>
-            <h4 style={{ marginBottom: '1rem' }}>
-              {categoria.nombre_categoria}
+          <div key={categoria.id} style={{ marginBottom: '2.5rem' }}>
+            <h4 style={{ marginBottom: '1rem', textAlign: 'center' }}>
+              {categoria.nombre}
             </h4>
             <div style={{ display: 'flex', justifyContent: 'center', gap: '0.75rem' }}>
               {[5, 6, 7, 8, 9, 10].map((valor) => (
                 <label key={valor} style={{ cursor: 'pointer' }}>
                   <input
                     type="radio"
-                    name={`cat-${categoria.id}`}
+                    name={`categoria-${categoria.id}`}
                     value={valor}
                     checked={puntuaciones[categoria.id] === valor}
                     onChange={() => handleVoteChange(categoria.id, valor)}
                     style={{ display: 'none' }}
                   />
-                  <span style={{
-                    fontSize: '1.8rem',
-                    color: puntuaciones[categoria.id] >= valor ? '#f5a623' : '#ccc'
-                  }}>★</span>
-                  <div style={{ textAlign: 'center', fontSize: '0.9rem' }}>{valor}</div>
+                  <div
+                    style={{
+                      fontSize: '2rem',
+                      color: puntuaciones[categoria.id] >= valor ? '#ffc107' : '#e4e5e9',
+                      transition: 'color 0.3s ease',
+                    }}
+                  >
+                    ★
+                  </div>
+                  <div style={{ textAlign: 'center', fontSize: '0.85rem' }}>{valor}</div>
                 </label>
               ))}
             </div>
