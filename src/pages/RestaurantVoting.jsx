@@ -34,7 +34,7 @@ function RestaurantVoting() {
       const { data: fijas } = await supabase.from('categorias_fijas').select('id, nombre_categoria');
       const { data: extras } = await supabase
         .from('categorias_extra')
-        .select('id, nombre_categoria')
+        .select('id, nombre_extra')
         .eq('restaurante_id', restaurantId);
 
       const { data: votoExistente } = await supabase
