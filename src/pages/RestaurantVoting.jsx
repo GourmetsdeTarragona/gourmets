@@ -31,10 +31,10 @@ function RestaurantVoting() {
       setRestaurant(restaurante);
       setAsiste(restaurante.asistentes?.includes(user.id));
 
-      const { data: fijas } = await supabase.from('categorias_fijas').select('*');
+      const { data: fijas } = await supabase.from('categorias_fijas').select('id, nombre_categoria');
       const { data: extras } = await supabase
         .from('categorias_extra')
-        .select('*')
+        .select('id, nombre_categoria')
         .eq('restaurante_id', restaurantId);
 
       const { data: votoExistente } = await supabase
@@ -99,7 +99,7 @@ function RestaurantVoting() {
         {categorias.map((categoria) => (
           <div key={categoria.id} style={{ marginBottom: '2rem' }}>
             <h4 style={{ marginBottom: '1rem' }}>
-              {categoria.nombre || categoria.titulo || 'Categoría'}
+              {categoria.nombre_categoria || 'Categoría'}
             </h4>
             <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center' }}>
               {[5, 6, 7, 8, 9, 10].map((valor) => (
