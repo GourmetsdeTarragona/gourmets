@@ -20,13 +20,13 @@ function RestaurantVoting() {
     if (!user) return;
 
     const cargarDatos = async () => {
-      const { data: restaurante } = await supabase
+      const { data: restaurante, error: errorRest } = await supabase
         .from('restaurantes')
         .select('id, nombre, asistentes')
         .eq('id', restaurantId)
         .single();
 
-      if (!restaurante) return;
+      if (errorRest || !restaurante) return;
 
       setRestaurant(restaurante);
       setAsiste(restaurante.asistentes?.includes(user.id));
@@ -47,29 +47,36 @@ function RestaurantVoting() {
       if (votoExistente) setYaVotado(true);
 
       const todas = [
-        ...fijas.map((cat) => ({ id: cat.id, nombre: cat.nombre_categoria, tipo: 'fija' })),
-        ...extras.map((cat) => ({ id: cat.id, nombre: cat.nombre_extra, tipo: 'extra' }))
+        ...fijas.map((cat) => ({ ...cat, tipo: 'fija' })),
+        ...extras.map((cat) => ({ ...cat, tipo: 'extra' }))
       ];
-
       setCategorias(todas);
     };
 
     cargarDatos();
   }, [restaurantId, user]);
 
-  const handleStarClick = (categoriaId, valor) => {
+  const handleVoteChange = (categoriaId, valor) => {
     setPuntuaciones((prev) => ({ ...prev, [categoriaId]: valor }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    // Validar que todas las categorías estén puntuadas correctamente
+    const todasPuntuadas = categorias.every((cat) => puntuaciones[cat.id] >= 5 && puntuaciones[cat.id] <= 10);
+
+    if (!todasPuntuadas) {
+      setConfirmacion('Por favor, puntúa todas las categorías antes de enviar.');
+      return;
+    }
+
     const votos = categorias.map((cat) => ({
       usuario_id: user.id,
       restaurante_id: restaurantId,
       categoria_fija_id: cat.tipo === 'fija' ? cat.id : null,
       categoria_extra_id: cat.tipo === 'extra' ? cat.id : null,
-      valor: puntuaciones[cat.id] || 0,
+      valor: puntuaciones[cat.id] ?? null,
     }));
 
     const { error } = await supabase.from('votaciones').insert(votos);
@@ -92,27 +99,27 @@ function RestaurantVoting() {
       <form onSubmit={handleSubmit}>
         {categorias.map((categoria) => (
           <div key={categoria.id} style={{ marginBottom: '2rem' }}>
-            <h4 style={{ marginBottom: '1rem' }}>{categoria.nombre}</h4>
-            <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', fontSize: '1.5rem' }}>
+            <h4 style={{ marginBottom: '1rem' }}>
+              {categoria.nombre_categoria || categoria.nombre_extra || 'Categoría'}
+            </h4>
+            <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center' }}>
               {[5, 6, 7, 8, 9, 10].map((valor) => (
-                <span
-                  key={valor}
-                  onClick={() => handleStarClick(categoria.id, valor)}
-                  style={{
-                    cursor: 'pointer',
-                    color: puntuaciones[categoria.id] >= valor ? '#ffc107' : '#ddd',
-                    transition: 'color 0.3s',
-                  }}
-                >
-                  ★
-                </span>
+                <label key={valor} style={{ textAlign: 'center' }}>
+                  <input
+                    type="radio"
+                    name={`categoria-${categoria.id}`}
+                    value={valor}
+                    checked={puntuaciones[categoria.id] === valor}
+                    onChange={() => handleVoteChange(categoria.id, valor)}
+                    style={{ marginBottom: '0.5rem' }}
+                  />
+                  <div>{valor}</div>
+                </label>
               ))}
-              <span style={{ marginLeft: '1rem', fontWeight: 'bold', fontSize: '1.2rem' }}>
-                {puntuaciones[categoria.id] || ''}
-              </span>
             </div>
           </div>
         ))}
+
         <button type="submit" className="button-primary" style={{ width: '100%' }}>
           Enviar votación
         </button>
