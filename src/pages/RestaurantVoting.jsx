@@ -71,6 +71,7 @@ function RestaurantVoting() {
       return;
     }
 
+    // Preparando los votos
     const votos = categorias.map((cat) => ({
       usuario_id: user.id,
       restaurante_id: restaurantId,
@@ -79,13 +80,20 @@ function RestaurantVoting() {
       valor: puntuaciones[cat.id] ?? null,
     }));
 
-    const { error } = await supabase.from('votaciones').insert(votos);
+    try {
+      // Intentar insertar los votos
+      const { error } = await supabase.from('votaciones').insert(votos);
 
-    if (!error) {
-      setConfirmacion('¡Gracias por votar! Redirigiendo al ranking...');
-      setTimeout(() => navigate('/ranking'), 2000);
-    } else {
+      if (error) {
+        setConfirmacion('Ocurrió un error al guardar los votos.');
+        console.error('Error al guardar los votos:', error.message);
+      } else {
+        setConfirmacion('¡Gracias por votar! Redirigiendo al ranking...');
+        setTimeout(() => navigate('/ranking'), 2000);
+      }
+    } catch (error) {
       setConfirmacion('Ocurrió un error al guardar los votos.');
+      console.error('Error al guardar los votos:', error.message);
     }
   };
 
