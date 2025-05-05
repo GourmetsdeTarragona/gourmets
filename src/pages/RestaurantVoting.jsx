@@ -20,58 +20,40 @@ function RestaurantVoting() {
     if (!user) return;
 
     const cargarDatos = async () => {
-      try {
-        // Cargar restaurante y verificar asistencia
-        const { data: restaurante, error: errorRest } = await supabase
-          .from('restaurantes')
-          .select('id, nombre, asistentes')
-          .eq('id', restaurantId)
-          .single();
+      const { data: restaurante } = await supabase
+        .from('restaurantes')
+        .select('id, nombre, asistentes')
+        .eq('id', restaurantId)
+        .single();
 
-        if (errorRest || !restaurante) {
-          console.error('Error al cargar restaurante:', errorRest?.message);
-          return;
-        }
-        setRestaurant(restaurante);
-        setAsiste(restaurante.asistentes?.includes(user.id));
+      if (!restaurante) return;
 
-        // Cargar categorías fijas y extra
-        const { data: fijas, error: errorFijas } = await supabase
-          .from('categorias_fijas')
-          .select('id, nombre_categoria');
-        if (errorFijas) {
-          console.error('Error al cargar categorías fijas:', errorFijas.message);
-          return;
-        }
+      setRestaurant(restaurante);
+      setAsiste(restaurante.asistentes?.includes(user.id));
 
-        const { data: extras, error: errorExtras } = await supabase
-          .from('categorias_extra')
-          .select('id, nombre_extra')
-          .eq('restaurante_id', restaurantId);
-        if (errorExtras) {
-          console.error('Error al cargar categorías extra:', errorExtras.message);
-          return;
-        }
+      const { data: fijas } = await supabase.from('categorias_fijas').select('id, nombre_categoria');
+      const { data: extras } = await supabase
+        .from('categorias_extra')
+        .select('id, nombre_extra')
+        .eq('restaurante_id', restaurantId);
 
-        // Verificar si el usuario ya ha votado
-        const { data: votoExistente } = await supabase
-          .from('votaciones')
-          .select('id')
-          .eq('usuario_id', user.id)
-          .eq('restaurante_id', restaurantId)
-          .maybeSingle();
+      const { data: votoExistente } = await supabase
+        .from('votaciones')
+        .select('id')
+        .eq('usuario_id', user.id)
+        .eq('restaurante_id', restaurantId)
+        .maybeSingle();
 
-        if (votoExistente) setYaVotado(true);
-
-        // Unir categorías fijas y extra
-        const todas = [
-          ...fijas.map((cat) => ({ ...cat, tipo: 'fija' })),
-          ...extras.map((cat) => ({ ...cat, tipo: 'extra' }))
-        ];
-        setCategorias(todas);
-      } catch (error) {
-        console.error('Error al cargar datos del restaurante:', error.message);
+      if (votoExistente) {
+        setYaVotado(true);
+        return;
       }
+
+      const todas = [
+        ...fijas.map((c) => ({ id: c.id, nombre: c.nombre_categoria, tipo: 'fija' })),
+        ...extras.map((c) => ({ id: c.id, nombre: c.nombre_extra, tipo: 'extra' })),
+      ];
+      setCategorias(todas);
     };
 
     cargarDatos();
@@ -84,37 +66,21 @@ function RestaurantVoting() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Validar que todas las categorías estén puntuadas correctamente
-    const todasPuntuadas = categorias.every((cat) => puntuaciones[cat.id] >= 5 && puntuaciones[cat.id] <= 10);
-
-    if (!todasPuntuadas) {
-      setConfirmacion('Por favor, puntúa todas las categorías antes de enviar.');
-      return;
-    }
-
-    // Preparando los votos
     const votos = categorias.map((cat) => ({
       usuario_id: user.id,
       restaurante_id: restaurantId,
       categoria_fija_id: cat.tipo === 'fija' ? cat.id : null,
       categoria_extra_id: cat.tipo === 'extra' ? cat.id : null,
-      valor: puntuaciones[cat.id] ?? null,
+      valor: puntuaciones[cat.id] || 0,
     }));
 
-    try {
-      // Intentar insertar los votos
-      const { error } = await supabase.from('votaciones').insert(votos);
+    const { error } = await supabase.from('votaciones').insert(votos);
 
-      if (error) {
-        setConfirmacion('Ocurrió un error al guardar los votos.');
-        console.error('Error al guardar los votos:', error.message);
-      } else {
-        setConfirmacion('¡Gracias por votar! Redirigiendo al ranking...');
-        setTimeout(() => navigate('/ranking'), 2000);
-      }
-    } catch (error) {
+    if (!error) {
+      setConfirmacion('¡Gracias por votar! Redirigiendo al ranking...');
+      setTimeout(() => navigate('/ranking'), 2000);
+    } else {
       setConfirmacion('Ocurrió un error al guardar los votos.');
-      console.error('Error al guardar los votos:', error.message);
     }
   };
 
@@ -128,23 +94,25 @@ function RestaurantVoting() {
       <form onSubmit={handleSubmit}>
         {categorias.map((categoria) => (
           <div key={categoria.id} style={{ marginBottom: '2rem' }}>
-            <h4 style={{ marginBottom: '1rem' }}>
-              {categoria.nombre_categoria || categoria.nombre_extra || 'Categoría'}
-            </h4>
-            <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center' }}>
+            <h4 style={{ marginBottom: '1rem' }}>{categoria.nombre}</h4>
+            <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
               {[5, 6, 7, 8, 9, 10].map((valor) => (
-                <label key={valor} style={{ textAlign: 'center' }}>
-                  <input
-                    type="radio"
-                    name={`categoria-${categoria.id}`}
-                    value={valor}
-                    checked={puntuaciones[categoria.id] === valor}
-                    onChange={() => handleVoteChange(categoria.id, valor)}
-                    style={{ marginBottom: '0.5rem' }}
-                  />
-                  <div>{valor}</div>
-                </label>
+                <span
+                  key={valor}
+                  onClick={() => handleVoteChange(categoria.id, valor)}
+                  style={{
+                    cursor: 'pointer',
+                    fontSize: '1.5rem',
+                    color: puntuaciones[categoria.id] >= valor ? '#FFD700' : '#ccc',
+                    transition: 'color 0.3s',
+                  }}
+                >
+                  ★
+                </span>
               ))}
+              <span style={{ marginLeft: '1rem', fontWeight: 'bold' }}>
+                {puntuaciones[categoria.id] || '—'} puntos
+              </span>
             </div>
           </div>
         ))}
