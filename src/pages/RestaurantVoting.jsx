@@ -27,14 +27,14 @@ function RestaurantVoting() {
         .single();
 
       if (!restaurante) return;
-      setRestaurant(restaurante);
 
+      setRestaurant(restaurante);
       setAsiste(restaurante.asistentes?.includes(user.id));
 
-      const { data: fijas } = await supabase.from('categorias_fijas').select('*');
+      const { data: fijas } = await supabase.from('categorias_fijas').select('id, nombre_categoria');
       const { data: extras } = await supabase
         .from('categorias_extra')
-        .select('*')
+        .select('id, nombre_extra')
         .eq('restaurante_id', restaurantId);
 
       const { data: votoExistente } = await supabase
@@ -47,16 +47,17 @@ function RestaurantVoting() {
       if (votoExistente) setYaVotado(true);
 
       const todas = [
-        ...fijas.map((cat) => ({ ...cat, tipo: 'fija', nombre: cat.nombre_categoria })),
-        ...extras.map((cat) => ({ ...cat, tipo: 'extra', nombre: cat.nombre_categoria })),
+        ...fijas.map((cat) => ({ id: cat.id, nombre: cat.nombre_categoria, tipo: 'fija' })),
+        ...extras.map((cat) => ({ id: cat.id, nombre: cat.nombre_extra, tipo: 'extra' }))
       ];
+
       setCategorias(todas);
     };
 
     cargarDatos();
   }, [restaurantId, user]);
 
-  const handleVoteChange = (categoriaId, valor) => {
+  const handleStarClick = (categoriaId, valor) => {
     setPuntuaciones((prev) => ({ ...prev, [categoriaId]: valor }));
   };
 
@@ -75,7 +76,7 @@ function RestaurantVoting() {
 
     if (!error) {
       setConfirmacion('¡Gracias por votar! Redirigiendo al ranking...');
-      setTimeout(() => navigate('/ranking'), 2500);
+      setTimeout(() => navigate('/ranking'), 2000);
     } else {
       setConfirmacion('Ocurrió un error al guardar los votos.');
     }
@@ -90,37 +91,28 @@ function RestaurantVoting() {
       <h2 style={{ marginBottom: '2rem' }}>Votación: {restaurant.nombre}</h2>
       <form onSubmit={handleSubmit}>
         {categorias.map((categoria) => (
-          <div key={categoria.id} style={{ marginBottom: '2.5rem' }}>
-            <h4 style={{ marginBottom: '1rem', textAlign: 'center' }}>
-              {categoria.nombre}
-            </h4>
-            <div style={{ display: 'flex', justifyContent: 'center', gap: '0.75rem' }}>
+          <div key={categoria.id} style={{ marginBottom: '2rem' }}>
+            <h4 style={{ marginBottom: '1rem' }}>{categoria.nombre}</h4>
+            <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', fontSize: '1.5rem' }}>
               {[5, 6, 7, 8, 9, 10].map((valor) => (
-                <label key={valor} style={{ cursor: 'pointer' }}>
-                  <input
-                    type="radio"
-                    name={`categoria-${categoria.id}`}
-                    value={valor}
-                    checked={puntuaciones[categoria.id] === valor}
-                    onChange={() => handleVoteChange(categoria.id, valor)}
-                    style={{ display: 'none' }}
-                  />
-                  <div
-                    style={{
-                      fontSize: '2rem',
-                      color: puntuaciones[categoria.id] >= valor ? '#ffc107' : '#e4e5e9',
-                      transition: 'color 0.3s ease',
-                    }}
-                  >
-                    ★
-                  </div>
-                  <div style={{ textAlign: 'center', fontSize: '0.85rem' }}>{valor}</div>
-                </label>
+                <span
+                  key={valor}
+                  onClick={() => handleStarClick(categoria.id, valor)}
+                  style={{
+                    cursor: 'pointer',
+                    color: puntuaciones[categoria.id] >= valor ? '#ffc107' : '#ddd',
+                    transition: 'color 0.3s',
+                  }}
+                >
+                  ★
+                </span>
               ))}
+              <span style={{ marginLeft: '1rem', fontWeight: 'bold', fontSize: '1.2rem' }}>
+                {puntuaciones[categoria.id] || ''}
+              </span>
             </div>
           </div>
         ))}
-
         <button type="submit" className="button-primary" style={{ width: '100%' }}>
           Enviar votación
         </button>
