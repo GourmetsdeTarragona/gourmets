@@ -44,7 +44,9 @@ function RestaurantVoting() {
         .eq('restaurante_id', restaurantId)
         .maybeSingle();
 
-      if (votoExistente) setYaVotado(true);
+      if (votoExistente) {
+        setYaVotado(true);
+      }
 
       const todas = [
         ...fijas.map((cat) => ({ ...cat, tipo: 'fija' })),
@@ -56,12 +58,17 @@ function RestaurantVoting() {
     cargarDatos();
   }, [restaurantId, user]);
 
-  const handleStarClick = (categoriaId, valor) => {
+  const handleVoteChange = (categoriaId, valor) => {
     setPuntuaciones((prev) => ({ ...prev, [categoriaId]: valor }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (yaVotado) {
+      setConfirmacion('Ya has votado. Puedes ver los resultados en el ranking.');
+      return;
+    }
 
     const votos = categorias.map((cat) => ({
       usuario_id: user.id,
@@ -83,40 +90,30 @@ function RestaurantVoting() {
 
   if (!restaurant) return <p className="container">Cargando datos del restaurante...</p>;
   if (!asiste) return <p className="container">Solo los asistentes pueden votar en este restaurante.</p>;
-  if (yaVotado) return (
-    <div className="container">
-      <p>Ya has votado. Puedes ver los resultados en el ranking.</p>
-      <button onClick={() => navigate('/ranking')} className="button-primary" style={{ marginTop: '1rem' }}>
-        Ver ranking
-      </button>
-    </div>
-  );
+  if (yaVotado) return <p className="container">Ya has votado. Puedes ver los resultados en el ranking.</p>;
 
   return (
     <div className="container">
       <h2 style={{ marginBottom: '2rem' }}>Votación: {restaurant.nombre}</h2>
       <form onSubmit={handleSubmit}>
         {categorias.map((categoria) => (
-          <div key={categoria.id} style={{ marginBottom: '2.5rem' }}>
-            <h4 style={{ marginBottom: '1rem', textAlign: 'center' }}>
+          <div key={categoria.id} style={{ marginBottom: '2rem' }}>
+            <h4 style={{ marginBottom: '1rem' }}>
               {categoria.nombre || categoria.titulo || 'Categoría'}
             </h4>
-            <div style={{ display: 'flex', justifyContent: 'center', gap: '1.5rem' }}>
+            <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center' }}>
               {[5, 6, 7, 8, 9, 10].map((valor) => (
-                <div key={valor} style={{ textAlign: 'center' }}>
-                  <span
-                    onClick={() => handleStarClick(categoria.id, valor)}
-                    style={{
-                      fontSize: '2rem',
-                      color: puntuaciones[categoria.id] >= valor ? '#ffc107' : '#e4e5e9',
-                      cursor: 'pointer',
-                      display: 'block',
-                    }}
-                  >
-                    ★
-                  </span>
-                  <span style={{ fontSize: '0.9rem' }}>{valor}</span>
-                </div>
+                <label key={valor} style={{ textAlign: 'center' }}>
+                  <input
+                    type="radio"
+                    name={`categoria-${categoria.id}`}
+                    value={valor}
+                    checked={puntuaciones[categoria.id] === valor}
+                    onChange={() => handleVoteChange(categoria.id, valor)}
+                    style={{ marginBottom: '0.5rem' }}
+                  />
+                  <div>{valor}</div>
+                </label>
               ))}
             </div>
           </div>
@@ -133,4 +130,3 @@ function RestaurantVoting() {
 }
 
 export default RestaurantVoting;
-
