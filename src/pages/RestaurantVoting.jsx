@@ -20,37 +20,58 @@ function RestaurantVoting() {
     if (!user) return;
 
     const cargarDatos = async () => {
-      const { data: restaurante, error: errorRest } = await supabase
-        .from('restaurantes')
-        .select('id, nombre, asistentes')
-        .eq('id', restaurantId)
-        .single();
+      try {
+        // Cargar restaurante y verificar asistencia
+        const { data: restaurante, error: errorRest } = await supabase
+          .from('restaurantes')
+          .select('id, nombre, asistentes')
+          .eq('id', restaurantId)
+          .single();
 
-      if (errorRest || !restaurante) return;
+        if (errorRest || !restaurante) {
+          console.error('Error al cargar restaurante:', errorRest?.message);
+          return;
+        }
+        setRestaurant(restaurante);
+        setAsiste(restaurante.asistentes?.includes(user.id));
 
-      setRestaurant(restaurante);
-      setAsiste(restaurante.asistentes?.includes(user.id));
+        // Cargar categorías fijas y extra
+        const { data: fijas, error: errorFijas } = await supabase
+          .from('categorias_fijas')
+          .select('id, nombre_categoria');
+        if (errorFijas) {
+          console.error('Error al cargar categorías fijas:', errorFijas.message);
+          return;
+        }
 
-      const { data: fijas } = await supabase.from('categorias_fijas').select('id, nombre_categoria');
-      const { data: extras } = await supabase
-        .from('categorias_extra')
-        .select('id, nombre_extra')
-        .eq('restaurante_id', restaurantId);
+        const { data: extras, error: errorExtras } = await supabase
+          .from('categorias_extra')
+          .select('id, nombre_extra')
+          .eq('restaurante_id', restaurantId);
+        if (errorExtras) {
+          console.error('Error al cargar categorías extra:', errorExtras.message);
+          return;
+        }
 
-      const { data: votoExistente } = await supabase
-        .from('votaciones')
-        .select('id')
-        .eq('usuario_id', user.id)
-        .eq('restaurante_id', restaurantId)
-        .maybeSingle();
+        // Verificar si el usuario ya ha votado
+        const { data: votoExistente } = await supabase
+          .from('votaciones')
+          .select('id')
+          .eq('usuario_id', user.id)
+          .eq('restaurante_id', restaurantId)
+          .maybeSingle();
 
-      if (votoExistente) setYaVotado(true);
+        if (votoExistente) setYaVotado(true);
 
-      const todas = [
-        ...fijas.map((cat) => ({ ...cat, tipo: 'fija' })),
-        ...extras.map((cat) => ({ ...cat, tipo: 'extra' }))
-      ];
-      setCategorias(todas);
+        // Unir categorías fijas y extra
+        const todas = [
+          ...fijas.map((cat) => ({ ...cat, tipo: 'fija' })),
+          ...extras.map((cat) => ({ ...cat, tipo: 'extra' }))
+        ];
+        setCategorias(todas);
+      } catch (error) {
+        console.error('Error al cargar datos del restaurante:', error.message);
+      }
     };
 
     cargarDatos();
