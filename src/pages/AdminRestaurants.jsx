@@ -13,22 +13,27 @@ function AdminRestaurants() {
 
   const fetchRestaurantes = async () => {
     setLoading(true);
-    const { data, error } = await supabase.from('restaurantes').select('*').order('fecha', { ascending: false });
+    const { data, error } = await supabase
+      .from('restaurantes')
+      .select('*')
+      .order('fecha', { ascending: false });
+
     if (error) {
       console.error('Error al cargar restaurantes:', error.message);
     } else {
-      setRestaurantes(data);
+      setRestaurantes(data || []);
     }
     setLoading(false);
   };
 
   const handleVerDetalle = (id) => {
-    navigate(`/admin/restaurante/${id}`);
+    if (id) navigate(`/admin/restaurante/${id}`);
   };
 
   return (
     <div className="container">
-      <h1>Gestionar Restaurantes</h1>
+      <h1 style={{ marginBottom: '1rem' }}>Gestionar Restaurantes</h1>
+
       {loading ? (
         <p>Cargando restaurantes...</p>
       ) : restaurantes.length === 0 ? (
@@ -44,13 +49,17 @@ function AdminRestaurants() {
                 borderRadius: '1rem',
                 boxShadow: '0 2px 6px rgba(0,0,0,0.1)',
                 marginBottom: '1rem',
+                display: 'flex',
+                flexDirection: 'column',
               }}
             >
-              <strong>{r.nombre}</strong> – {r.fecha ? new Date(r.fecha).toLocaleDateString() : 'Sin fecha'}
-              <br />
+              <strong>{r.nombre}</strong>
+              <span style={{ fontSize: '0.9rem', color: '#666' }}>
+                {r.fecha ? new Date(r.fecha).toLocaleDateString() : 'Sin fecha asignada'}
+              </span>
               <button
                 className="button-primary"
-                style={{ marginTop: '0.5rem' }}
+                style={{ marginTop: '0.75rem', alignSelf: 'flex-start' }}
                 onClick={() => handleVerDetalle(r.id)}
               >
                 Ver detalle
