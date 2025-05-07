@@ -1,18 +1,17 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { supabase } from '../supabase/supabase';
+import { supabase } from '../lib/supabase';
 import { useUser } from '../contexts/UserContext';
 
 function Restaurants() {
+  const [restaurantes, setRestaurantes] = useState([]);
+  const [votados, setVotados] = useState([]);
+  const [loading, setLoading] = useState(true);
   const { user } = useUser();
   const navigate = useNavigate();
 
-  const [restaurantes, setRestaurantes] = useState([]);
-  const [votos, setVotos] = useState([]);
-  const [loading, setLoading] = useState(true);
-
   useEffect(() => {
-    if (user?.id) {
+    if (user) {
       fetchData();
     }
   }, [user]);
@@ -20,60 +19,75 @@ function Restaurants() {
   const fetchData = async () => {
     setLoading(true);
 
-    try {
-      const { data: rData, error: rError } = await supabase
-        .from('restaurantes')
-        .select('*');
+    const { data: restData, error: restError } = await supabase
+      .from('restaurantes')
+      .select('*')
+      .order('fecha', { ascending: false });
 
-      if (rError) throw rError;
+    const { data: votosData, error: votosError } = await supabase
+      .from('votaciones')
+      .select('restaurante_id')
+      .eq('usuario_id', user.id);
 
-      const filtrados = (rData || []).filter(r =>
-        Array.isArray(r.asistentes) && r.asistentes.includes(user.id)
-      );
+    if (restError) {
+      console.error('Error cargando restaurantes:', restError.message);
+    } else {
+      setRestaurantes(restData || []);
+    }
 
-      setRestaurantes(filtrados);
-
-      const { data: votosData } = await supabase
-        .from('votos')
-        .select('restaurante_id')
-        .eq('socio_id', user.id);
-
-      setVotos((votosData || []).map(v => v.restaurante_id));
-    } catch (err) {
-      console.error('Error cargando datos:', err.message);
+    if (votosError) {
+      console.error('Error verificando votos:', votosError.message);
+    } else {
+      const idsVotados = votosData.map((v) => v.restaurante_id);
+      setVotados(idsVotados);
     }
 
     setLoading(false);
   };
 
-  const haVotado = (restauranteId) => votos.includes(restauranteId);
-
-  if (!user) return <p>Cargando perfil de usuario...</p>;
-  if (loading) return <p>Cargando restaurantes...</p>;
+  const handleVotar = (id) => {
+    navigate(`/vote/${id}`);
+  };
 
   return (
-    <div style={{ maxWidth: '700px', margin: '2rem auto' }}>
-      <h2>Restaurantes visitados</h2>
-
-      {restaurantes.length === 0 && (
-        <p>No hay restaurantes asignados a tu perfil.</p>
-      )}
-
-      <ul style={{ listStyle: 'none', padding: 0 }}>
-        {restaurantes.map((r) => (
-          <li key={r.id} style={{ marginBottom: '1.5rem', borderBottom: '1px solid #ccc', paddingBottom: '1rem' }}>
-            <h3>{r.nombre}</h3>
-            <p><strong>Fecha:</strong> {r.fecha || 'Sin fecha'}</p>
-            {haVotado(r.id) ? (
-              <p style={{ color: 'green' }}>✅ Ya has votado</p>
-            ) : (
-              <button onClick={() => navigate(`/vote/${r.id}`)}>
-                Votar ahora
+    <div className="container">
+      <h1>Restaurantes disponibles</h1>
+      {loading ? (
+        <p>Cargando restaurantes...</p>
+      ) : restaurantes.length === 0 ? (
+        <p>No hay restaurantes disponibles.</p>
+      ) : (
+        <ul style={{ listStyle: 'none', padding: 0 }}>
+          {restaurantes.map((r) => (
+            <li
+              key={r.id}
+              style={{
+                background: '#fff',
+                padding: '1rem',
+                borderRadius: '1rem',
+                boxShadow: '0 2px 6px rgba(0,0,0,0.1)',
+                marginBottom: '1rem',
+              }}
+            >
+              <strong>{r.nombre}</strong> —{' '}
+              {r.fecha ? new Date(r.fecha).toLocaleDateString() : 'Sin fecha'}
+              <br />
+              <button
+                className="button-primary"
+                style={{
+                  marginTop: '0.5rem',
+                  backgroundColor: votados.includes(r.id) ? '#ccc' : '#000',
+                  cursor: votados.includes(r.id) ? 'not-allowed' : 'pointer',
+                }}
+                disabled={votados.includes(r.id)}
+                onClick={() => handleVotar(r.id)}
+              >
+                {votados.includes(r.id) ? 'Ya votado' : 'Votar'}
               </button>
-            )}
-          </li>
-        ))}
-      </ul>
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   );
 }
