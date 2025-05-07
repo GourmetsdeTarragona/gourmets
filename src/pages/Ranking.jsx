@@ -1,100 +1,71 @@
 import { useEffect, useState } from 'react';
-import { supabase } from '../supabase/supabase';
+import { supabase } from '../lib/supabase';
 import RankingList from '../components/RankingList';
+import logo from '/logo.png';
+import { useNavigate } from 'react-router-dom';
 
 function Ranking() {
-  const [rankingGlobal, setRankingGlobal] = useState([]);
-  const [rankingPorCategoria, setRankingPorCategoria] = useState([]);
-  const [categorias, setCategorias] = useState([]);
+  const [restaurantes, setRestaurantes] = useState([]);
+  const navigate = useNavigate();
 
   useEffect(() => {
-    fetchRankingGlobal();
-    fetchCategorias();
+    fetchRanking();
   }, []);
 
-  const fetchRankingGlobal = async () => {
+  const fetchRanking = async () => {
     const { data, error } = await supabase.rpc('calcular_ranking_global');
-    if (error) {
-      console.error('Error al cargar ranking global:', error.message);
-      return;
+    if (!error) {
+      setRestaurantes(data);
+    } else {
+      console.error('Error al cargar ranking:', error.message);
     }
-    setRankingGlobal(data);
   };
-
-  const fetchCategorias = async () => {
-    const { data: fijas } = await supabase.from('categorias_fijas').select('*');
-    const { data: extras } = await supabase.from('categorias_extra').select('id, nombre');
-
-    const todas = [
-      ...fijas.map((cat) => ({ ...cat, tipo: 'fija' })),
-      ...extras.map((cat) => ({ ...cat, tipo: 'extra' }))
-    ];
-
-    setCategorias(todas);
-  };
-
-  const fetchRankingCategoria = async (categoriaId, tipo) => {
-    let query = supabase
-      .from('votaciones')
-      .select('restaurante_id, valor, restaurantes(nombre)')
-      .eq(tipo === 'fija' ? 'categoria_fija_id' : 'categoria_extra_id', categoriaId);
-
-    const { data, error } = await query;
-    if (error) {
-      console.error(`Error en ranking por categoría ${categoriaId}:`, error.message);
-      return;
-    }
-
-    const agrupado = data.reduce((acc, voto) => {
-      const key = voto.restaurante_id;
-      if (!acc[key]) {
-        acc[key] = { restaurante_id: key, nombre: voto.restaurantes.nombre, total: 0, count: 0 };
-      }
-      acc[key].total += voto.valor;
-      acc[key].count += 1;
-      return acc;
-    }, {});
-
-    const resultado = Object.values(agrupado)
-      .map((r) => ({
-        restaurante_id: r.restaurante_id,
-        nombre: r.nombre,
-        promedio: (r.total / r.count).toFixed(2)
-      }))
-      .sort((a, b) => b.promedio - a.promedio || a.nombre.localeCompare(b.nombre));
-
-    setRankingPorCategoria((prev) => [...prev, { categoriaId, tipo, datos: resultado }]);
-  };
-
-  useEffect(() => {
-    if (categorias.length > 0) {
-      categorias.forEach((cat) => {
-        fetchRankingCategoria(cat.id, cat.tipo);
-      });
-    }
-  }, [categorias]);
 
   return (
-    <div className="container">
-      <h1 style={{ marginBottom: '2rem' }}>Ranking Gourmet</h1>
+    <div
+      style={{
+        position: 'relative',
+        minHeight: '100vh',
+        backgroundColor: '#d0e4fa',
+        padding: '2rem',
+      }}
+    >
+      <img
+        src={logo}
+        alt="Logo"
+        style={{
+          position: 'absolute',
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)',
+          opacity: 0.07,
+          width: '60%',
+          zIndex: 0,
+        }}
+      />
 
-      {rankingGlobal.length > 0 && (
-        <RankingList
-          restaurantes={rankingGlobal}
-          titulo="⭐ Ranking Global"
-        />
-      )}
+      <div style={{ position: 'relative', zIndex: 1 }}>
+        <h1 style={{ textAlign: 'center', marginBottom: '2rem' }}>
+          Ranking de Restaurantes
+        </h1>
 
-      {rankingPorCategoria.map((r) => {
-        const categoria = categorias.find((c) => c.id === r.categoriaId);
-        return (
-          <RankingList
-            key={r.categoriaId}
-            restaurantes={r.datos}
-            titulo={`🏅 Mejor en ${categoria?.nombre || 'Categoría'}`}
-          />
-        );
-      })}
+        {restaurantes.length > 0 ? (
+          <RankingList restaurantes={restaurantes} />
+        ) : (
+          <p style={{ textAlign: 'center' }}>
+            No hay datos de ranking disponibles.
+          </p>
+        )}
+
+        <div style={{ textAlign: 'center', marginTop: '2rem' }}>
+          <button
+            className="button-primary"
+            onClick={() => navigate('/restaurants')}
+          >
+            Volver a restaurantes
+          </button>
+        </div>
+      </div>
     </div>
   );
 }
