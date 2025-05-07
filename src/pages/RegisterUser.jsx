@@ -3,8 +3,8 @@ import { supabase } from '../supabase/supabase';
 import ConfirmationMessage from '../components/ConfirmationMessage';
 
 function RegisterUser() {
-  const [email, setEmail] = useState('');
   const [nombre, setNombre] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [rol, setRol] = useState('socio');
   const [message, setMessage] = useState('');
@@ -12,59 +12,82 @@ function RegisterUser() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setMessage('');
     setError('');
+    setMessage('');
 
-    // Comprobar si el correo ya existe
-    const { data: existingUser } = await supabase
-      .from('usuarios')
-      .select('id')
-      .eq('email', email)
-      .maybeSingle();
-
-    if (existingUser) {
-      setError('Este correo ya está registrado.');
-      return;
-    }
-
-    const { error } = await supabase.from('usuarios').insert([
+    const { error: insertError } = await supabase.from('usuarios').insert([
       {
-        email,
         nombre,
+        email,
         password,
         rol,
       },
     ]);
 
-    if (error) {
+    if (insertError) {
       setError('Error al registrar el usuario.');
-      console.error(error);
-    } else {
-      setMessage('Usuario registrado con éxito.');
-      setEmail('');
-      setNombre('');
-      setPassword('');
-      setRol('socio');
+      return;
     }
+
+    setMessage('Usuario registrado con éxito.');
+    setNombre('');
+    setEmail('');
+    setPassword('');
+    setRol('socio');
   };
 
   return (
-    <div className="container" style={{ maxWidth: '400px', margin: '3rem auto' }}>
-      <h2>Registrar nuevo usuario</h2>
-      <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-        <input
-          type="email"
-          placeholder="Correo electrónico"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-        />
+    <div
+      style={{
+        minHeight: '100vh',
+        backgroundImage: 'url(https://redojogbxdtqxqzxvyhp.supabase.co/storage/v1/object/public/imagenes/imagenes/foto-defecto.jpg)',
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        position: 'relative',
+        padding: '2rem',
+      }}
+    >
+      <div
+        style={{
+          position: 'absolute',
+          inset: 0,
+          backgroundColor: 'rgba(0, 0, 0, 0.5)',
+          zIndex: 1,
+        }}
+      />
+      <form
+        onSubmit={handleSubmit}
+        style={{
+          zIndex: 2,
+          backgroundColor: 'rgba(255,255,255,0.95)',
+          padding: '2rem',
+          borderRadius: '1rem',
+          maxWidth: '400px',
+          width: '100%',
+          boxShadow: '0 8px 24px rgba(0,0,0,0.2)',
+          textAlign: 'center',
+        }}
+      >
+        <h2 style={{ marginBottom: '1.5rem' }}>Registrar usuario</h2>
+
         <input
           type="text"
-          placeholder="Nombre completo"
+          placeholder="Nombre"
           value={nombre}
           onChange={(e) => setNombre(e.target.value)}
           required
+          style={inputStyle}
+        />
+        <input
+          type="email"
+          placeholder="Email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          required
+          style={inputStyle}
         />
         <input
           type="password"
@@ -72,19 +95,44 @@ function RegisterUser() {
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           required
+          style={inputStyle}
         />
-        <select value={rol} onChange={(e) => setRol(e.target.value)}>
+        <select
+          value={rol}
+          onChange={(e) => setRol(e.target.value)}
+          required
+          style={{ ...inputStyle, fontSize: '1rem' }}
+        >
           <option value="socio">Socio</option>
           <option value="admin">Administrador</option>
         </select>
-        <button className="button-primary" type="submit">
-          Registrar usuario
-        </button>
-        {error && <div style={{ color: 'red' }}>{error}</div>}
+
+        <button type="submit" style={buttonStyle}>Registrar</button>
+        {error && <div style={{ color: 'red', marginTop: '1rem' }}>{error}</div>}
         <ConfirmationMessage message={message} />
       </form>
     </div>
   );
 }
+
+const inputStyle = {
+  width: '100%',
+  padding: '0.75rem',
+  marginBottom: '1rem',
+  borderRadius: '0.5rem',
+  border: '1px solid #ccc',
+  fontSize: '1rem',
+};
+
+const buttonStyle = {
+  width: '100%',
+  padding: '0.75rem',
+  backgroundColor: '#007bff',
+  color: '#fff',
+  border: 'none',
+  borderRadius: '0.5rem',
+  fontSize: '1rem',
+  cursor: 'pointer',
+};
 
 export default RegisterUser;
