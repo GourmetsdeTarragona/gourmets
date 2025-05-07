@@ -44,28 +44,29 @@ function Restaurants() {
   const handleRanking = () => navigate('/ranking');
 
   return (
-    <div
-      className="container"
-      style={{
-        position: 'relative',
-        paddingTop: '2rem',
-        backgroundColor: '#fdf6e4', // tono suave basado en el logo
-        minHeight: '100vh',
-      }}
-    >
-      <img
-        src={logoMarcaAgua}
-        alt="Marca de agua"
-        style={{
-          position: 'fixed',
-          opacity: 0.05,
-          zIndex: 0,
-          width: '60%',
-          top: '25%',
-          left: '20%',
-          pointerEvents: 'none',
-        }}
-      />
+  <div
+  className="container"
+  style={{
+    position: 'relative',
+    paddingTop: '2rem',
+    backgroundColor: '#e6f0fa', // azul suave basado en el logo
+    minHeight: '100vh',
+  }}
+>
+  <img
+    src={logoMarcaAgua}
+    alt="Marca de agua"
+    style={{
+      position: 'fixed',
+      opacity: 0.08, // subimos opacidad
+      zIndex: 0,
+      width: '60%',
+      top: '25%',
+      left: '20%',
+      pointerEvents: 'none',
+    }}
+  />
+
 
       <div style={{ position: 'relative', zIndex: 2 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
