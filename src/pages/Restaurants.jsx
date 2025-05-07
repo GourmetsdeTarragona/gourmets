@@ -49,7 +49,7 @@ function Restaurants() {
   style={{
     position: 'relative',
     paddingTop: '2rem',
-    backgroundColor: '#e6f0fa', // azul suave basado en el logo
+    backgroundColor: '#d0e4fa', // azul suave basado en el logo
     minHeight: '100vh',
   }}
 >
