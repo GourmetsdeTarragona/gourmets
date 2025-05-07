@@ -7,33 +7,34 @@ function AdminDashboard() {
     <div
       style={{
         minHeight: '100vh',
-        backgroundImage: 'url(https://redojogbxdtqxqzxvyhp.supabase.co/storage/v1/object/public/imagenes/imagenes/foto-defecto.jpg)',
-        backgroundSize: 'cover',
+        backgroundColor: '#d0e4fa',
+        backgroundImage: 'url(/logo.png)',
+        backgroundRepeat: 'no-repeat',
         backgroundPosition: 'center',
+        backgroundSize: 'contain',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        position: 'relative',
+        padding: '2rem',
       }}
     >
       <div style={{
-        position: 'absolute',
-        inset: 0,
-        backgroundColor: 'rgba(0, 0, 0, 0.6)',
-        zIndex: 1,
-      }} />
-
-      <div style={{
-        zIndex: 2,
-        backgroundColor: 'rgba(255,255,255,0.9)',
-        padding: '2rem',
+        backgroundColor: 'rgba(255, 255, 255, 0.95)',
         borderRadius: '1rem',
-        width: '100%',
+        padding: '2rem',
         maxWidth: '400px',
+        width: '100%',
         boxShadow: '0 8px 24px rgba(0,0,0,0.2)',
         textAlign: 'center',
       }}>
-        <h2 style={{ marginBottom: '1.5rem', fontSize: '1.5rem' }}>Panel del Administrador</h2>
+        <h2 style={{
+          marginBottom: '2rem',
+          fontSize: '1.8rem',
+          fontWeight: 'bold',
+          color: '#003366',
+        }}>
+          Panel del Administrador
+        </h2>
 
         <button onClick={() => navigate('/admin/register-user')} style={buttonStyle}>
           Registrar nuevo socio o administrador
@@ -57,10 +58,12 @@ const buttonStyle = {
   marginBottom: '1rem',
   border: 'none',
   borderRadius: '0.5rem',
-  backgroundColor: '#000',
+  backgroundColor: '#003366',
   color: '#fff',
   fontSize: '1rem',
+  fontWeight: 'bold',
   cursor: 'pointer',
+  transition: 'background-color 0.3s ease',
 };
 
 export default AdminDashboard;
