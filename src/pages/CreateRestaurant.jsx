@@ -11,7 +11,6 @@ function CreateRestaurant() {
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
 
-  // Obtener lista de socios
   useEffect(() => {
     const fetchSocios = async () => {
       const { data, error } = await supabase
@@ -46,11 +45,9 @@ function CreateRestaurant() {
 
     if (insertError) {
       setError('Error al crear el restaurante.');
-      console.error(insertError);
       return;
     }
 
-    // Insertar categoría extra si se indicó
     if (categoriaExtra.trim()) {
       const { error: extraError } = await supabase.from('categorias_extra').insert([
         {
@@ -73,49 +70,106 @@ function CreateRestaurant() {
   };
 
   return (
-    <div className="container" style={{ maxWidth: '600px', margin: '3rem auto' }}>
-      <h2>Crear nuevo restaurante</h2>
-      <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-        <input
-          type="text"
-          placeholder="Nombre del restaurante"
-          value={nombre}
-          onChange={(e) => setNombre(e.target.value)}
-          required
-        />
-        <input
-          type="date"
-          value={fecha}
-          onChange={(e) => setFecha(e.target.value)}
-          required
-        />
-        <input
-          type="text"
-          placeholder="Categoría extra (opcional)"
-          value={categoriaExtra}
-          onChange={(e) => setCategoriaExtra(e.target.value)}
-        />
-        <fieldset style={{ border: '1px solid #ccc', padding: '1rem' }}>
-          <legend>Seleccionar asistentes (socios):</legend>
-          {socios.map((socio) => (
-            <label key={socio.id} style={{ display: 'block', marginBottom: '0.5rem' }}>
-              <input
-                type="checkbox"
-                checked={asistentes.includes(socio.id)}
-                onChange={() => toggleAsistente(socio.id)}
-              />{' '}
-              {socio.nombre} ({socio.email})
-            </label>
-          ))}
-        </fieldset>
-        <button className="button-primary" type="submit">
-          Crear restaurante
-        </button>
-        {error && <div style={{ color: 'red' }}>{error}</div>}
-        <ConfirmationMessage message={message} />
-      </form>
+    <div
+      style={{
+        minHeight: '100vh',
+        backgroundImage: 'url(https://redojogbxdtqxqzxvyhp.supabase.co/storage/v1/object/public/imagenes/imagenes/foto-defecto.jpg)',
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        position: 'relative',
+        padding: '2rem',
+      }}
+    >
+      <div style={{
+        position: 'absolute',
+        inset: 0,
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        zIndex: 1,
+      }} />
+      <div style={{
+        zIndex: 2,
+        backgroundColor: 'rgba(255,255,255,0.9)',
+        padding: '2rem',
+        borderRadius: '1rem',
+        width: '100%',
+        maxWidth: '500px',
+        boxShadow: '0 8px 24px rgba(0,0,0,0.2)',
+      }}>
+        <h2 style={{ marginBottom: '1rem', textAlign: 'center' }}>Crear nuevo restaurante</h2>
+        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+          <input
+            type="text"
+            placeholder="Nombre del restaurante"
+            value={nombre}
+            onChange={(e) => setNombre(e.target.value)}
+            required
+            style={inputStyle}
+          />
+          <input
+            type="date"
+            value={fecha}
+            onChange={(e) => setFecha(e.target.value)}
+            required
+            style={inputStyle}
+          />
+          <input
+            type="text"
+            placeholder="Categoría extra (opcional)"
+            value={categoriaExtra}
+            onChange={(e) => setCategoriaExtra(e.target.value)}
+            style={inputStyle}
+          />
+
+          <fieldset style={{
+            border: '1px solid #ccc',
+            borderRadius: '0.5rem',
+            padding: '1rem',
+          }}>
+            <legend style={{ fontWeight: 'bold' }}>Seleccionar asistentes (socios):</legend>
+            <div style={{ maxHeight: '200px', overflowY: 'auto' }}>
+              {socios.map((socio) => (
+                <label key={socio.id} style={{ display: 'block', marginBottom: '0.5rem' }}>
+                  <input
+                    type="checkbox"
+                    checked={asistentes.includes(socio.id)}
+                    onChange={() => toggleAsistente(socio.id)}
+                    style={{ marginRight: '0.5rem' }}
+                  />
+                  {socio.nombre} ({socio.email})
+                </label>
+              ))}
+            </div>
+          </fieldset>
+
+          <button className="button-primary" type="submit" style={buttonStyle}>
+            Crear restaurante
+          </button>
+          {error && <div style={{ color: 'red' }}>{error}</div>}
+          <ConfirmationMessage message={message} />
+        </form>
+      </div>
     </div>
   );
 }
+
+const inputStyle = {
+  padding: '0.75rem',
+  borderRadius: '0.5rem',
+  border: '1px solid #ccc',
+  width: '100%',
+};
+
+const buttonStyle = {
+  padding: '0.75rem',
+  backgroundColor: '#004080',
+  color: '#fff',
+  border: 'none',
+  borderRadius: '0.5rem',
+  fontSize: '1rem',
+  cursor: 'pointer',
+};
 
 export default CreateRestaurant;
