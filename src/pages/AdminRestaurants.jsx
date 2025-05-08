@@ -17,57 +17,78 @@ function AdminRestaurants() {
       .from('restaurantes')
       .select('*')
       .order('fecha', { ascending: false });
-
-    if (error) {
-      console.error('Error al cargar restaurantes:', error.message);
-    } else {
-      setRestaurantes(data || []);
-    }
+    if (!error) setRestaurantes(data);
     setLoading(false);
   };
 
   const handleVerDetalle = (id) => {
-    if (id) navigate(`/admin/restaurante/${id}`);
+    navigate(`/admin/restaurante/${id}`);
   };
 
   return (
-    <div className="container">
-      <h1 style={{ marginBottom: '1rem' }}>Gestionar Restaurantes</h1>
-
-      {loading ? (
-        <p>Cargando restaurantes...</p>
-      ) : restaurantes.length === 0 ? (
-        <p>No hay restaurantes registrados.</p>
-      ) : (
-        <ul style={{ listStyle: 'none', padding: 0 }}>
-          {restaurantes.map((r) => (
-            <li
-              key={r.id}
-              style={{
-                background: '#fff',
-                padding: '1rem',
-                borderRadius: '1rem',
-                boxShadow: '0 2px 6px rgba(0,0,0,0.1)',
-                marginBottom: '1rem',
-                display: 'flex',
-                flexDirection: 'column',
-              }}
-            >
-              <strong>{r.nombre}</strong>
-              <span style={{ fontSize: '0.9rem', color: '#666' }}>
-                {r.fecha ? new Date(r.fecha).toLocaleDateString() : 'Sin fecha asignada'}
-              </span>
-              <button
-                className="button-primary"
-                style={{ marginTop: '0.75rem', alignSelf: 'flex-start' }}
-                onClick={() => handleVerDetalle(r.id)}
+    <div
+      style={{
+        minHeight: '100vh',
+        backgroundImage: 'url(/logo.png)',
+        backgroundRepeat: 'no-repeat',
+        backgroundPosition: 'center',
+        backgroundSize: 'contain',
+        backgroundColor: '#d0e4fa',
+        display: 'flex',
+        justifyContent: 'center',
+        padding: '3rem 1rem',
+      }}
+    >
+      <div
+        style={{
+          backgroundColor: 'rgba(255, 255, 255, 0.95)',
+          padding: '2rem',
+          borderRadius: '1rem',
+          maxWidth: '700px',
+          width: '100%',
+          boxShadow: '0 8px 20px rgba(0,0,0,0.2)',
+        }}
+      >
+        <h2 style={{ marginBottom: '1.5rem' }}>Gestionar Restaurantes</h2>
+        {loading ? (
+          <p>Cargando restaurantes...</p>
+        ) : restaurantes.length === 0 ? (
+          <p>No hay restaurantes registrados.</p>
+        ) : (
+          <ul style={{ listStyle: 'none', padding: 0 }}>
+            {restaurantes.map((r) => (
+              <li
+                key={r.id}
+                style={{
+                  background: '#fff',
+                  padding: '1rem',
+                  borderRadius: '0.75rem',
+                  boxShadow: '0 2px 6px rgba(0,0,0,0.1)',
+                  marginBottom: '1rem',
+                }}
               >
-                Ver detalle
-              </button>
-            </li>
-          ))}
-        </ul>
-      )}
+                <strong>{r.nombre}</strong> –{' '}
+                {r.fecha ? new Date(r.fecha).toLocaleDateString() : 'Sin fecha'}
+                <br />
+                <button
+                  onClick={() => handleVerDetalle(r.id)}
+                  style={{
+                    marginTop: '0.75rem',
+                    backgroundColor: '#000',
+                    color: '#fff',
+                    border: 'none',
+                    borderRadius: '0.5rem',
+                    padding: '0.5rem 1rem',
+                    cursor: 'pointer',
+                  }}
+                >
+                  Ver detalle
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
     </div>
   );
 }
