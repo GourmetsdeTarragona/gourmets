@@ -76,45 +76,96 @@ function AdminRestaurantDetail() {
     fetchImagenes();
   };
 
-  if (!restaurante) return <p>Cargando detalles...</p>;
+  if (!restaurante) return <p style={{ padding: '2rem' }}>Cargando detalles...</p>;
 
   return (
-    <div className="container">
-      <h2>{restaurante.nombre}</h2>
-      <p>Fecha: {restaurante.fecha ? new Date(restaurante.fecha).toLocaleDateString() : 'Sin asignar'}</p>
+    <div
+      style={{
+        minHeight: '100vh',
+        backgroundImage: 'url(/logo.png)',
+        backgroundRepeat: 'no-repeat',
+        backgroundPosition: 'center',
+        backgroundSize: 'contain',
+        backgroundColor: '#d0e4fa',
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        padding: '2rem',
+      }}
+    >
+      <div
+        style={{
+          backgroundColor: 'rgba(255, 255, 255, 0.95)',
+          padding: '2rem',
+          borderRadius: '1rem',
+          maxWidth: '700px',
+          width: '100%',
+          boxShadow: '0 8px 20px rgba(0,0,0,0.2)',
+        }}
+      >
+        <h2 style={{ marginBottom: '1rem' }}>{restaurante.nombre}</h2>
+        <p>Fecha: {restaurante.fecha ? new Date(restaurante.fecha).toLocaleDateString() : 'Sin asignar'}</p>
 
-      <h3>Asistentes</h3>
-      <ul style={{ listStyle: 'none', padding: 0 }}>
-        {usuarios.map((user) => (
-          <li key={user.id}>
-            <label>
-              <input
-                type="checkbox"
-                checked={asistentes.includes(user.id)}
-                onChange={() => toggleAsistente(user.id)}
-              />{' '}
-              {user.nombre}
-            </label>
-          </li>
-        ))}
-      </ul>
+        <h3 style={{ marginTop: '2rem' }}>Asistentes</h3>
+        <ul style={{ listStyle: 'none', paddingLeft: 0, marginBottom: '2rem' }}>
+          {usuarios.map((user) => (
+            <li key={user.id}>
+              <label>
+                <input
+                  type="checkbox"
+                  checked={asistentes.includes(user.id)}
+                  onChange={() => toggleAsistente(user.id)}
+                />{' '}
+                {user.nombre}
+              </label>
+            </li>
+          ))}
+        </ul>
 
-      <h3>Imágenes del restaurante</h3>
-      <input type="file" onChange={(e) => setFile(e.target.files[0])} />
-      <button className="button-primary" onClick={handleUpload}>Subir imagen</button>
+        <h3>Imágenes del restaurante</h3>
+        <input type="file" onChange={(e) => setFile(e.target.files[0])} />
+        <button
+          onClick={handleUpload}
+          style={{
+            marginTop: '1rem',
+            marginBottom: '1rem',
+            padding: '0.5rem 1rem',
+            backgroundColor: '#000',
+            color: '#fff',
+            border: 'none',
+            borderRadius: '0.5rem',
+            cursor: 'pointer',
+          }}
+        >
+          Subir imagen
+        </button>
 
-      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem', marginTop: '1rem' }}>
-        {imagenes.length === 0 && <p>No hay imágenes.</p>}
-        {imagenes.map((img) => (
-          <div key={img.name} style={{ textAlign: 'center' }}>
-            <img
-              src={`https://redojogbxdtqxqzxvyhp.supabase.co/storage/v1/object/public/imagenes/${id}/${img.name}`}
-              alt={img.name}
-              style={{ width: '150px', height: '100px', objectFit: 'cover', borderRadius: '0.5rem' }}
-            />
-            <button onClick={() => handleDelete(img.name)} style={{ marginTop: '0.5rem' }}>Eliminar</button>
-          </div>
-        ))}
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem' }}>
+          {imagenes.length === 0 && <p>No hay imágenes.</p>}
+          {imagenes.map((img) => (
+            <div key={img.name} style={{ textAlign: 'center' }}>
+              <img
+                src={`https://redojogbxdtqxqzxvyhp.supabase.co/storage/v1/object/public/imagenes/${id}/${img.name}`}
+                alt={img.name}
+                style={{ width: '150px', height: '100px', objectFit: 'cover', borderRadius: '0.5rem' }}
+              />
+              <button
+                onClick={() => handleDelete(img.name)}
+                style={{
+                  marginTop: '0.5rem',
+                  padding: '0.25rem 0.75rem',
+                  backgroundColor: '#c00',
+                  color: '#fff',
+                  border: 'none',
+                  borderRadius: '0.5rem',
+                  cursor: 'pointer',
+                }}
+              >
+                Eliminar
+              </button>
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );
