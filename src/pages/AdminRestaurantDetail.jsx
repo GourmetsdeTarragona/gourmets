@@ -9,11 +9,14 @@ function AdminRestaurantDetail() {
   const [asistentes, setAsistentes] = useState([]);
   const [imagenes, setImagenes] = useState([]);
   const [file, setFile] = useState(null);
+  const [search, setSearch] = useState('');
+  const [votaciones, setVotaciones] = useState([]);
 
   useEffect(() => {
     fetchRestaurante();
     fetchUsuarios();
     fetchImagenes();
+    fetchVotaciones();
   }, []);
 
   const fetchRestaurante = async () => {
@@ -24,20 +27,23 @@ function AdminRestaurantDetail() {
   };
 
   const fetchUsuarios = async () => {
-    const { data, error } = await supabase.from('usuarios').select('id, nombre');
+    const { data, error } = await supabase.from('usuarios').select('id, nombre, rol');
     if (error) return console.error('Error cargando usuarios:', error.message);
-    setUsuarios(data);
+    const socios = data.filter(u => u.rol !== 'admin');
+    setUsuarios(socios);
+  };
+
+  const fetchVotaciones = async () => {
+    const { data, error } = await supabase
+      .from('votaciones')
+      .select('usuario_id')
+      .eq('restaurante_id', id);
+    if (error) return console.error('Error votaciones:', error.message);
+    setVotaciones(data.map(v => v.usuario_id));
   };
 
   const toggleAsistente = async (usuarioId) => {
-    const yaHaVotado = await supabase
-      .from('votaciones')
-      .select('id')
-      .eq('usuario_id', usuarioId)
-      .eq('restaurante_id', id)
-      .maybeSingle();
-
-    if (yaHaVotado.data) {
+    if (votaciones.includes(usuarioId)) {
       alert('Este usuario ya ha votado y no se puede eliminar.');
       return;
     }
@@ -76,74 +82,59 @@ function AdminRestaurantDetail() {
     fetchImagenes();
   };
 
-  if (!restaurante) return <p style={{ padding: '2rem' }}>Cargando detalles...</p>;
+  if (!restaurante) return <p>Cargando detalles...</p>;
 
   return (
     <div
       style={{
         minHeight: '100vh',
-        backgroundImage: 'url(/logo.png)',
-        backgroundRepeat: 'no-repeat',
-        backgroundPosition: 'center',
-        backgroundSize: 'contain',
-        backgroundColor: '#d0e4fa',
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
+        backgroundColor: '#e6f0fa',
         padding: '2rem',
       }}
     >
-      <div
-        style={{
-          backgroundColor: 'rgba(255, 255, 255, 0.95)',
-          padding: '2rem',
-          borderRadius: '1rem',
-          maxWidth: '700px',
-          width: '100%',
-          boxShadow: '0 8px 20px rgba(0,0,0,0.2)',
-        }}
-      >
-        <h2 style={{ marginBottom: '1rem' }}>{restaurante.nombre}</h2>
+      <div style={{
+        backgroundColor: 'white',
+        padding: '2rem',
+        borderRadius: '1rem',
+        maxWidth: '1000px',
+        margin: '0 auto',
+        boxShadow: '0 8px 20px rgba(0,0,0,0.1)'
+      }}>
+        <h2>{restaurante.nombre}</h2>
         <p>Fecha: {restaurante.fecha ? new Date(restaurante.fecha).toLocaleDateString() : 'Sin asignar'}</p>
 
         <h3 style={{ marginTop: '2rem' }}>Asistentes</h3>
-        <ul style={{ listStyle: 'none', paddingLeft: 0, marginBottom: '2rem' }}>
-          {usuarios.map((user) => (
-            <li key={user.id}>
-              <label>
+        <input
+          type="text"
+          placeholder="Buscar socio..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          style={{ marginBottom: '1rem', padding: '0.5rem', width: '100%' }}
+        />
+        <div style={{ maxHeight: '200px', overflowY: 'auto', border: '1px solid #ddd', padding: '1rem', borderRadius: '0.5rem' }}>
+          {usuarios
+            .filter(u => u.nombre.toLowerCase().includes(search.toLowerCase()))
+            .map((user) => (
+              <label key={user.id} style={{ display: 'block', marginBottom: '0.5rem' }}>
                 <input
                   type="checkbox"
                   checked={asistentes.includes(user.id)}
                   onChange={() => toggleAsistente(user.id)}
+                  disabled={votaciones.includes(user.id)}
                 />{' '}
-                {user.nombre}
+                {user.nombre} {votaciones.includes(user.id) && '(Ya ha votado)'}
               </label>
-            </li>
-          ))}
-        </ul>
+            ))}
+        </div>
 
-        <h3>Imágenes del restaurante</h3>
-        <input type="file" onChange={(e) => setFile(e.target.files[0])} />
-        <button
-          onClick={handleUpload}
-          style={{
-            marginTop: '1rem',
-            marginBottom: '1rem',
-            padding: '0.5rem 1rem',
-            backgroundColor: '#000',
-            color: '#fff',
-            border: 'none',
-            borderRadius: '0.5rem',
-            cursor: 'pointer',
-          }}
-        >
-          Subir imagen
-        </button>
-
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem' }}>
-          {imagenes.length === 0 && <p>No hay imágenes.</p>}
+        <h3 style={{ marginTop: '2rem' }}>Imágenes</h3>
+        <div>
+          <input type="file" onChange={(e) => setFile(e.target.files[0])} />
+          <button className="button-primary" onClick={handleUpload}>Subir imagen</button>
+        </div>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem', marginTop: '1rem' }}>
           {imagenes.map((img) => (
-            <div key={img.name} style={{ textAlign: 'center' }}>
+            <div key={img.name} style={{ position: 'relative' }}>
               <img
                 src={`https://redojogbxdtqxqzxvyhp.supabase.co/storage/v1/object/public/imagenes/${id}/${img.name}`}
                 alt={img.name}
@@ -152,16 +143,19 @@ function AdminRestaurantDetail() {
               <button
                 onClick={() => handleDelete(img.name)}
                 style={{
-                  marginTop: '0.5rem',
-                  padding: '0.25rem 0.75rem',
-                  backgroundColor: '#c00',
-                  color: '#fff',
+                  position: 'absolute',
+                  top: '5px',
+                  right: '5px',
+                  backgroundColor: 'rgba(0,0,0,0.6)',
+                  color: 'white',
                   border: 'none',
-                  borderRadius: '0.5rem',
+                  borderRadius: '50%',
+                  width: '24px',
+                  height: '24px',
                   cursor: 'pointer',
                 }}
               >
-                Eliminar
+                ×
               </button>
             </div>
           ))}
