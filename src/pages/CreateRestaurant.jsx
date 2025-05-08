@@ -8,38 +8,48 @@ function CreateRestaurant() {
   const [categoriasExtra, setCategoriasExtra] = useState(['']);
   const [socios, setSocios] = useState([]);
   const [asistentes, setAsistentes] = useState([]);
+  const [cartaFile, setCartaFile] = useState(null);
+  const [minutaFile, setMinutaFile] = useState(null);
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
 
   useEffect(() => {
     const fetchSocios = async () => {
-      const { data, error } = await supabase
+      const { data } = await supabase
         .from('usuarios')
         .select('id, nombre, email, rol')
         .neq('rol', 'admin');
-
-      if (!error) setSocios(data);
+      if (data) setSocios(data);
     };
-
     fetchSocios();
   }, []);
 
   const toggleAsistente = (id) => {
-    if (asistentes.includes(id)) {
-      setAsistentes(asistentes.filter((a) => a !== id));
-    } else {
-      setAsistentes([...asistentes, id]);
-    }
+    setAsistentes((prev) =>
+      prev.includes(id) ? prev.filter((a) => a !== id) : [...prev, id]
+    );
   };
 
   const handleCategoriaChange = (index, value) => {
-    const nuevasCategorias = [...categoriasExtra];
-    nuevasCategorias[index] = value;
-    setCategoriasExtra(nuevasCategorias);
+    const nuevas = [...categoriasExtra];
+    nuevas[index] = value;
+    setCategoriasExtra(nuevas);
   };
 
   const agregarCategoria = () => {
     setCategoriasExtra([...categoriasExtra, '']);
+  };
+
+  const subirPDF = async (restauranteId, file, nombreArchivo) => {
+    if (!file) return null;
+    const path = `${restauranteId}/${nombreArchivo}`;
+    const { error } = await supabase.storage.from('documentos').upload(path, file, {
+      cacheControl: '3600',
+      upsert: true,
+    });
+    if (error) throw new Error(error.message);
+    const { data } = supabase.storage.from('documentos').getPublicUrl(path);
+    return data.publicUrl;
   };
 
   const handleSubmit = async (e) => {
@@ -47,6 +57,7 @@ function CreateRestaurant() {
     setMessage('');
     setError('');
 
+    // 1. Crear restaurante sin carta ni minuta
     const { data: restaurante, error: insertError } = await supabase
       .from('restaurantes')
       .insert([{ nombre, fecha, asistentes }])
@@ -59,6 +70,21 @@ function CreateRestaurant() {
       return;
     }
 
+    // 2. Subir PDFs y actualizar restaurante
+    try {
+      const cartaUrl = await subirPDF(restaurante.id, cartaFile, 'carta.pdf');
+      const minutaUrl = await subirPDF(restaurante.id, minutaFile, 'minuta.pdf');
+
+      await supabase
+        .from('restaurantes')
+        .update({ carta_url: cartaUrl, minuta_url: minutaUrl })
+        .eq('id', restaurante.id);
+    } catch (uploadErr) {
+      setError('Restaurante creado, pero error al subir los PDFs.');
+      console.error(uploadErr);
+    }
+
+    // 3. Insertar categorías extra
     for (const cat of categoriasExtra) {
       if (cat.trim()) {
         await supabase.from('categorias_extra').insert([
@@ -72,6 +98,8 @@ function CreateRestaurant() {
     setFecha('');
     setCategoriasExtra(['']);
     setAsistentes([]);
+    setCartaFile(null);
+    setMinutaFile(null);
   };
 
   return (
@@ -149,6 +177,18 @@ function CreateRestaurant() {
               </label>
             ))}
           </div>
+        </fieldset>
+
+        <fieldset style={{ marginBottom: '1rem' }}>
+          <legend>Documentos (PDF):</legend>
+          <label style={{ display: 'block', marginBottom: '0.5rem' }}>
+            Carta de invitación:
+            <input type="file" accept="application/pdf" onChange={(e) => setCartaFile(e.target.files[0])} />
+          </label>
+          <label>
+            Minuta:
+            <input type="file" accept="application/pdf" onChange={(e) => setMinutaFile(e.target.files[0])} />
+          </label>
         </fieldset>
 
         <button className="button-primary" type="submit" style={{ width: '100%' }}>
