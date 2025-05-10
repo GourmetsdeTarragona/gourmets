@@ -1,5 +1,5 @@
 import { useParams } from 'react-router-dom';
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
 
 function AdminRestaurantDetail() {
@@ -8,7 +8,9 @@ function AdminRestaurantDetail() {
   const [usuarios, setUsuarios] = useState([]);
   const [asistentes, setAsistentes] = useState([]);
   const [imagenes, setImagenes] = useState([]);
-  const fileInputRef = useRef(null);
+  const [file, setFile] = useState(null);
+  const [cartaFile, setCartaFile] = useState(null);
+  const [minutaFile, setMinutaFile] = useState(null);
 
   useEffect(() => {
     fetchRestaurante();
@@ -17,7 +19,11 @@ function AdminRestaurantDetail() {
   }, []);
 
   const fetchRestaurante = async () => {
-    const { data, error } = await supabase.from('restaurantes').select('*').eq('id', id).single();
+    const { data, error } = await supabase
+      .from('restaurantes')
+      .select('*')
+      .eq('id', id)
+      .single();
     if (error) return console.error('Error cargando restaurante:', error.message);
     setRestaurante(data);
     setAsistentes(data.asistentes || []);
@@ -26,27 +32,33 @@ function AdminRestaurantDetail() {
   const fetchUsuarios = async () => {
     const { data, error } = await supabase
       .from('usuarios')
-      .select('id, nombre, rol')
-      .neq('rol', 'admin');
+      .select('id, nombre, rol');
     if (error) return console.error('Error cargando usuarios:', error.message);
-    setUsuarios(data);
+    const socios = data.filter(u => u.rol !== 'admin');
+    setUsuarios(socios);
+  };
+
+  const fetchImagenes = async () => {
+    const { data, error } = await supabase.storage.from('imagenes').list(`${id}`);
+    if (error) return console.error('Error listando imágenes:', error.message);
+    setImagenes(data || []);
   };
 
   const toggleAsistente = async (usuarioId) => {
-    const { data: yaHaVotado } = await supabase
+    const { data: voto } = await supabase
       .from('votaciones')
       .select('id')
       .eq('usuario_id', usuarioId)
       .eq('restaurante_id', id)
       .maybeSingle();
 
-    if (yaHaVotado) {
+    if (voto) {
       alert('Este usuario ya ha votado y no se puede eliminar.');
       return;
     }
 
     const nuevosAsistentes = asistentes.includes(usuarioId)
-      ? asistentes.filter((uid) => uid !== usuarioId)
+      ? asistentes.filter(uid => uid !== usuarioId)
       : [...asistentes, usuarioId];
 
     const { error } = await supabase
@@ -58,21 +70,12 @@ function AdminRestaurantDetail() {
     setAsistentes(nuevosAsistentes);
   };
 
-  const fetchImagenes = async () => {
-    const { data, error } = await supabase.storage.from('imagenes').list(`${id}`);
-    if (error) return console.error('Error listando imágenes:', error.message);
-    setImagenes(data || []);
-  };
-
-  const handleUpload = async (e) => {
-    const files = e.target.files;
-    if (!files || files.length === 0) return;
-
-    for (const file of files) {
-      const filename = `${Date.now()}_${file.name}`;
-      const { error } = await supabase.storage.from('imagenes').upload(`${id}/${filename}`, file);
-      if (error) console.error('Error subiendo imagen:', error.message);
-    }
+  const handleImageUpload = async () => {
+    if (!file) return;
+    const filename = `${Date.now()}_${file.name}`;
+    const { error } = await supabase.storage.from('imagenes').upload(`${id}/${filename}`, file);
+    if (error) return console.error('Error subiendo imagen:', error.message);
+    setFile(null);
     fetchImagenes();
   };
 
@@ -82,93 +85,128 @@ function AdminRestaurantDetail() {
     fetchImagenes();
   };
 
-  if (!restaurante) return <p>Cargando detalles...</p>;
+  const handlePDFUpload = async (type) => {
+    const fileToUpload = type === 'carta' ? cartaFile : minutaFile;
+    if (!fileToUpload) return;
+    const filename = `${type}_${Date.now()}.pdf`;
+    const { data, error } = await supabase.storage
+      .from('documentos')
+      .upload(`${id}/${filename}`, fileToUpload, { contentType: 'application/pdf', upsert: true });
+
+    if (error) return console.error(`Error subiendo ${type}:`, error.message);
+
+    const fileUrl = `https://redojogbxdtqxqzxvyhp.supabase.co/storage/v1/object/public/documentos/${id}/${filename}`;
+    const updateField = type === 'carta' ? { carta_url: fileUrl } : { minuta_url: fileUrl };
+
+    const { error: updateError } = await supabase
+      .from('restaurantes')
+      .update(updateField)
+      .eq('id', id);
+
+    if (updateError) return console.error('Error actualizando URL:', updateError.message);
+
+    fetchRestaurante();
+    if (type === 'carta') setCartaFile(null);
+    else setMinutaFile(null);
+  };
+
+  if (!restaurante) return <p className="container">Cargando detalles...</p>;
 
   return (
-    <div
-      style={{
-        minHeight: '100vh',
-        backgroundImage: 'url(/logo.png)',
-        backgroundRepeat: 'no-repeat',
-        backgroundPosition: 'center',
-        backgroundSize: 'contain',
-        backgroundColor: '#d0e4fa',
-        padding: '2rem',
-      }}
-    >
-      <div
-        style={{
-          maxWidth: '1000px',
-          margin: '0 auto',
-          backgroundColor: 'rgba(255, 255, 255, 0.95)',
-          padding: '2rem',
-          borderRadius: '1rem',
-          boxShadow: '0 8px 20px rgba(0,0,0,0.2)',
-        }}
-      >
-        <h2>{restaurante.nombre}</h2>
-        <p>Fecha: {restaurante.fecha ? new Date(restaurante.fecha).toLocaleDateString() : 'Sin asignar'}</p>
+    <div className="container" style={{ maxWidth: '900px', margin: '2rem auto' }}>
+      <h2>{restaurante.nombre}</h2>
+      <p>Fecha: {restaurante.fecha ? new Date(restaurante.fecha).toLocaleDateString() : 'Sin asignar'}</p>
 
-        <h3>Asistentes</h3>
-        <div style={{ maxHeight: '200px', overflowY: 'auto', marginBottom: '2rem' }}>
-          <ul style={{ listStyle: 'none', padding: 0 }}>
-            {usuarios.map((user) => {
-              const haVotado = asistentes.includes(user.id)
-                ? supabase
+      <h3>Asistentes</h3>
+      <ul style={{ listStyle: 'none', padding: 0 }}>
+        {usuarios.map((user) => (
+          <li key={user.id}>
+            <label>
+              <input
+                type="checkbox"
+                checked={asistentes.includes(user.id)}
+                onChange={() => toggleAsistente(user.id)}
+                disabled={
+                  asistentes.includes(user.id) &&
+                  restaurante &&
+                  restaurante.id &&
+                  supabase
                     .from('votaciones')
                     .select('id')
                     .eq('usuario_id', user.id)
-                    .eq('restaurante_id', id)
-                : null;
+                    .eq('restaurante_id', restaurante.id)
+                }
+              />{' '}
+              {user.nombre}
+            </label>
+          </li>
+        ))}
+      </ul>
 
-              return (
-                <li key={user.id}>
-                  <label>
-                    <input
-                      type="checkbox"
-                      checked={asistentes.includes(user.id)}
-                      onChange={() => toggleAsistente(user.id)}
-                    />{' '}
-                    {user.nombre}
-                  </label>
-                </li>
-              );
-            })}
-          </ul>
-        </div>
+      <h3>Imágenes del restaurante</h3>
+      <button
+        className="button-primary"
+        onClick={() => document.getElementById('upload-image').click()}
+        style={{ marginBottom: '1rem' }}
+      >
+        Seleccionar imagen
+      </button>
+      <input
+        id="upload-image"
+        type="file"
+        accept="image/*"
+        style={{ display: 'none' }}
+        onChange={(e) => {
+          setFile(e.target.files[0]);
+          setTimeout(() => handleImageUpload(), 300);
+        }}
+      />
 
-        <h3>Imágenes del restaurante</h3>
-        <button
-          className="button-primary"
-          style={{ marginBottom: '1rem' }}
-          onClick={() => fileInputRef.current.click()}
-        >
-          Subir imágenes
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem', marginTop: '1rem' }}>
+        {imagenes.length === 0 && <p>No hay imágenes.</p>}
+        {imagenes.map((img) => (
+          <div key={img.name} style={{ textAlign: 'center' }}>
+            <img
+              src={`https://redojogbxdtqxqzxvyhp.supabase.co/storage/v1/object/public/imagenes/${id}/${img.name}`}
+              alt={img.name}
+              style={{ width: '150px', height: '100px', objectFit: 'cover', borderRadius: '0.5rem' }}
+            />
+            <button onClick={() => handleDelete(img.name)} style={{ marginTop: '0.5rem' }}>Eliminar</button>
+          </div>
+        ))}
+      </div>
+
+      <h3 style={{ marginTop: '2rem' }}>Documentos adjuntos</h3>
+      <div style={{ marginBottom: '1rem' }}>
+        {restaurante.carta_url ? (
+          <p>
+            📄 <strong>Carta de invitación:</strong>{' '}
+            <a href={restaurante.carta_url} target="_blank" rel="noopener noreferrer">
+              Descargar PDF
+            </a>
+          </p>
+        ) : (
+          <p>No se ha subido la carta de invitación.</p>
+        )}
+        <input type="file" accept="application/pdf" onChange={(e) => setCartaFile(e.target.files[0])} />
+        <button onClick={() => handlePDFUpload('carta')} className="button-primary" style={{ marginBottom: '1rem' }}>
+          Subir carta
         </button>
-        <input
-          type="file"
-          accept="image/*"
-          ref={fileInputRef}
-          style={{ display: 'none' }}
-          multiple
-          onChange={handleUpload}
-        />
 
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem' }}>
-          {imagenes.length === 0 && <p>No hay imágenes.</p>}
-          {imagenes.map((img) => (
-            <div key={img.name} style={{ textAlign: 'center' }}>
-              <img
-                src={`https://redojogbxdtqxqzxvyhp.supabase.co/storage/v1/object/public/imagenes/${id}/${img.name}`}
-                alt={img.name}
-                style={{ width: '150px', height: '100px', objectFit: 'cover', borderRadius: '0.5rem' }}
-              />
-              <button onClick={() => handleDelete(img.name)} style={{ marginTop: '0.5rem' }}>
-                Eliminar
-              </button>
-            </div>
-          ))}
-        </div>
+        {restaurante.minuta_url ? (
+          <p>
+            📄 <strong>Minuta del restaurante:</strong>{' '}
+            <a href={restaurante.minuta_url} target="_blank" rel="noopener noreferrer">
+              Descargar PDF
+            </a>
+          </p>
+        ) : (
+          <p>No se ha subido la minuta.</p>
+        )}
+        <input type="file" accept="application/pdf" onChange={(e) => setMinutaFile(e.target.files[0])} />
+        <button onClick={() => handlePDFUpload('minuta')} className="button-primary">
+          Subir minuta
+        </button>
       </div>
     </div>
   );
