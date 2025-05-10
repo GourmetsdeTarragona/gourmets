@@ -15,6 +15,7 @@ function RestaurantVoting() {
   const [yaVotado, setYaVotado] = useState(false);
   const [asiste, setAsiste] = useState(false);
   const [confirmacion, setConfirmacion] = useState('');
+  const [imagenes, setImagenes] = useState([]);
 
   useEffect(() => {
     if (!user) return;
@@ -22,7 +23,7 @@ function RestaurantVoting() {
     const cargarDatos = async () => {
       const { data: restaurante } = await supabase
         .from('restaurantes')
-        .select('id, nombre, asistentes')
+        .select('id, nombre, asistentes, carta_url, minuta_url')
         .eq('id', restaurantId)
         .single();
 
@@ -51,6 +52,9 @@ function RestaurantVoting() {
         ...extras.map((cat) => ({ ...cat, tipo: 'extra', nombre: cat.nombre_extra }))
       ];
       setCategorias(todas);
+
+      const { data: fotos } = await supabase.storage.from('imagenes').list(`${restaurantId}`);
+      setImagenes(fotos || []);
     };
 
     cargarDatos();
@@ -92,45 +96,108 @@ function RestaurantVoting() {
   if (yaVotado) return <p className="container">Ya has votado. Puedes ver los resultados en el ranking.</p>;
 
   return (
-    <div className="container">
-      <h2 style={{ marginBottom: '2rem' }}>Votación: {restaurant.nombre}</h2>
-      <form onSubmit={handleSubmit}>
-        {categorias.map((categoria) => (
-          <div key={categoria.id} style={{ marginBottom: '2rem' }}>
-            <h4 style={{ marginBottom: '1rem' }}>{categoria.nombre}</h4>
-            <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'center' }}>
-              {[5, 6, 7, 8, 9, 10].map((valor) => (
-                <label key={valor} style={{ textAlign: 'center' }}>
-                  <input
-                    type="radio"
-                    name={`categoria-${categoria.id}`}
-                    value={valor}
-                    checked={puntuaciones[categoria.id] === valor}
-                    onChange={() => handleVoteChange(categoria.id, valor)}
-                    style={{ display: 'none' }}
-                  />
-                  <span
-                    style={{
-                      fontSize: '2rem',
-                      color: puntuaciones[categoria.id] >= valor ? '#FFD700' : '#ccc',
-                      cursor: 'pointer',
-                    }}
-                  >
-                    ★
-                  </span>
-                  <div style={{ fontSize: '0.8rem' }}>{valor}</div>
-                </label>
-              ))}
-            </div>
+    <div
+      style={{
+        minHeight: '100vh',
+        backgroundImage: 'url(/logo.png)',
+        backgroundRepeat: 'no-repeat',
+        backgroundPosition: 'center',
+        backgroundSize: 'contain',
+        backgroundColor: '#d0e4fa',
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'flex-start',
+        padding: '2rem',
+      }}
+    >
+      <div
+        style={{
+          backgroundColor: 'rgba(255,255,255,0.95)',
+          padding: '2rem',
+          borderRadius: '1rem',
+          width: '100%',
+          maxWidth: '700px',
+          boxShadow: '0 8px 20px rgba(0,0,0,0.2)',
+        }}
+      >
+        <h2 style={{ marginBottom: '1rem' }}>Votación: {restaurant.nombre}</h2>
+
+        <div style={{ display: 'flex', gap: '1rem', marginBottom: '1.5rem', flexWrap: 'wrap' }}>
+          {restaurant.carta_url && (
+            <a
+              href={restaurant.carta_url}
+              target="_blank"
+              rel="noreferrer"
+              className="button-primary"
+              style={{ padding: '0.5rem 1rem' }}
+            >
+              Ver Carta
+            </a>
+          )}
+          {restaurant.minuta_url && (
+            <a
+              href={restaurant.minuta_url}
+              target="_blank"
+              rel="noreferrer"
+              className="button-primary"
+              style={{ padding: '0.5rem 1rem' }}
+            >
+              Ver Minuta
+            </a>
+          )}
+        </div>
+
+        {imagenes.length > 0 && (
+          <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.5rem', flexWrap: 'wrap' }}>
+            {imagenes.map((img) => (
+              <img
+                key={img.name}
+                src={`https://redojogbxdtqxqzxvyhp.supabase.co/storage/v1/object/public/imagenes/${restaurantId}/${img.name}`}
+                alt={img.name}
+                style={{ width: '120px', height: '80px', objectFit: 'cover', borderRadius: '0.5rem' }}
+              />
+            ))}
           </div>
-        ))}
+        )}
 
-        <button type="submit" className="button-primary" style={{ width: '100%' }}>
-          Enviar votación
-        </button>
-      </form>
+        <form onSubmit={handleSubmit}>
+          {categorias.map((categoria) => (
+            <div key={categoria.id} style={{ marginBottom: '2rem' }}>
+              <h4 style={{ marginBottom: '1rem' }}>{categoria.nombre}</h4>
+              <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'center' }}>
+                {[5, 6, 7, 8, 9, 10].map((valor) => (
+                  <label key={valor} style={{ textAlign: 'center' }}>
+                    <input
+                      type="radio"
+                      name={`categoria-${categoria.id}`}
+                      value={valor}
+                      checked={puntuaciones[categoria.id] === valor}
+                      onChange={() => handleVoteChange(categoria.id, valor)}
+                      style={{ display: 'none' }}
+                    />
+                    <span
+                      style={{
+                        fontSize: '2rem',
+                        color: puntuaciones[categoria.id] >= valor ? '#FFD700' : '#ccc',
+                        cursor: 'pointer',
+                      }}
+                    >
+                      ★
+                    </span>
+                    <div style={{ fontSize: '0.8rem' }}>{valor}</div>
+                  </label>
+                ))}
+              </div>
+            </div>
+          ))}
 
-      {confirmacion && <ConfirmationMessage message={confirmacion} />}
+          <button type="submit" className="button-primary" style={{ width: '100%' }}>
+            Enviar votación
+          </button>
+        </form>
+
+        {confirmacion && <ConfirmationMessage message={confirmacion} />}
+      </div>
     </div>
   );
 }
