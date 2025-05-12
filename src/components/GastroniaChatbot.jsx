@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useUser } from '../contexts/UserContext';
-import avatarGastronia from '/gastronia-avatar.png';
+import avatarGastronia from '/gastronia-avatar-64x64.png';
 
 function GastroniaChatbot({ modoForzado }) {
   const { user } = useUser();
@@ -28,9 +28,9 @@ function GastroniaChatbot({ modoForzado }) {
           height: '60px',
           borderRadius: '50%',
           overflow: 'hidden',
-          boxShadow: '0 0 12px rgba(0,0,0,0.3)',
+          boxShadow: '0 0 10px rgba(255, 255, 255, 0.5), 0 0 20px rgba(255, 255, 255, 0.2)',
           cursor: 'pointer',
-          animation: 'respirar 3s ease-in-out infinite',
+          animation: 'respirar 3s ease-in-out infinite, flotar 5s ease-in-out infinite',
           backgroundColor: '#fff',
           display: 'flex',
           alignItems: 'center',
@@ -105,10 +105,14 @@ function GastroniaChatbot({ modoForzado }) {
           50% { transform: scale(1.05); }
           100% { transform: scale(1); }
         }
+
+        @keyframes flotar {
+          0%, 100% { transform: translateY(0); }
+          50% { transform: translateY(-6px); }
+        }
       `}</style>
     </div>
   );
 }
 
 export default GastroniaChatbot;
-
