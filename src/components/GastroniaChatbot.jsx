@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useUser } from '../contexts/UserContext';
 import avatarGastronia from '/gastronia-avatar-64x64.png';
 import gastroniaCara from '/gastronia-cara.png';
@@ -9,8 +9,8 @@ function GastroniaChatbot({ modoForzado }) {
   const [modo, setModo] = useState('publico');
   const [visible, setVisible] = useState(false);
   const [mostrarGaleria, setMostrarGaleria] = useState(false);
-  const [tapCount, setTapCount] = useState(0);
   const [galeriaIndex, setGaleriaIndex] = useState(0);
+  const touchStartY = useRef(null);
 
   useEffect(() => {
     if (modoForzado) {
@@ -36,15 +36,6 @@ function GastroniaChatbot({ modoForzado }) {
   }, []);
 
   useEffect(() => {
-    if (tapCount >= 3) {
-      setMostrarGaleria(true);
-      setTapCount(0);
-    }
-    const timer = setTimeout(() => setTapCount(0), 1000);
-    return () => clearTimeout(timer);
-  }, [tapCount]);
-
-  useEffect(() => {
     let interval;
     if (mostrarGaleria) {
       interval = setInterval(() => {
@@ -56,13 +47,23 @@ function GastroniaChatbot({ modoForzado }) {
 
   const imagenes = [gastroniaCara, gastroniaEntero];
 
+  const handleTouchStart = (e) => {
+    touchStartY.current = e.touches[0].clientY;
+  };
+
+  const handleTouchEnd = (e) => {
+    const endY = e.changedTouches[0].clientY;
+    if (touchStartY.current - endY > 40) {
+      setMostrarGaleria(true);
+    }
+  };
+
   return (
     <div style={{ position: 'fixed', bottom: '1.5rem', right: '1.5rem', zIndex: 99 }}>
       <div
-        onClick={() => {
-          setVisible(!visible);
-          setTapCount((prev) => prev + 1);
-        }}
+        onClick={() => setVisible(!visible)}
+        onTouchStart={handleTouchStart}
+        onTouchEnd={handleTouchEnd}
         style={{
           width: '64px',
           height: '64px',
