@@ -18,25 +18,22 @@ const respuestas = {
 
 export default function GastroniaChatbot() {
   const [chat, setChat] = useState([]);
-  const [typingIndex, setTypingIndex] = useState(0);
-  const textoBienvenida = 'Gastronia os escucha…';
 
   useEffect(() => {
-  let index = 0;
-  const texto = 'Gastronia os escucha…';
+    let index = 0;
+    const texto = 'Gastronia os escucha…';
 
-  const interval = setInterval(() => {
-    setChat([{ tipo: 'gastronia', texto: texto.slice(0, index + 1) }]);
-    index++;
+    const interval = setInterval(() => {
+      setChat([{ tipo: 'gastronia', texto: texto.slice(0, index + 1) }]);
+      index++;
 
-    if (index === texto.length) {
-      clearInterval(interval);
-    }
-  }, 50); // velocidad de escritura
+      if (index === texto.length) {
+        clearInterval(interval);
+      }
+    }, 50);
 
-  return () => clearInterval(interval);
-}, []);
-
+    return () => clearInterval(interval);
+  }, []);
 
   const handlePregunta = (pregunta) => {
     setChat([
@@ -46,7 +43,7 @@ export default function GastroniaChatbot() {
   };
 
   return (
-    <div className="max-w-lg mx-auto bg-yellow-100 border border-yellow-300 rounded-xl p-4 mt-4 shadow-2xl">
+    <div className="max-w-lg mx-auto bg-[#fff9e6] bg-opacity-95 border border-yellow-400 rounded-xl p-4 mt-4 shadow-2xl backdrop-blur-md">
       <div className="flex items-center gap-3 mb-3">
         <img
           src="/gastronia-avatar-mini.png"
