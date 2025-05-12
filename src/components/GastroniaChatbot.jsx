@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 const opciones = [
   '¿Cómo puedo votar un restaurante?',
@@ -17,9 +17,27 @@ const respuestas = {
 };
 
 export default function GastroniaChatbot() {
-  const [chat, setChat] = useState([
-    { tipo: 'gastronia', texto: 'Saludos, comensal. ¿Qué deseas saber?' }
-  ]);
+  const [chat, setChat] = useState([]);
+  const [typingIndex, setTypingIndex] = useState(0);
+  const textoBienvenida = 'Gastronia os escucha…';
+
+  useEffect(() => {
+    setChat([{ tipo: 'gastronia', texto: '' }]);
+
+    const interval = setInterval(() => {
+      setChat((prev) => {
+        const actual = prev[0].texto + textoBienvenida.charAt(typingIndex);
+        return [{ tipo: 'gastronia', texto: actual }];
+      });
+
+      setTypingIndex((prev) => {
+        if (prev >= textoBienvenida.length - 1) clearInterval(interval);
+        return prev + 1;
+      });
+    }, 40);
+
+    return () => clearInterval(interval);
+  }, []);
 
   const handlePregunta = (pregunta) => {
     setChat([
@@ -29,9 +47,13 @@ export default function GastroniaChatbot() {
   };
 
   return (
-    <div className="max-w-lg mx-auto bg-yellow-50 border border-yellow-300 rounded-xl p-4 mt-4 shadow-2xl backdrop-blur-sm bg-opacity-90">
+    <div className="max-w-lg mx-auto bg-yellow-100 border border-yellow-300 rounded-xl p-4 mt-4 shadow-2xl">
       <div className="flex items-center gap-3 mb-3">
-        <img src="/gastronia-avatar-mini.png" className="w-10 h-10 rounded-full border border-yellow-400" />
+        <img
+          src="/gastronia-avatar-mini.png"
+          className="w-10 h-10 rounded-full border border-yellow-400 animate-bounce-slow"
+          alt="Avatar de Gastronia"
+        />
         <h2 className="font-semibold text-yellow-900">Gastronia</h2>
       </div>
       <div className="space-y-2 mb-4 max-h-48 overflow-y-auto">
