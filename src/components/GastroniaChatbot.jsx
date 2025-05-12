@@ -1,21 +1,23 @@
 import { useEffect, useState } from 'react';
 import { useUser } from '../contexts/UserContext';
-import avatarGastronia from '/gastronia-avatar.png'; // asegúrate de tener esta imagen
+import avatarGastronia from '/gastronia-avatar-64x64.png';
 
-function GastroniaChatbot() {
+function GastroniaChatbot({ modoForzado }) {
   const { user } = useUser();
   const [modo, setModo] = useState('publico');
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
-    if (!user) {
+    if (modoForzado) {
+      setModo(modoForzado);
+    } else if (!user) {
       setModo('publico');
     } else if (user.rol === 'socio') {
       setModo('socio');
     } else if (user.rol === 'admin') {
       setModo('admin');
     }
-  }, [user]);
+  }, [user, modoForzado]);
 
   return (
     <div style={{ position: 'fixed', bottom: '1.5rem', right: '1.5rem', zIndex: 99 }}>
@@ -109,3 +111,4 @@ function GastroniaChatbot() {
 }
 
 export default GastroniaChatbot;
+
