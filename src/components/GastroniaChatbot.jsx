@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from 'react';
 import { useUser } from '../contexts/UserContext';
 import avatarGastronia from '/gastronia-avatar-64x64.png';
@@ -11,6 +10,7 @@ function GastroniaChatbot({ modoForzado }) {
   const [visible, setVisible] = useState(false);
   const [mostrarGaleria, setMostrarGaleria] = useState(false);
   const [tapCount, setTapCount] = useState(0);
+  const [galeriaIndex, setGaleriaIndex] = useState(0);
 
   useEffect(() => {
     if (modoForzado) {
@@ -43,6 +43,18 @@ function GastroniaChatbot({ modoForzado }) {
     const timer = setTimeout(() => setTapCount(0), 1000);
     return () => clearTimeout(timer);
   }, [tapCount]);
+
+  useEffect(() => {
+    let interval;
+    if (mostrarGaleria) {
+      interval = setInterval(() => {
+        setGaleriaIndex((prev) => (prev + 1) % 2);
+      }, 3000);
+    }
+    return () => clearInterval(interval);
+  }, [mostrarGaleria]);
+
+  const imagenes = [gastroniaCara, gastroniaEntero];
 
   return (
     <div style={{ position: 'fixed', bottom: '1.5rem', right: '1.5rem', zIndex: 99 }}>
@@ -143,17 +155,27 @@ function GastroniaChatbot({ modoForzado }) {
           style={{
             position: 'fixed',
             inset: 0,
-            backgroundColor: 'rgba(0,0,0,0.85)',
+            backgroundColor: 'rgba(0,0,0,0.9)',
             display: 'flex',
-            flexDirection: 'column',
             alignItems: 'center',
             justifyContent: 'center',
             zIndex: 999,
+            animation: 'desvanecer 1s ease-in-out',
           }}
           onClick={() => setMostrarGaleria(false)}
         >
-          <img src={gastroniaCara} alt="Gastronia Cara" style={{ maxWidth: '90%', maxHeight: '40vh', marginBottom: '1rem' }} />
-          <img src={gastroniaEntero} alt="Gastronia Entera" style={{ maxWidth: '90%', maxHeight: '50vh' }} />
+          <img
+            src={imagenes[galeriaIndex]}
+            alt="Gastronia Vision"
+            style={{
+              maxWidth: '90%',
+              maxHeight: '90vh',
+              transition: 'opacity 1s ease-in-out',
+              opacity: 1,
+              borderRadius: '1rem',
+              boxShadow: '0 0 40px rgba(255,255,255,0.25)',
+            }}
+          />
         </div>
       )}
 
@@ -172,6 +194,11 @@ function GastroniaChatbot({ modoForzado }) {
         @keyframes resplandor {
           0%, 100% { box-shadow: 0 0 12px rgba(255,255,255,0.2); }
           50% { box-shadow: 0 0 20px rgba(255,255,255,0.6); }
+        }
+
+        @keyframes desvanecer {
+          from { opacity: 0; }
+          to { opacity: 1; }
         }
       `}</style>
     </div>
