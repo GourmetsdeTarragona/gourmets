@@ -2,6 +2,7 @@ import { useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
 import logo from '/logo.png';
+import GastroniaChatbot from '../components/GastroniaChatbot'; // 🟡 nuevo
 
 const IMAGEN_DEFECTO =
   'https://redojogbxdtqxqzxvyhp.supabase.co/storage/v1/object/public/imagenes/imagenes/foto-defecto.jpg';
@@ -131,6 +132,11 @@ function Home() {
           >
             Explorar como invitado
           </button>
+        </div>
+
+        {/* 🔸 Chatbot integrado */}
+        <div style={{ marginTop: '3rem', maxWidth: '480px', marginInline: 'auto' }}>
+          <GastroniaChatbot />
         </div>
       </div>
 
