@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from 'react';
 import { useUser } from '../contexts/UserContext';
 import avatarGastronia from '/gastronia-avatar.png'; // asegúrate de tener esta imagen
