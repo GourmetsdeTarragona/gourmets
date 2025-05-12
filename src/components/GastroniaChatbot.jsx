@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useUser } from '../contexts/UserContext';
-import avatarGastronia from '/gastronia-avatar.png';
+import avatarGastronia from '/gastronia-avatar-64x64.png';
 
 function GastroniaChatbot({ modoForzado }) {
   const { user } = useUser();
@@ -24,23 +24,34 @@ function GastroniaChatbot({ modoForzado }) {
       <div
         onClick={() => setVisible(!visible)}
         style={{
-          width: '60px',
-          height: '60px',
+          width: '64px',
+          height: '64px',
           borderRadius: '50%',
           overflow: 'hidden',
-          boxShadow: '0 0 10px rgba(255, 255, 255, 0.5), 0 0 20px rgba(255, 255, 255, 0.2)',
           cursor: 'pointer',
-          animation: 'respirar 3s ease-in-out infinite, flotar 5s ease-in-out infinite',
+          animation: 'respirar 3s ease-in-out infinite, flotar 5s ease-in-out infinite, resplandor 4s ease-in-out infinite',
           backgroundColor: '#fff',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
+          position: 'relative',
+          boxShadow: '0 0 12px rgba(255, 255, 255, 0.3)',
         }}
       >
+        <div
+          style={{
+            position: 'absolute',
+            width: '100%',
+            height: '100%',
+            borderRadius: '50%',
+            boxShadow: '0 0 25px 5px rgba(255, 255, 255, 0.15)',
+            zIndex: 0,
+          }}
+        ></div>
         <img
           src={avatarGastronia}
           alt="Avatar Gastronia"
-          style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+          style={{ width: '100%', height: '100%', objectFit: 'cover', zIndex: 1 }}
         />
       </div>
 
@@ -109,6 +120,11 @@ function GastroniaChatbot({ modoForzado }) {
         @keyframes flotar {
           0%, 100% { transform: translateY(0); }
           50% { transform: translateY(-6px); }
+        }
+
+        @keyframes resplandor {
+          0%, 100% { box-shadow: 0 0 12px rgba(255,255,255,0.2); }
+          50% { box-shadow: 0 0 20px rgba(255,255,255,0.6); }
         }
       `}</style>
     </div>
