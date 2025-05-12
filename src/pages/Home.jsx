@@ -6,7 +6,7 @@ import GastroniaChatbot from '../components/GastroniaChatbot';
 
 const IMAGEN_DEFECTO =
   'https://redojogbxdtqxqzxvyhp.supabase.co/storage/v1/object/public/imagenes/imagenes/foto-defecto.jpg';
-  <GastroniaChatbot modoForzado="publico" />
+
 function Home() {
   const navigate = useNavigate();
   const [imagenActual, setImagenActual] = useState(IMAGEN_DEFECTO);
@@ -14,7 +14,7 @@ function Home() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [errorMsg, setErrorMsg] = useState('');
-  
+
   useEffect(() => {
     const obtenerImagenAleatoria = async () => {
       const { data, error } = await supabase.storage.from('imagenes').list('imagenes', {
@@ -117,7 +117,7 @@ function Home() {
         </div>
 
         <div style={{ marginTop: '3rem', maxWidth: '480px', marginInline: 'auto' }}>
-          <GastroniaChatbot />
+          <GastroniaChatbot modoForzado="publico" />
         </div>
       </div>
 
