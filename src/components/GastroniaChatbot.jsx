@@ -1,11 +1,15 @@
 import { useEffect, useState } from 'react';
 import { useUser } from '../contexts/UserContext';
 import avatarGastronia from '/gastronia-avatar-64x64.png';
+import gastroniaCara from '/gastronia-cara.png';
+import gastroniaEntero from '/gastronia-entero.png';
 
 function GastroniaChatbot({ modoForzado }) {
   const { user } = useUser();
   const [modo, setModo] = useState('publico');
   const [visible, setVisible] = useState(false);
+  const [mostrarGaleria, setMostrarGaleria] = useState(false);
+  const [tapCount, setTapCount] = useState(0);
 
   useEffect(() => {
     if (modoForzado) {
@@ -19,10 +23,33 @@ function GastroniaChatbot({ modoForzado }) {
     }
   }, [user, modoForzado]);
 
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.ctrlKey && e.key === 'g') {
+        e.preventDefault();
+        setMostrarGaleria(true);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
+  useEffect(() => {
+    if (tapCount >= 3) {
+      setMostrarGaleria(true);
+      setTapCount(0);
+    }
+    const timer = setTimeout(() => setTapCount(0), 1000);
+    return () => clearTimeout(timer);
+  }, [tapCount]);
+
   return (
     <div style={{ position: 'fixed', bottom: '1.5rem', right: '1.5rem', zIndex: 99 }}>
       <div
-        onClick={() => setVisible(!visible)}
+        onClick={() => {
+          setVisible(!visible);
+          setTapCount((prev) => prev + 1);
+        }}
         style={{
           width: '64px',
           height: '64px',
@@ -107,6 +134,25 @@ function GastroniaChatbot({ modoForzado }) {
               </p>
             </div>
           )}
+        </div>
+      )}
+
+      {mostrarGaleria && (
+        <div
+          style={{
+            position: 'fixed',
+            inset: 0,
+            backgroundColor: 'rgba(0,0,0,0.85)',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 999,
+          }}
+          onClick={() => setMostrarGaleria(false)}
+        >
+          <img src={gastroniaCara} alt="Gastronia Cara" style={{ maxWidth: '90%', maxHeight: '40vh', marginBottom: '1rem' }} />
+          <img src={gastroniaEntero} alt="Gastronia Entera" style={{ maxWidth: '90%', maxHeight: '50vh' }} />
         </div>
       )}
 
