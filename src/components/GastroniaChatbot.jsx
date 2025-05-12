@@ -22,22 +22,21 @@ export default function GastroniaChatbot() {
   const textoBienvenida = 'Gastronia os escucha…';
 
   useEffect(() => {
-    setChat([{ tipo: 'gastronia', texto: '' }]);
+  let index = 0;
+  const texto = 'Gastronia os escucha…';
 
-    const interval = setInterval(() => {
-      setChat((prev) => {
-        const actual = prev[0].texto + textoBienvenida.charAt(typingIndex);
-        return [{ tipo: 'gastronia', texto: actual }];
-      });
+  const interval = setInterval(() => {
+    setChat([{ tipo: 'gastronia', texto: texto.slice(0, index + 1) }]);
+    index++;
 
-      setTypingIndex((prev) => {
-        if (prev >= textoBienvenida.length - 1) clearInterval(interval);
-        return prev + 1;
-      });
-    }, 40);
+    if (index === texto.length) {
+      clearInterval(interval);
+    }
+  }, 50); // velocidad de escritura
 
-    return () => clearInterval(interval);
-  }, []);
+  return () => clearInterval(interval);
+}, []);
+
 
   const handlePregunta = (pregunta) => {
     setChat([
