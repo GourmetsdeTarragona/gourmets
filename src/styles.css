@@ -1,11 +1,14 @@
-/* Estilos globales básicos para Gourmets Tarragona */
+/* ===============================
+   Estilos globales para Gourmets Tarragona
+   =============================== */
+
 /* Reset y base */
 body {
   margin: 0;
   padding: 0;
   font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
   background-color: #f8f9fa;
-  color: #222;
+  color: #333;
   line-height: 1.6;
 }
 
@@ -28,15 +31,22 @@ button {
   transition: all 0.3s ease;
 }
 
+/* ===============================
+   Contenedor
+   =============================== */
+
 .container {
   max-width: 1200px;
   margin: 0 auto;
   padding: 1.5rem;
 }
 
-/* Tarjetas refinadas */
+/* ===============================
+   Tarjetas refinadas
+   =============================== */
+
 .card {
-  background: #ffffff;
+  background: #fff;
   border-radius: 1rem;
   padding: 1.5rem;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
@@ -48,7 +58,10 @@ button {
   box-shadow: 0 12px 32px rgba(0, 0, 0, 0.12);
 }
 
-/* Botón principal */
+/* ===============================
+   Botones
+   =============================== */
+
 .button-primary {
   background-color: #000;
   color: #fff;
@@ -63,7 +76,6 @@ button {
   background-color: #333;
 }
 
-/* Botón alternativo claro */
 .button-light {
   background-color: #ffffffcc;
   color: #000;
@@ -77,56 +89,15 @@ button {
   background-color: #f2f2f2;
 }
 
-body {
-  margin: 0;
-  padding: 0;
-  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-  background-color: #f8f9fa;
-  color: #333;
+/* ===============================
+   Animación suave para Gastronia
+   =============================== */
+
+@keyframes bounce-slow {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
 }
 
-h1, h2, h3, h4, h5, h6 {
-  margin: 0;
-}
-
-a {
-  text-decoration: none;
-  color: inherit;
-}
-
-button {
-  cursor: pointer;
-  font-family: inherit;
-}
-
-.container {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 1rem;
-}
-
-.card {
-  background: #fff;
-  border-radius: 1rem;
-  padding: 1.5rem;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-  transition: all 0.3s ease;
-}
-
-.card:hover {
-  transform: translateY(-5px);
-}
-
-.button-primary {
-  background-color: #000;
-  color: #fff;
-  padding: 0.75rem 1.5rem;
-  border: none;
-  border-radius: 0.5rem;
-  font-size: 1rem;
-  transition: background-color 0.3s;
-}
-
-.button-primary:hover {
-  background-color: #333;
+.animate-bounce-slow {
+  animation: bounce-slow 3s infinite;
 }
