@@ -56,11 +56,7 @@ export default function GastroniaChatbot() {
         {chat.map((msg, i) => (
           <div
             key={i}
-            className={`p-2 rounded-md text-sm ${
-              msg.tipo === 'gastronia'
-                ? 'bg-yellow-100 text-yellow-900'
-                : 'bg-blue-100 text-blue-900 ml-auto w-fit'
-            }`}
+            className={`p-2 rounded-md text-sm ${msg.tipo === 'gastronia' ? 'bg-yellow-200 text-yellow-900' : 'bg-yellow-200 text-yellow-900 ml-auto w-fit'}`}
           >
             {msg.texto}
           </div>
