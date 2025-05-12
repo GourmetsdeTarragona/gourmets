@@ -22,25 +22,26 @@ export default function GastroniaChatbot() {
   ]);
 
   const handlePregunta = (pregunta) => {
-    setChat(prev => [
-      ...prev,
+    setChat([
       { tipo: 'usuario', texto: pregunta },
       { tipo: 'gastronia', texto: respuestas[pregunta] || 'Aún no tengo respuesta para eso.' }
     ]);
   };
 
   return (
-    <div className="max-w-lg mx-auto bg-amber-50 border border-yellow-300 rounded-xl p-4 mt-4 shadow-md">
+    <div className="max-w-lg mx-auto bg-yellow-50 border border-yellow-300 rounded-xl p-4 mt-4 shadow-2xl backdrop-blur-sm bg-opacity-90">
       <div className="flex items-center gap-3 mb-3">
         <img src="/gastronia-avatar-mini.png" className="w-10 h-10 rounded-full border border-yellow-400" />
-        <h2 className="font-semibold text-yellow-800">Gastronia</h2>
+        <h2 className="font-semibold text-yellow-900">Gastronia</h2>
       </div>
-      <div className="space-y-2 mb-4 max-h-60 overflow-y-auto">
+      <div className="space-y-2 mb-4 max-h-48 overflow-y-auto">
         {chat.map((msg, i) => (
           <div
             key={i}
             className={`p-2 rounded-md text-sm ${
-              msg.tipo === 'gastronia' ? 'bg-yellow-100 text-yellow-900' : 'bg-blue-100 text-blue-900 ml-auto w-fit'
+              msg.tipo === 'gastronia'
+                ? 'bg-yellow-100 text-yellow-900'
+                : 'bg-blue-100 text-blue-900 ml-auto w-fit'
             }`}
           >
             {msg.texto}
