@@ -2,14 +2,13 @@ import { useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
 import logo from '/logo.png';
-import GastroniaChatbot from '../components/GastroniaChatbot'; // 🟡 nuevo
+import GastroniaChatbot from '../components/GastroniaChatbot';
 
 const IMAGEN_DEFECTO =
   'https://redojogbxdtqxqzxvyhp.supabase.co/storage/v1/object/public/imagenes/imagenes/foto-defecto.jpg';
 
 function Home() {
   const navigate = useNavigate();
-  const [imagenes, setImagenes] = useState([IMAGEN_DEFECTO]);
   const [imagenActual, setImagenActual] = useState(IMAGEN_DEFECTO);
   const [mostrarLogin, setMostrarLogin] = useState(false);
   const [email, setEmail] = useState('');
@@ -17,43 +16,27 @@ function Home() {
   const [errorMsg, setErrorMsg] = useState('');
 
   useEffect(() => {
-    const obtenerImagenes = async () => {
-      const { data, error } = await supabase
-        .storage
-        .from('imagenes')
-        .list('imagenes', {
-          limit: 100,
-          sortBy: { column: 'name', order: 'asc' },
-        });
+    const obtenerImagenAleatoria = async () => {
+      const { data, error } = await supabase.storage.from('imagenes').list('imagenes', {
+        limit: 100,
+        sortBy: { column: 'name', order: 'asc' },
+      });
 
       if (!error && data.length > 0) {
-        const urls = data
-          .filter((item) => item.name.match(/\.(jpg|jpeg|png)$/i))
-          .map(
-            (item) =>
-              supabase.storage
-                .from('imagenes')
-                .getPublicUrl(`imagenes/${item.name}`).data.publicUrl
-          );
+        const imagenesValidas = data.filter((item) => item.name.match(/\.(jpg|jpeg|png)$/i));
+        const seleccion = imagenesValidas[Math.floor(Math.random() * imagenesValidas.length)];
 
-        setImagenes(urls);
-        setImagenActual(urls[0]);
+        if (seleccion) {
+          const { data: urlData } = supabase.storage
+            .from('imagenes')
+            .getPublicUrl(`imagenes/${seleccion.name}`);
+          setImagenActual(urlData.publicUrl);
+        }
       }
     };
 
-    obtenerImagenes();
+    obtenerImagenAleatoria();
   }, []);
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setImagenActual((prev) => {
-        const index = imagenes.indexOf(prev);
-        return imagenes[(index + 1) % imagenes.length] || IMAGEN_DEFECTO;
-      });
-    }, 5000);
-
-    return () => clearInterval(interval);
-  }, [imagenes]);
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -96,7 +79,6 @@ function Home() {
         alignItems: 'center',
         justifyContent: 'center',
         position: 'relative',
-        transition: 'background-image 1s ease-in-out',
         flexDirection: 'column',
       }}
     >
@@ -134,13 +116,11 @@ function Home() {
           </button>
         </div>
 
-        {/* 🔸 Chatbot integrado */}
         <div style={{ marginTop: '3rem', maxWidth: '480px', marginInline: 'auto' }}>
           <GastroniaChatbot />
         </div>
       </div>
 
-      {/* Modal login */}
       {mostrarLogin && (
         <div
           style={{
@@ -215,17 +195,11 @@ function Home() {
                   fontSize: '1rem',
                 }}
               />
-              <button
-                type="submit"
-                className="button-primary"
-                style={{ width: '100%' }}
-              >
+              <button type="submit" className="button-primary" style={{ width: '100%' }}>
                 Entrar
               </button>
             </form>
-            {errorMsg && (
-              <p style={{ color: 'red', marginTop: '1rem' }}>{errorMsg}</p>
-            )}
+            {errorMsg && <p style={{ color: 'red', marginTop: '1rem' }}>{errorMsg}</p>}
           </div>
         </div>
       )}
