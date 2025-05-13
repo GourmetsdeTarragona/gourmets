@@ -3,21 +3,26 @@ import { supabase } from '../lib/supabase';
 import RankingList from '../components/RankingList';
 import logo from '/logo.png';
 import { useNavigate } from 'react-router-dom';
+import { useUser } from '../contexts/UserContext';
 
 function Ranking() {
   const [restaurantes, setRestaurantes] = useState([]);
+  const { user } = useUser();
   const navigate = useNavigate();
 
   useEffect(() => {
-    fetchRanking();
-  }, []);
+    if (user) fetchRanking();
+  }, [user]);
 
   const fetchRanking = async () => {
-    const { data, error } = await supabase.rpc('calcular_ranking_global');
+    const { data, error } = await supabase.rpc('calcular_ranking_personalizado', {
+      user_id_param: user.id,
+    });
+
     if (!error) {
       setRestaurantes(data);
     } else {
-      console.error('Error al cargar ranking:', error.message);
+      console.error('Error al cargar ranking personalizado:', error.message);
     }
   };
 
