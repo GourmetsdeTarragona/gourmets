@@ -1,45 +1,75 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
-import logo from '/logo.png';
-import { useNavigate } from 'react-router-dom';
 import { useUser } from '../contexts/UserContext';
+import logo from '/logo.png';
 
 function Ranking() {
-  const [restaurantes, setRestaurantes] = useState([]);
-  const [vinos, setVinos] = useState([]);
-  const [tab, setTab] = useState('restaurantes');
   const { user } = useUser();
-  const navigate = useNavigate();
+  const [tab, setTab] = useState('restaurantes');
+  const [rankingRestaurantes, setRankingRestaurantes] = useState([]);
+  const [rankingVinos, setRankingVinos] = useState([]);
 
   useEffect(() => {
-    if (!user) return;
-    fetchRankingRestaurantes();
-    fetchRankingVinos();
+    if (user) {
+      cargarRanking();
+    }
   }, [user]);
 
-  const fetchRankingRestaurantes = async () => {
-    const { data, error } = await supabase.rpc('calcular_ranking_personalizado_v2', {
-      uid: user.id,
-    });
-    if (!error) setRestaurantes(data);
-    else console.error('Error ranking restaurantes:', error.message);
+  const cargarRanking = async () => {
+    const { data: rankingR, error: errorR } = await supabase.rpc(
+      'calcular_ranking_personalizado',
+      { uid: user.id }
+    );
+    const { data: rankingV, error: errorV } = await supabase.rpc(
+      'calcular_ranking_vinos_personalizado',
+      { uid: user.id }
+    );
+
+    if (!errorR) setRankingRestaurantes(rankingR || []);
+    if (!errorV) setRankingVinos(rankingV || []);
   };
 
-  const fetchRankingVinos = async () => {
-    const { data, error } = await supabase.rpc('ranking_vinos_v2');
-    if (!error) setVinos(data);
-    else console.error('Error ranking vinos:', error.message);
-  };
+  const renderBloqueCategoria = (categoria, datos) => (
+    <div key={categoria} style={{
+      background: '#fff',
+      padding: '1.5rem',
+      borderRadius: '1rem',
+      boxShadow: '0 4px 10px rgba(0,0,0,0.1)',
+      marginBottom: '2rem'
+    }}>
+      <h3 style={{ marginBottom: '1rem', color: '#005a8d' }}>{categoria}</h3>
+      <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+        <thead>
+          <tr>
+            <th style={thStyle}>#</th>
+            <th style={thStyle}>Nombre</th>
+            <th style={thStyle}>Media</th>
+            <th style={thStyle}>Mi nota</th>
+          </tr>
+        </thead>
+        <tbody>
+          {datos
+            .sort((a, b) => b.media - a.media)
+            .map((fila, i) => (
+              <tr key={fila.nombre}>
+                <td style={tdStyle}>{i + 1}</td>
+                <td style={tdStyle}>{fila.nombre}</td>
+                <td style={tdStyle}>{parseFloat(fila.media).toFixed(2)}</td>
+                <td style={tdStyle}>{fila.personal ? parseFloat(fila.personal).toFixed(2) : '—'}</td>
+              </tr>
+            ))}
+        </tbody>
+      </table>
+    </div>
+  );
 
   return (
-    <div
-      style={{
-        position: 'relative',
-        minHeight: '100vh',
-        backgroundColor: '#d0e4fa',
-        padding: '2rem',
-      }}
-    >
+    <div style={{
+      position: 'relative',
+      minHeight: '100vh',
+      backgroundColor: '#d0e4fa',
+      padding: '2rem'
+    }}>
       <img
         src={logo}
         alt="Logo"
@@ -48,120 +78,89 @@ function Ranking() {
           top: '50%',
           left: '50%',
           transform: 'translate(-50%, -50%)',
-          opacity: 0.07,
+          opacity: 0.06,
           width: '60%',
           zIndex: 0,
         }}
       />
 
       <div style={{ position: 'relative', zIndex: 1 }}>
-        <h1 style={{ textAlign: 'center', marginBottom: '2rem' }}>
-          Ranking
-        </h1>
+        <h1 style={{ textAlign: 'center', marginBottom: '2rem' }}>Ranking</h1>
 
-        <div style={{ display: 'flex', justifyContent: 'center', gap: '2rem', marginBottom: '2rem' }}>
+        <div style={{
+          display: 'flex',
+          justifyContent: 'center',
+          gap: '1rem',
+          marginBottom: '2rem'
+        }}>
           <button
             onClick={() => setTab('restaurantes')}
-            style={{
-              backgroundColor: tab === 'restaurantes' ? '#000' : '#ccc',
-              color: '#fff',
-              padding: '0.5rem 1rem',
-              border: 'none',
-              borderRadius: '0.5rem',
-              fontWeight: 'bold',
-            }}
+            style={tab === 'restaurantes' ? activeTabStyle : tabStyle}
           >
-            🥘 Restaurantes
+            Restaurantes
           </button>
           <button
             onClick={() => setTab('vinos')}
-            style={{
-              backgroundColor: tab === 'vinos' ? '#000' : '#ccc',
-              color: '#fff',
-              padding: '0.5rem 1rem',
-              border: 'none',
-              borderRadius: '0.5rem',
-              fontWeight: 'bold',
-            }}
+            style={tab === 'vinos' ? activeTabStyle : tabStyle}
           >
-            🍷 Vinos
+            Vinos
           </button>
         </div>
 
         {tab === 'restaurantes' && (
           <>
-            {restaurantes.length > 0 ? (
-              <ul style={{ listStyle: 'none', padding: 0 }}>
-                {restaurantes.map((r, idx) => (
-                  <li
-                    key={r.id}
-                    style={{
-                      background: '#fff',
-                      marginBottom: '1rem',
-                      padding: '1rem',
-                      borderRadius: '0.75rem',
-                      boxShadow: '0 4px 10px rgba(0,0,0,0.1)',
-                    }}
-                  >
-                    <h3 style={{ marginBottom: '0.5rem' }}>
-                      #{idx + 1} – {r.nombre}
-                    </h3>
-                    <p>
-                      Tu media: <strong>{r.tu_media ? parseFloat(r.tu_media).toFixed(2) : '—'}</strong> | Media global:{' '}
-                      <strong>{r.promedio ? parseFloat(r.promedio).toFixed(2) : '—'}</strong>
-                    </p>
-                  </li>
-                ))}
-              </ul>
+            {rankingRestaurantes.length === 0 ? (
+              <p style={{ textAlign: 'center' }}>No hay datos disponibles.</p>
             ) : (
-              <p style={{ textAlign: 'center' }}>No hay datos de ranking.</p>
+              [...new Set(rankingRestaurantes.map((r) => r.categoria))].map((cat) =>
+                renderBloqueCategoria(cat, rankingRestaurantes.filter((r) => r.categoria === cat))
+              )
             )}
           </>
         )}
 
         {tab === 'vinos' && (
           <>
-            {vinos.length > 0 ? (
-              <ul style={{ listStyle: 'none', padding: 0 }}>
-                {vinos.map((vino, idx) => (
-                  <li
-                    key={vino.restaurante_id}
-                    style={{
-                      background: '#fffaf2',
-                      marginBottom: '1rem',
-                      padding: '1rem',
-                      borderRadius: '0.75rem',
-                      boxShadow: '0 4px 10px rgba(0,0,0,0.1)',
-                    }}
-                  >
-                    <h3 style={{ marginBottom: '0.5rem' }}>
-                      #{idx + 1} – {vino.nombre_restaurante}
-                    </h3>
-                    <p>
-                      Categoría: <strong>{vino.nombre_extra}</strong><br />
-                      Media: <strong>{parseFloat(vino.promedio).toFixed(2)}</strong>
-                    </p>
-                  </li>
-                ))}
-              </ul>
+            {rankingVinos.length === 0 ? (
+              <p style={{ textAlign: 'center' }}>No hay datos de vinos.</p>
             ) : (
-              <p style={{ textAlign: 'center' }}>No hay datos de vinos disponibles.</p>
+              [...new Set(rankingVinos.map((v) => v.categoria))].map((cat) =>
+                renderBloqueCategoria(cat, rankingVinos.filter((v) => v.categoria === cat))
+              )
             )}
           </>
         )}
-
-        <div style={{ textAlign: 'center', marginTop: '2rem' }}>
-          <button
-            className="button-primary"
-            onClick={() => navigate('/restaurants')}
-            style={{ backgroundColor: '#000', color: '#fff', padding: '0.75rem 1.5rem', borderRadius: '0.5rem' }}
-          >
-            Volver a restaurantes
-          </button>
-        </div>
       </div>
     </div>
   );
 }
+
+const tabStyle = {
+  padding: '0.5rem 1rem',
+  borderRadius: '0.5rem',
+  backgroundColor: '#fff',
+  border: '1px solid #aaa',
+  cursor: 'pointer',
+  fontWeight: 'bold',
+};
+
+const activeTabStyle = {
+  ...tabStyle,
+  backgroundColor: '#005a8d',
+  color: '#fff',
+  border: '1px solid #005a8d',
+};
+
+const thStyle = {
+  padding: '0.75rem',
+  textAlign: 'left',
+  backgroundColor: '#f0f0f0',
+  borderBottom: '1px solid #ccc',
+};
+
+const tdStyle = {
+  padding: '0.75rem',
+  borderBottom: '1px solid #e0e0e0',
+};
 
 export default Ranking;
