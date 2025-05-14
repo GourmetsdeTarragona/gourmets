@@ -98,13 +98,48 @@ function Ranking() {
           ) : renderRankingCategorias()
         )}
 
-        {tab === 'vinos' && (
-          vinos.length === 0 ? (
-            <p style={{ textAlign: 'center' }}>No hay datos de vinos.</p>
-          ) : (
-            renderTabla(vinos, ['#', 'Restaurante', 'Vino', 'Media', 'Mi nota'])
-          )
-        )}
+       {tab === 'vinos' && (
+  <>
+    {rankingVinos.length === 0 ? (
+      <p style={{ textAlign: 'center' }}>No hay datos de vinos.</p>
+    ) : (
+      <div style={{
+        background: '#fff',
+        padding: '1.5rem',
+        borderRadius: '1rem',
+        boxShadow: '0 4px 10px rgba(0,0,0,0.1)',
+        marginBottom: '2rem'
+      }}>
+        <h3 style={{ marginBottom: '1rem', color: '#005a8d' }}>Ranking de Vinos</h3>
+        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+          <thead>
+            <tr>
+              <th style={thStyle}>#</th>
+              <th style={thStyle}>Vino</th>
+              <th style={thStyle}>Restaurante</th>
+              <th style={thStyle}>Media</th>
+              <th style={thStyle}>Mi nota</th>
+            </tr>
+          </thead>
+          <tbody>
+            {rankingVinos
+              .sort((a, b) => b.media - a.media)
+              .map((fila, i) => (
+                <tr key={fila.nombre_restaurante + fila.nombre_vino}>
+                  <td style={tdStyle}>{i + 1}</td>
+                  <td style={tdStyle}>{fila.nombre_vino}</td>
+                  <td style={tdStyle}>{fila.nombre_restaurante}</td>
+                  <td style={tdStyle}>{parseFloat(fila.media).toFixed(2)}</td>
+                  <td style={tdStyle}>{fila.personal ? parseFloat(fila.personal).toFixed(2) : '—'}</td>
+                </tr>
+              ))}
+          </tbody>
+        </table>
+      </div>
+    )}
+  </>
+)}
+
 
         <div style={{ textAlign: 'center', marginTop: '2rem' }}>
           <button className="button-primary" onClick={() => navigate('/restaurants')}>
