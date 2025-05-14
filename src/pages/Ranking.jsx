@@ -16,29 +16,17 @@ function Ranking() {
   }, [user]);
 
   const cargarRanking = async () => {
-    const { data: rankingR, error: errorR } = await supabase.rpc(
-      'calcular_ranking_personalizado',
-      { uid: user.id }
-    );
-    const { data: rankingV, error: errorV } = await supabase.rpc(
-      'calcular_ranking_vinos_personalizado',
-      { uid: user.id }
-    );
+    const { data: rankingR } = await supabase.rpc('calcular_ranking_personalizado', { uid: user.id });
+    const { data: rankingV } = await supabase.rpc('calcular_ranking_vinos_personalizado', { uid: user.id });
 
-    if (!errorR) setRankingRestaurantes(rankingR || []);
-    if (!errorV) setRankingVinos(rankingV || []);
+    setRankingRestaurantes(rankingR || []);
+    setRankingVinos(rankingV || []);
   };
 
-  const renderBloqueCategoria = (categoria, datos) => (
-    <div key={categoria} style={{
-      background: '#fff',
-      padding: '1.5rem',
-      borderRadius: '1rem',
-      boxShadow: '0 4px 10px rgba(0,0,0,0.1)',
-      marginBottom: '2rem'
-    }}>
-      <h3 style={{ marginBottom: '1rem', color: '#005a8d' }}>{categoria}</h3>
-      <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+  const renderCategoria = (categoria, datos) => (
+    <div key={categoria} style={categoriaBlockStyle}>
+      <h3 style={categoriaTitleStyle}>{categoria}</h3>
+      <table style={tableStyle}>
         <thead>
           <tr>
             <th style={thStyle}>#</th>
@@ -51,7 +39,7 @@ function Ranking() {
           {datos
             .sort((a, b) => b.media - a.media)
             .map((fila, i) => (
-              <tr key={fila.nombre}>
+              <tr key={`${fila.nombre}-${fila.media}`}>
                 <td style={tdStyle}>{i + 1}</td>
                 <td style={tdStyle}>{fila.nombre}</td>
                 <td style={tdStyle}>{parseFloat(fila.media).toFixed(2)}</td>
@@ -64,78 +52,73 @@ function Ranking() {
   );
 
   return (
-    <div style={{
-      position: 'relative',
-      minHeight: '100vh',
-      backgroundColor: '#d0e4fa',
-      padding: '2rem'
-    }}>
-      <img
-        src={logo}
-        alt="Logo"
-        style={{
-          position: 'absolute',
-          top: '50%',
-          left: '50%',
-          transform: 'translate(-50%, -50%)',
-          opacity: 0.06,
-          width: '60%',
-          zIndex: 0,
-        }}
-      />
+    <div style={backgroundStyle}>
+      <img src={logo} alt="Marca" style={logoStyle} />
 
       <div style={{ position: 'relative', zIndex: 1 }}>
-        <h1 style={{ textAlign: 'center', marginBottom: '2rem' }}>Ranking</h1>
+        <h1 style={tituloStyle}>Ranking</h1>
 
-        <div style={{
-          display: 'flex',
-          justifyContent: 'center',
-          gap: '1rem',
-          marginBottom: '2rem'
-        }}>
-          <button
-            onClick={() => setTab('restaurantes')}
-            style={tab === 'restaurantes' ? activeTabStyle : tabStyle}
-          >
+        <div style={tabContainerStyle}>
+          <button onClick={() => setTab('restaurantes')} style={tab === 'restaurantes' ? activeTab : tabBase}>
             Restaurantes
           </button>
-          <button
-            onClick={() => setTab('vinos')}
-            style={tab === 'vinos' ? activeTabStyle : tabStyle}
-          >
+          <button onClick={() => setTab('vinos')} style={tab === 'vinos' ? activeTab : tabBase}>
             Vinos
           </button>
         </div>
 
-        {tab === 'restaurantes' && (
-          <>
-            {rankingRestaurantes.length === 0 ? (
-              <p style={{ textAlign: 'center' }}>No hay datos disponibles.</p>
-            ) : (
-              [...new Set(rankingRestaurantes.map((r) => r.categoria))].map((cat) =>
-                renderBloqueCategoria(cat, rankingRestaurantes.filter((r) => r.categoria === cat))
-              )
-            )}
-          </>
-        )}
+        {tab === 'restaurantes' &&
+          (rankingRestaurantes.length === 0 ? (
+            <p style={noDataStyle}>No hay datos disponibles.</p>
+          ) : (
+            [...new Set(rankingRestaurantes.map((r) => r.categoria))].map((cat) =>
+              renderCategoria(cat, rankingRestaurantes.filter((r) => r.categoria === cat))
+            )
+          ))}
 
-        {tab === 'vinos' && (
-          <>
-            {rankingVinos.length === 0 ? (
-              <p style={{ textAlign: 'center' }}>No hay datos de vinos.</p>
-            ) : (
-              [...new Set(rankingVinos.map((v) => v.categoria))].map((cat) =>
-                renderBloqueCategoria(cat, rankingVinos.filter((v) => v.categoria === cat))
-              )
-            )}
-          </>
-        )}
+        {tab === 'vinos' &&
+          (rankingVinos.length === 0 ? (
+            <p style={noDataStyle}>No hay datos disponibles.</p>
+          ) : (
+            [...new Set(rankingVinos.map((v) => v.categoria))].map((cat) =>
+              renderCategoria(cat, rankingVinos.filter((v) => v.categoria === cat))
+            )
+          ))}
       </div>
     </div>
   );
 }
 
-const tabStyle = {
+const backgroundStyle = {
+  position: 'relative',
+  minHeight: '100vh',
+  backgroundColor: '#d0e4fa',
+  padding: '2rem',
+};
+
+const logoStyle = {
+  position: 'absolute',
+  top: '50%',
+  left: '50%',
+  transform: 'translate(-50%, -50%)',
+  opacity: 0.06,
+  width: '60%',
+  zIndex: 0,
+};
+
+const tituloStyle = {
+  textAlign: 'center',
+  marginBottom: '2rem',
+};
+
+const tabContainerStyle = {
+  display: 'flex',
+  justifyContent: 'center',
+  gap: '1rem',
+  marginBottom: '2rem',
+};
+
+const tabBase = {
   padding: '0.5rem 1rem',
   borderRadius: '0.5rem',
   backgroundColor: '#fff',
@@ -144,11 +127,34 @@ const tabStyle = {
   fontWeight: 'bold',
 };
 
-const activeTabStyle = {
-  ...tabStyle,
+const activeTab = {
+  ...tabBase,
   backgroundColor: '#005a8d',
   color: '#fff',
   border: '1px solid #005a8d',
+};
+
+const noDataStyle = {
+  textAlign: 'center',
+  fontSize: '1rem',
+};
+
+const categoriaBlockStyle = {
+  background: '#fff',
+  padding: '1.5rem',
+  borderRadius: '1rem',
+  boxShadow: '0 4px 10px rgba(0,0,0,0.1)',
+  marginBottom: '2rem',
+};
+
+const categoriaTitleStyle = {
+  marginBottom: '1rem',
+  color: '#005a8d',
+};
+
+const tableStyle = {
+  width: '100%',
+  borderCollapse: 'collapse',
 };
 
 const thStyle = {
