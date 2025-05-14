@@ -18,7 +18,7 @@ function Ranking() {
   }, [user]);
 
   const fetchRankingRestaurantes = async () => {
-    const { data, error } = await supabase.rpc('calcular_ranking_personalizado', {
+    const { data, error } = await supabase.rpc('calcular_ranking_personalizado_v2', {
       uid: user.id,
     });
     if (!error) setRestaurantes(data);
@@ -26,7 +26,7 @@ function Ranking() {
   };
 
   const fetchRankingVinos = async () => {
-    const { data, error } = await supabase.rpc('ranking_vinos');
+    const { data, error } = await supabase.rpc('ranking_vinos_v2');
     if (!error) setVinos(data);
     else console.error('Error ranking vinos:', error.message);
   };
