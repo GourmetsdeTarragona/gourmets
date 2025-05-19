@@ -63,6 +63,9 @@ function RestaurantVoting() {
 
   const handleVoteChange = (categoriaId, valor) => {
     setPuntuaciones((prev) => ({ ...prev, [categoriaId]: valor }));
+    const sonido = new Audio('/ding-voto.mp3');
+    sonido.volume = 0.3;
+    sonido.play();
   };
 
   const handleSubmit = async (e) => {
@@ -83,6 +86,10 @@ function RestaurantVoting() {
     }));
 
     const { error } = await supabase.from('votaciones').insert(votos);
+
+    const aplauso = new Audio('/aplausos-final.mp3');
+    aplauso.volume = 0.6;
+    aplauso.play();
 
     if (!error) {
       setConfirmacion('¡Gracias por votar! Redirigiendo al ranking...');
@@ -164,7 +171,7 @@ function RestaurantVoting() {
                 {categoria.nombre}
               </h4>
               <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'center' }}>
-                {[5, 6, 7, 8, 9, 10].map((valor) => (
+                {[1, 2, 3, 4, 5].map((valor) => (
                   <label key={valor} style={{ textAlign: 'center' }}>
                     <input
                       type="radio"
@@ -179,6 +186,10 @@ function RestaurantVoting() {
                         fontSize: '2rem',
                         color: puntuaciones[categoria.id] >= valor ? '#FFD700' : '#ccc',
                         cursor: 'pointer',
+                        display: 'inline-block',
+                        transform:
+                          puntuaciones[categoria.id] === valor ? 'scale(1.3)' : 'scale(1)',
+                        transition: 'transform 0.2s ease',
                       }}
                     >
                       ★
@@ -202,6 +213,7 @@ function RestaurantVoting() {
               border: 'none',
               fontSize: '1rem',
               cursor: 'pointer',
+              marginTop: '1rem',
             }}
           >
             Enviar votación
