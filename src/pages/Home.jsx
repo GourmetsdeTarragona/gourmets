@@ -44,45 +44,43 @@ function Home() {
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
-        justifyContent: 'flex-start',
-        padding: '2rem 1rem',
+        padding: '2rem 1rem 0 1rem',
       }}
     >
-      {/* Logo fuera del contenedor */}
+      {/* Logo sin borde, centrado arriba */}
       <img
         src={logo}
         alt="Logo"
         style={{
           width: '100px',
-          marginBottom: '1.5rem',
           marginTop: '1rem',
+          marginBottom: '1.5rem',
+          objectFit: 'contain',
         }}
       />
 
-      {/* Contenedor blanco principal */}
+      {/* Contenedor blanco que ocupa toda la altura restante */}
       <div
         style={{
           backgroundColor: '#fff',
-          padding: '2rem 1.5rem',
-          borderRadius: '1.5rem',
+          flex: 1,
           width: '100%',
           maxWidth: '400px',
-          textAlign: 'center',
-          boxShadow: '0 8px 20px rgba(0,0,0,0.2)',
+          borderTopLeftRadius: '2rem',
+          borderTopRightRadius: '2rem',
+          padding: '2rem 1.5rem',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'flex-start',
+          boxShadow: '0 -4px 20px rgba(0,0,0,0.15)',
         }}
       >
-        <h2
-          style={{
-            marginBottom: '1.5rem',
-            fontSize: '1.5rem',
-            fontWeight: '700',
-            color: '#222',
-          }}
-        >
+        <h2 style={{ marginBottom: '1.5rem', fontSize: '1.5rem', fontWeight: '700', color: '#222' }}>
           Iniciar sesión
         </h2>
 
-        <form onSubmit={handleLogin}>
+        <form onSubmit={handleLogin} style={{ width: '100%' }}>
           <input
             type="email"
             placeholder="Correo electrónico"
@@ -110,20 +108,9 @@ function Home() {
 
         {errorMsg && <p style={{ color: 'red', marginTop: '1rem' }}>{errorMsg}</p>}
 
-        <div style={{ marginTop: '2rem' }}>
-          <div
-            style={{
-              backgroundColor: '#f5f5f5',
-              padding: '0.8rem 1rem',
-              borderRadius: '0.75rem',
-              fontSize: '0.95rem',
-              display: 'inline-block',
-              cursor: 'pointer',
-              boxShadow: '0 2px 5px rgba(0,0,0,0.1)',
-            }}
-          >
-            <GastroniaChatbot modoForzado="publico" />
-          </div>
+        {/* Chatbot compacto, bajo el botón */}
+        <div style={{ marginTop: '1.5rem', width: '100%', maxWidth: '320px' }}>
+          <GastroniaChatbot modoForzado="publico" />
         </div>
       </div>
     </div>
@@ -166,4 +153,3 @@ const estiloBotonSecundario = {
 };
 
 export default Home;
-
