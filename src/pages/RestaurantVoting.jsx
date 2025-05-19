@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { useUser } from '../contexts/UserContext';
 import ConfirmationMessage from '../components/ConfirmationMessage';
+import GastroniaChatbot from '../components/GastroniaChatbot'; // 🟡 Chatbot añadido
 import logo from '/logo.png';
 
 function RestaurantVoting() {
@@ -18,7 +19,6 @@ function RestaurantVoting() {
   const [confirmacion, setConfirmacion] = useState('');
   const [imagenes, setImagenes] = useState([]);
 
-  // 🔓 Desbloquear contexto de audio en móviles
   useEffect(() => {
     const desbloquearSonido = () => {
       const audio = new Audio();
@@ -243,6 +243,11 @@ function RestaurantVoting() {
             <ConfirmationMessage message={confirmacion} />
           </div>
         )}
+
+        {/* 🟡 Chatbot insertado aquí */}
+        <div style={{ marginTop: '2rem' }}>
+          <GastroniaChatbot />
+        </div>
       </div>
     </div>
   );
@@ -279,3 +284,4 @@ const miniBoton = {
 };
 
 export default RestaurantVoting;
+
