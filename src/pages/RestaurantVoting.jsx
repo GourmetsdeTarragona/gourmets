@@ -64,7 +64,7 @@ function RestaurantVoting() {
   const handleVoteChange = (categoriaId, valor) => {
     setPuntuaciones((prev) => ({ ...prev, [categoriaId]: valor }));
     const sonido = new Audio('/ding-voto.mp3');
-    sonido.volume = 0.3;
+    sonido.volume = 3.0;
     sonido.play();
   };
 
@@ -88,7 +88,7 @@ function RestaurantVoting() {
     const { error } = await supabase.from('votaciones').insert(votos);
 
     const aplauso = new Audio('/aplausos-final.mp3');
-    aplauso.volume = 0.6;
+    aplauso.volume = 3.0;
     aplauso.play();
 
     if (!error) {
