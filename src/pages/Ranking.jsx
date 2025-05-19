@@ -3,6 +3,7 @@ import { supabase } from '../lib/supabase';
 import { useUser } from '../contexts/UserContext';
 import logo from '/logo.png';
 import { useNavigate } from 'react-router-dom';
+import GastroniaChatbot from '../components/GastroniaChatbot'; // 🟡 Chatbot añadido
 
 function Ranking() {
   const { user } = useUser();
@@ -140,6 +141,11 @@ function Ranking() {
             Volver a restaurantes
           </button>
         </div>
+
+        {/* 🟡 Chatbot insertado aquí */}
+        <div style={{ marginTop: '2rem' }}>
+          <GastroniaChatbot />
+        </div>
       </div>
     </div>
   );
@@ -192,4 +198,5 @@ const tituloCat = {
 };
 
 export default Ranking;
+
 
