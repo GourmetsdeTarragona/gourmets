@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { useUser } from '../contexts/UserContext';
 import ConfirmationMessage from '../components/ConfirmationMessage';
+import logoMarcaAgua from '/logo.png';
 
 function RestaurantVoting() {
   const { restaurantId } = useParams();
@@ -96,40 +97,23 @@ function RestaurantVoting() {
   if (yaVotado) return <p className="container">Ya has votado. Puedes ver los resultados en el ranking.</p>;
 
   return (
-    <div
-      style={{
-        minHeight: '100vh',
-        backgroundImage: 'url(/logo.png)',
-        backgroundRepeat: 'no-repeat',
-        backgroundPosition: 'center',
-        backgroundSize: 'contain',
-        backgroundColor: '#d0e4fa',
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'flex-start',
-        padding: '2rem',
-      }}
-    >
-      <div
-        style={{
-          backgroundColor: 'rgba(255,255,255,0.95)',
-          padding: '2rem',
-          borderRadius: '1rem',
-          width: '100%',
-          maxWidth: '700px',
-          boxShadow: '0 8px 20px rgba(0,0,0,0.2)',
-        }}
-      >
-        <h2 style={{ marginBottom: '1rem' }}>Votación: {restaurant.nombre}</h2>
+    <div className="min-h-screen bg-[#d0e4fa] flex items-center justify-center relative px-4 py-8">
+      <img
+        src={logoMarcaAgua}
+        alt="Fondo logo"
+        className="absolute inset-0 mx-auto my-auto w-[60%] opacity-10 object-contain pointer-events-none"
+      />
 
-        <div style={{ display: 'flex', gap: '1rem', marginBottom: '1.5rem', flexWrap: 'wrap' }}>
+      <div className="relative bg-white bg-opacity-95 rounded-2xl p-6 shadow-xl max-w-2xl w-full z-10">
+        <h2 className="text-2xl font-semibold mb-4 text-center">Votación: {restaurant.nombre}</h2>
+
+        <div className="flex flex-wrap gap-4 justify-center mb-6">
           {restaurant.carta_url && (
             <a
               href={restaurant.carta_url}
               target="_blank"
               rel="noreferrer"
-              className="button-primary"
-              style={{ padding: '0.5rem 1rem' }}
+              className="px-4 py-2 bg-blue-600 text-white rounded-xl shadow-md hover:bg-blue-700"
             >
               Ver Carta
             </a>
@@ -139,8 +123,7 @@ function RestaurantVoting() {
               href={restaurant.minuta_url}
               target="_blank"
               rel="noreferrer"
-              className="button-primary"
-              style={{ padding: '0.5rem 1rem' }}
+              className="px-4 py-2 bg-blue-600 text-white rounded-xl shadow-md hover:bg-blue-700"
             >
               Ver Minuta
             </a>
@@ -148,13 +131,13 @@ function RestaurantVoting() {
         </div>
 
         {imagenes.length > 0 && (
-          <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.5rem', flexWrap: 'wrap' }}>
+          <div className="flex flex-wrap gap-2 justify-center mb-6">
             {imagenes.map((img) => (
               <img
                 key={img.name}
                 src={`https://redojogbxdtqxqzxvyhp.supabase.co/storage/v1/object/public/imagenes/${restaurantId}/${img.name}`}
                 alt={img.name}
-                style={{ width: '120px', height: '80px', objectFit: 'cover', borderRadius: '0.5rem' }}
+                className="w-28 h-20 object-cover rounded-md shadow-sm"
               />
             ))}
           </div>
@@ -162,36 +145,36 @@ function RestaurantVoting() {
 
         <form onSubmit={handleSubmit}>
           {categorias.map((categoria) => (
-            <div key={categoria.id} style={{ marginBottom: '2rem' }}>
-              <h4 style={{ marginBottom: '1rem' }}>{categoria.nombre}</h4>
-              <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'center' }}>
+            <div key={categoria.id} className="mb-8">
+              <h4 className="text-lg font-medium mb-2 text-center">{categoria.nombre}</h4>
+              <div className="flex justify-center gap-2">
                 {[5, 6, 7, 8, 9, 10].map((valor) => (
-                  <label key={valor} style={{ textAlign: 'center' }}>
+                  <label key={valor} className="text-center cursor-pointer">
                     <input
                       type="radio"
                       name={`categoria-${categoria.id}`}
                       value={valor}
                       checked={puntuaciones[categoria.id] === valor}
                       onChange={() => handleVoteChange(categoria.id, valor)}
-                      style={{ display: 'none' }}
+                      className="hidden"
                     />
                     <span
-                      style={{
-                        fontSize: '2rem',
-                        color: puntuaciones[categoria.id] >= valor ? '#FFD700' : '#ccc',
-                        cursor: 'pointer',
-                      }}
+                      className="text-3xl"
+                      style={{ color: puntuaciones[categoria.id] >= valor ? '#FFD700' : '#ccc' }}
                     >
                       ★
                     </span>
-                    <div style={{ fontSize: '0.8rem' }}>{valor}</div>
+                    <div className="text-sm">{valor}</div>
                   </label>
                 ))}
               </div>
             </div>
           ))}
 
-          <button type="submit" className="button-primary" style={{ width: '100%' }}>
+          <button
+            type="submit"
+            className="w-full mt-4 py-2 bg-green-600 text-white font-semibold rounded-xl shadow hover:bg-green-700"
+          >
             Enviar votación
           </button>
         </form>
@@ -203,3 +186,4 @@ function RestaurantVoting() {
 }
 
 export default RestaurantVoting;
+
