@@ -42,29 +42,39 @@ function Home() {
         minHeight: '100vh',
         backgroundColor: '#0070b8',
         display: 'flex',
+        flexDirection: 'column',
         alignItems: 'center',
-        justifyContent: 'center',
-        padding: '2rem',
+        justifyContent: 'flex-start',
+        padding: '2rem 1rem',
       }}
     >
+      {/* Logo fuera del contenedor */}
+      <img
+        src={logo}
+        alt="Logo"
+        style={{
+          width: '100px',
+          marginBottom: '1.5rem',
+          marginTop: '1rem',
+        }}
+      />
+
+      {/* Contenedor blanco principal */}
       <div
         style={{
           backgroundColor: '#fff',
-          padding: '2rem',
+          padding: '2rem 1.5rem',
           borderRadius: '1.5rem',
-          maxWidth: '380px',
           width: '100%',
+          maxWidth: '400px',
           textAlign: 'center',
           boxShadow: '0 8px 20px rgba(0,0,0,0.2)',
-          transition: 'all 0.3s ease',
         }}
       >
-        <img src={logo} alt="Logo" style={{ width: '110px', marginBottom: '2rem' }} />
-
         <h2
           style={{
             marginBottom: '1.5rem',
-            fontSize: '1.6rem',
+            fontSize: '1.5rem',
             fontWeight: '700',
             color: '#222',
           }}
@@ -79,7 +89,7 @@ function Home() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
-            style={inputStyle}
+            style={estiloInput}
           />
           <input
             type="password"
@@ -87,14 +97,14 @@ function Home() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
-            style={inputStyle}
+            style={estiloInput}
           />
-          <button type="submit" style={botonPrimario}>
+          <button type="submit" style={estiloBotonPrimario}>
             Entrar
           </button>
         </form>
 
-        <button onClick={() => navigate('/ranking')} style={botonSecundario}>
+        <button onClick={() => navigate('/ranking')} style={estiloBotonSecundario}>
           Explorar como invitado
         </button>
 
@@ -120,7 +130,8 @@ function Home() {
   );
 }
 
-const inputStyle = {
+// Estilos reutilizables
+const estiloInput = {
   width: '100%',
   padding: '0.75rem',
   marginBottom: '1rem',
@@ -130,7 +141,7 @@ const inputStyle = {
   transition: 'border 0.3s',
 };
 
-const botonPrimario = {
+const estiloBotonPrimario = {
   backgroundColor: '#0070b8',
   color: '#fff',
   padding: '0.75rem',
@@ -143,7 +154,7 @@ const botonPrimario = {
   transition: 'background 0.3s',
 };
 
-const botonSecundario = {
+const estiloBotonSecundario = {
   backgroundColor: '#f1f1f1',
   border: '1px solid #ccc',
   padding: '0.75rem',
@@ -155,3 +166,4 @@ const botonSecundario = {
 };
 
 export default Home;
+
