@@ -18,6 +18,16 @@ function RestaurantVoting() {
   const [confirmacion, setConfirmacion] = useState('');
   const [imagenes, setImagenes] = useState([]);
 
+  // 🔓 Desbloquear contexto de audio en móviles
+  useEffect(() => {
+    const desbloquearSonido = () => {
+      const audio = new Audio();
+      audio.play().catch(() => {});
+      document.removeEventListener('click', desbloquearSonido);
+    };
+    document.addEventListener('click', desbloquearSonido);
+  }, []);
+
   useEffect(() => {
     if (!user) return;
 
@@ -61,11 +71,15 @@ function RestaurantVoting() {
     cargarDatos();
   }, [restaurantId, user]);
 
-  const handleVoteChange = (categoriaId, valor) => {
+  const handleVoteChange = async (categoriaId, valor) => {
     setPuntuaciones((prev) => ({ ...prev, [categoriaId]: valor }));
-    const sonido = new Audio('/ding-voto.mp3');
-    sonido.volume = 3.0;
-    sonido.play();
+    try {
+      const audio = new Audio('/ding-voto.mp3');
+      audio.volume = 0.3;
+      await audio.play();
+    } catch (e) {
+      console.log('No se pudo reproducir sonido:', e);
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -85,11 +99,15 @@ function RestaurantVoting() {
       valor: puntuaciones[cat.id],
     }));
 
-    const { error } = await supabase.from('votaciones').insert(votos);
+    try {
+      const aplausos = new Audio('/aplausos-final.mp3');
+      aplausos.volume = 0.6;
+      await aplausos.play();
+    } catch (e) {
+      console.log('No se pudo reproducir aplausos:', e);
+    }
 
-    const aplauso = new Audio('/aplausos-final.mp3');
-    aplauso.volume = 3.0;
-    aplauso.play();
+    const { error } = await supabase.from('votaciones').insert(votos);
 
     if (!error) {
       setConfirmacion('¡Gracias por votar! Redirigiendo al ranking...');
@@ -261,4 +279,3 @@ const miniBoton = {
 };
 
 export default RestaurantVoting;
-
