@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { useUser } from '../contexts/UserContext';
 import logo from '/logo.png';
+import GastroniaChatbot from '../components/GastroniaChatbot'; // ⬅️ NUEVO
 
 function Restaurants() {
   const { user } = useUser();
@@ -65,18 +66,16 @@ function Restaurants() {
         padding: '2rem 1rem 0 1rem',
       }}
     >
-      {/* Logo centrado */}
       <img
         src={logo}
         alt="Logo"
         style={{ width: '140px', marginBottom: '1.5rem', objectFit: 'contain' }}
       />
 
-      {/* Contenedor blanco */}
       <div
         style={{
           backgroundColor: '#fff',
-          height: '85vh',
+          height: 'auto',
           width: '100%',
           maxWidth: '420px',
           borderTopLeftRadius: '2rem',
@@ -85,7 +84,6 @@ function Restaurants() {
           boxShadow: '0 -4px 20px rgba(0,0,0,0.15)',
           display: 'flex',
           flexDirection: 'column',
-          overflowY: 'auto',
         }}
       >
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -198,6 +196,11 @@ function Restaurants() {
               );
             })
           )}
+        </div>
+
+        {/* ⬇️ Chatbot insertado aquí */}
+        <div style={{ marginTop: '2rem' }}>
+          <GastroniaChatbot />
         </div>
       </div>
     </div>
