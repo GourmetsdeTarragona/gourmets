@@ -47,23 +47,23 @@ function Home() {
         padding: '2rem 1rem 0 1rem',
       }}
     >
-      {/* Logo grande y centrado arriba */}
+      {/* Logo más grande */}
       <img
         src={logo}
         alt="Logo"
         style={{
-          width: '120px',
+          width: '140px',
           marginTop: '1rem',
           marginBottom: '1.5rem',
           objectFit: 'contain',
         }}
       />
 
-      {/* Contenedor blanco ajustado (más bajo) */}
+      {/* Contenedor blanco más bajo */}
       <div
         style={{
           backgroundColor: '#fff',
-          height: '60vh',
+          height: '55vh',
           width: '100%',
           maxWidth: '400px',
           borderTopLeftRadius: '2rem',
@@ -109,15 +109,17 @@ function Home() {
 
         {errorMsg && <p style={{ color: 'red', marginTop: '1rem' }}>{errorMsg}</p>}
 
-        {/* Chatbot centrado horizontalmente, parte inferior */}
+        {/* Chatbot centrado abajo */}
         <div
           style={{
             position: 'absolute',
             bottom: '1rem',
             left: '50%',
             transform: 'translateX(-50%)',
-            maxWidth: '320px',
             width: '90%',
+            maxWidth: '320px',
+            display: 'flex',
+            justifyContent: 'center',
           }}
         >
           <GastroniaChatbot modoForzado="publico" />
