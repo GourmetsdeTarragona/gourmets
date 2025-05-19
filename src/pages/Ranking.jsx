@@ -65,22 +65,38 @@ function Ranking() {
   };
 
   return (
-    <div style={{ minHeight: '100vh', backgroundColor: '#d0e4fa', padding: '2rem', position: 'relative' }}>
-      <img src={logo} alt="logo" style={{
-        position: 'absolute',
-        top: '50%',
-        left: '50%',
-        transform: 'translate(-50%, -50%)',
-        opacity: 0.06,
-        width: '60%',
-        zIndex: 0
-      }} />
-      <div style={{ position: 'relative', zIndex: 1 }}>
-        <h1 style={{ textAlign: 'center', marginBottom: '2rem' }}>Ranking</h1>
+    <div
+      style={{
+        minHeight: '100dvh',
+        backgroundColor: '#0070b8',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        padding: '2rem 1rem 0 1rem',
+      }}
+    >
+      <img src={logo} alt="Logo" style={{ width: '140px', marginBottom: '1.5rem' }} />
 
-        <div style={{ display: 'flex', justifyContent: 'center', gap: '1rem', marginBottom: '2rem' }}>
+      <div
+        style={{
+          backgroundColor: '#fff',
+          width: '100%',
+          maxWidth: '420px',
+          borderTopLeftRadius: '2rem',
+          borderTopRightRadius: '2rem',
+          padding: '2rem 1.5rem',
+          boxShadow: '0 -4px 20px rgba(0,0,0,0.15)',
+          flexGrow: 1,
+          overflowY: 'auto',
+        }}
+      >
+        <h2 style={{ textAlign: 'center', fontSize: '1.4rem', fontWeight: '700', marginBottom: '1.5rem' }}>
+          Ranking
+        </h2>
+
+        <div style={{ display: 'flex', justifyContent: 'center', gap: '0.5rem', marginBottom: '2rem' }}>
           <button onClick={() => setTab('general')} style={tab === 'general' ? activeTab : tabStyle}>🏆 General</button>
-          <button onClick={() => setTab('categorias')} style={tab === 'categorias' ? activeTab : tabStyle}>📊 Por Categorías</button>
+          <button onClick={() => setTab('categorias')} style={tab === 'categorias' ? activeTab : tabStyle}>📊 Categorías</button>
           <button onClick={() => setTab('vinos')} style={tab === 'vinos' ? activeTab : tabStyle}>🍷 Vinos</button>
         </div>
 
@@ -107,7 +123,20 @@ function Ranking() {
         )}
 
         <div style={{ textAlign: 'center', marginTop: '2rem' }}>
-          <button className="button-primary" onClick={() => navigate('/restaurants')}>
+          <button
+            style={{
+              width: '100%',
+              height: '48px',
+              backgroundColor: '#0070b8',
+              color: '#fff',
+              fontWeight: 'bold',
+              borderRadius: '0.5rem',
+              border: 'none',
+              fontSize: '1rem',
+              cursor: 'pointer',
+            }}
+            onClick={() => navigate('/restaurants')}
+          >
             Volver a restaurantes
           </button>
         </div>
@@ -117,12 +146,13 @@ function Ranking() {
 }
 
 const tabStyle = {
-  padding: '0.5rem 1rem',
+  padding: '0.5rem 0.9rem',
   borderRadius: '0.5rem',
   backgroundColor: '#fff',
   border: '1px solid #aaa',
   cursor: 'pointer',
   fontWeight: 'bold',
+  fontSize: '0.9rem',
 };
 
 const activeTab = {
@@ -133,28 +163,34 @@ const activeTab = {
 };
 
 const thStyle = {
-  padding: '0.75rem',
+  padding: '0.6rem',
   textAlign: 'left',
-  backgroundColor: '#f0f0f0',
+  backgroundColor: '#f5f5f5',
   borderBottom: '1px solid #ccc',
+  fontSize: '0.9rem',
 };
 
 const tdStyle = {
-  padding: '0.75rem',
+  padding: '0.6rem',
   borderBottom: '1px solid #e0e0e0',
+  fontSize: '0.9rem',
 };
 
 const bloqueStyle = {
   background: '#fff',
   padding: '1.5rem',
   borderRadius: '1rem',
-  boxShadow: '0 4px 10px rgba(0,0,0,0.1)',
+  boxShadow: '0 4px 10px rgba(0,0,0,0.05)',
   marginBottom: '2rem',
 };
 
 const tituloCat = {
   marginBottom: '1rem',
   color: '#005a8d',
+  fontSize: '1rem',
+  fontWeight: '600',
 };
+
+export default Ranking;
 
 export default Ranking;
