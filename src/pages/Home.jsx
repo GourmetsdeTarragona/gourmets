@@ -161,3 +161,5 @@ const estiloBotonSecundario = {
   cursor: 'pointer',
   transition: 'all 0.3s',
 };
+
+export default Home;
