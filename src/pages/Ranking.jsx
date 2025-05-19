@@ -193,4 +193,3 @@ const tituloCat = {
 
 export default Ranking;
 
-export default Ranking;
