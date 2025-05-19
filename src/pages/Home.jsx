@@ -47,23 +47,23 @@ function Home() {
         padding: '2rem 1rem 0 1rem',
       }}
     >
-      {/* Logo sin borde, centrado arriba */}
+      {/* Logo grande y centrado arriba */}
       <img
         src={logo}
         alt="Logo"
         style={{
-          width: '100px',
+          width: '120px',
           marginTop: '1rem',
           marginBottom: '1.5rem',
           objectFit: 'contain',
         }}
       />
 
-      {/* Contenedor blanco que ocupa toda la altura restante */}
+      {/* Contenedor blanco ajustado (más bajo) */}
       <div
         style={{
           backgroundColor: '#fff',
-          flex: 1,
+          height: '60vh',
           width: '100%',
           maxWidth: '400px',
           borderTopLeftRadius: '2rem',
@@ -74,6 +74,7 @@ function Home() {
           alignItems: 'center',
           justifyContent: 'flex-start',
           boxShadow: '0 -4px 20px rgba(0,0,0,0.15)',
+          position: 'relative',
         }}
       >
         <h2 style={{ marginBottom: '1.5rem', fontSize: '1.5rem', fontWeight: '700', color: '#222' }}>
@@ -108,8 +109,17 @@ function Home() {
 
         {errorMsg && <p style={{ color: 'red', marginTop: '1rem' }}>{errorMsg}</p>}
 
-        {/* Chatbot compacto, bajo el botón */}
-        <div style={{ marginTop: '1.5rem', width: '100%', maxWidth: '320px' }}>
+        {/* Chatbot centrado horizontalmente, parte inferior */}
+        <div
+          style={{
+            position: 'absolute',
+            bottom: '1rem',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            maxWidth: '320px',
+            width: '90%',
+          }}
+        >
           <GastroniaChatbot modoForzado="publico" />
         </div>
       </div>
@@ -151,5 +161,3 @@ const estiloBotonSecundario = {
   cursor: 'pointer',
   transition: 'all 0.3s',
 };
-
-export default Home;
