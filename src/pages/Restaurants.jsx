@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { useUser } from '../contexts/UserContext';
-import logoMarcaAgua from '/logo.png';
+import logo from '/logo.png';
 
 function Restaurants() {
   const { user } = useUser();
@@ -56,55 +56,64 @@ function Restaurants() {
 
   return (
     <div
-      className="container"
       style={{
-        position: 'relative',
-        paddingTop: '2rem',
-        backgroundColor: '#d0e4fa',
-        minHeight: '100vh',
+        minHeight: '100dvh',
+        backgroundColor: '#0070b8',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        padding: '2rem 1rem 0 1rem',
       }}
     >
+      {/* Logo centrado */}
       <img
-        src={logoMarcaAgua}
-        alt="Marca de agua"
-        style={{
-          position: 'fixed',
-          opacity: 0.08,
-          zIndex: 0,
-          width: '60%',
-          top: '25%',
-          left: '20%',
-          pointerEvents: 'none',
-        }}
+        src={logo}
+        alt="Logo"
+        style={{ width: '140px', marginBottom: '1.5rem', objectFit: 'contain' }}
       />
 
-      <div style={{ position: 'relative', zIndex: 2 }}>
+      {/* Contenedor blanco */}
+      <div
+        style={{
+          backgroundColor: '#fff',
+          height: '85vh',
+          width: '100%',
+          maxWidth: '420px',
+          borderTopLeftRadius: '2rem',
+          borderTopRightRadius: '2rem',
+          padding: '2rem 1.5rem',
+          boxShadow: '0 -4px 20px rgba(0,0,0,0.15)',
+          display: 'flex',
+          flexDirection: 'column',
+          overflowY: 'auto',
+        }}
+      >
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <h1 style={{ marginBottom: '2rem', fontSize: '2rem', color: '#222' }}>
-            Restaurantes disponibles
-          </h1>
+          <h2 style={{ fontSize: '1.4rem', fontWeight: '700', color: '#222' }}>
+            Restaurantes
+          </h2>
           <button
-            className="button-primary"
             onClick={handleRanking}
             style={{
               backgroundColor: '#B48C59',
-              padding: '0.5rem 1.25rem',
+              padding: '0.4rem 0.9rem',
               borderRadius: '0.5rem',
               border: 'none',
               fontWeight: 'bold',
               color: '#fff',
               cursor: 'pointer',
+              fontSize: '0.9rem',
             }}
           >
-            Ver Ranking
+            Ver ranking
           </button>
         </div>
 
-        {loading ? (
-          <p>Cargando restaurantes...</p>
-        ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
-            {restaurantes.map((r) => {
+        <div style={{ marginTop: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+          {loading ? (
+            <p>Cargando restaurantes...</p>
+          ) : (
+            restaurantes.map((r) => {
               const yaVotado = votaciones.includes(r.id);
               const puedeVotar = r.asistentes?.includes(user.id);
               const imagenesRest = imagenes[r.id] || [];
@@ -113,89 +122,97 @@ function Restaurants() {
                 <div
                   key={r.id}
                   style={{
-                    background: '#fff',
-                    borderLeft: `6px solid ${yaVotado ? '#28a745' : puedeVotar ? '#ffc107' : '#dee2e6'}`,
+                    backgroundColor: '#f9f9f9',
                     borderRadius: '1rem',
-                    boxShadow: '0 2px 6px rgba(0,0,0,0.1)',
-                    padding: '1.5rem',
+                    padding: '1rem',
+                    boxShadow: '0 1px 4px rgba(0,0,0,0.1)',
+                    borderLeft: `5px solid ${
+                      yaVotado ? '#28a745' : puedeVotar ? '#ffc107' : '#ccc'
+                    }`,
                   }}
                 >
-                  <h2 style={{ marginBottom: '0.5rem', fontSize: '1.4rem' }}>{r.nombre}</h2>
-                  <p style={{ marginBottom: '1rem' }}>
+                  <h3 style={{ marginBottom: '0.5rem', fontSize: '1.1rem', fontWeight: '600' }}>
+                    {r.nombre}
+                  </h3>
+                  <p style={{ fontSize: '0.95rem', marginBottom: '0.5rem' }}>
                     Fecha: {r.fecha ? new Date(r.fecha).toLocaleDateString() : 'Sin asignar'}
                   </p>
 
                   {(r.carta_url || r.minuta_url) && (
-                    <div style={{ display: 'flex', gap: '1rem', marginBottom: '1rem' }}>
+                    <div style={{ display: 'flex', gap: '0.8rem', marginBottom: '0.8rem' }}>
                       {r.carta_url && (
-                        <a
-                          href={r.carta_url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          style={buttonMini}
-                        >
-                          Ver Carta
+                        <a href={r.carta_url} target="_blank" rel="noopener noreferrer" style={miniBoton}>
+                          Carta
                         </a>
                       )}
                       {r.minuta_url && (
-                        <a
-                          href={r.minuta_url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          style={buttonMini}
-                        >
-                          Ver Minuta
+                        <a href={r.minuta_url} target="_blank" rel="noopener noreferrer" style={miniBoton}>
+                          Minuta
                         </a>
                       )}
                     </div>
                   )}
 
                   {imagenesRest.length > 0 && (
-                    <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', marginBottom: '1rem' }}>
+                    <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.8rem' }}>
                       {imagenesRest.slice(0, 3).map((img) => (
                         <img
                           key={img.name}
                           src={`https://redojogbxdtqxqzxvyhp.supabase.co/storage/v1/object/public/imagenes/${r.id}/${img.name}`}
                           alt={img.name}
-                          style={{ width: '80px', height: '60px', objectFit: 'cover', borderRadius: '0.5rem' }}
+                          style={{
+                            width: '70px',
+                            height: '55px',
+                            objectFit: 'cover',
+                            borderRadius: '0.4rem',
+                          }}
                         />
                       ))}
                     </div>
                   )}
 
                   <button
-                    className="button-primary"
+                    onClick={() => !yaVotado && puedeVotar && handleVote(r.id)}
+                    disabled={yaVotado || !puedeVotar}
                     style={{
-                      backgroundColor: yaVotado ? '#6c757d' : '#000',
+                      width: '100%',
+                      height: '48px',
+                      backgroundColor: yaVotado
+                        ? '#6c757d'
+                        : puedeVotar
+                        ? '#0070b8'
+                        : '#ccc',
                       color: '#fff',
-                      padding: '0.5rem 1rem',
+                      fontWeight: 'bold',
+                      fontSize: '1rem',
                       border: 'none',
                       borderRadius: '0.5rem',
                       cursor: yaVotado || !puedeVotar ? 'not-allowed' : 'pointer',
                       opacity: yaVotado || !puedeVotar ? 0.6 : 1,
+                      transition: 'all 0.3s',
                     }}
-                    onClick={() => !yaVotado && puedeVotar && handleVote(r.id)}
-                    disabled={yaVotado || !puedeVotar}
                   >
                     {yaVotado ? 'Ya votado' : puedeVotar ? 'Votar' : 'No asististe'}
                   </button>
                 </div>
               );
-            })}
-          </div>
-        )}
+            })
+          )}
+        </div>
       </div>
     </div>
   );
 }
 
-const buttonMini = {
+const miniBoton = {
   backgroundColor: '#B48C59',
   color: '#fff',
   padding: '0.4rem 0.8rem',
   borderRadius: '0.4rem',
   textDecoration: 'none',
   fontWeight: 'bold',
+  fontSize: '0.9rem',
 };
 
 export default Restaurants;
+
