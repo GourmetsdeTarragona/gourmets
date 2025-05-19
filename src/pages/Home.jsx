@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 import logo from '/logo.png';
 import GastroniaChatbot from '../components/GastroniaChatbot';
@@ -9,6 +9,14 @@ function Home() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [errorMsg, setErrorMsg] = useState('');
+
+  useEffect(() => {
+    // Prevención de scroll no deseado
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = 'auto';
+    };
+  }, []);
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -39,7 +47,7 @@ function Home() {
   return (
     <div
       style={{
-        minHeight: '100vh',
+        minHeight: '100dvh',
         backgroundColor: '#0070b8',
         display: 'flex',
         flexDirection: 'column',
@@ -130,38 +138,35 @@ function Home() {
 }
 
 // Estilos reutilizables
-const estiloInput = {
+const cajaBase = {
   width: '100%',
-  padding: '0.75rem',
+  height: '48px',
+  boxSizing: 'border-box',
+  padding: '0 0.75rem',
   marginBottom: '1rem',
   borderRadius: '0.5rem',
-  border: '1px solid #ccc',
   fontSize: '1rem',
-  transition: 'border 0.3s',
+};
+
+const estiloInput = {
+  ...cajaBase,
+  border: '1px solid #ccc',
 };
 
 const estiloBotonPrimario = {
+  ...cajaBase,
   backgroundColor: '#0070b8',
   color: '#fff',
-  padding: '0.75rem',
-  borderRadius: '0.5rem',
   border: 'none',
-  fontSize: '1rem',
-  width: '100%',
   cursor: 'pointer',
   marginBottom: '1rem',
-  transition: 'background 0.3s',
 };
 
 const estiloBotonSecundario = {
+  ...cajaBase,
   backgroundColor: '#f1f1f1',
   border: '1px solid #ccc',
-  padding: '0.75rem',
-  fontSize: '1rem',
-  borderRadius: '0.5rem',
-  width: '100%',
   cursor: 'pointer',
-  transition: 'all 0.3s',
 };
 
 export default Home;
