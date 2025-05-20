@@ -46,7 +46,7 @@ function Home() {
   const explorarComoInvitado = () => {
     localStorage.removeItem('usuario_id');
     localStorage.removeItem('usuario_rol');
-    navigate('/ranking');
+    navigate('/explorar');
     window.location.reload();
   };
 
