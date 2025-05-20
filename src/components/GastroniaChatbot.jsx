@@ -56,9 +56,7 @@ function GastroniaChatbot({ modoForzado }) {
     if (modoForzado) {
       setModo(modoForzado);
     } else if (!user || !user.id) {
-  setModo('publico');
-}
-;
+      setModo('publico');
     } else if (user.rol === 'socio') {
       setModo('socio');
     } else if (user.rol === 'admin') {
