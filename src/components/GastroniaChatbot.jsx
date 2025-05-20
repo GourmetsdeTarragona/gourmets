@@ -3,14 +3,54 @@ import { useUser } from '../contexts/UserContext';
 import avatarGastronia from '/gastronia-avatar-64x64.png';
 import gastroniaCara from '/gastronia-cara.png';
 import gastroniaEntero from '/gastronia-entero.png';
+import { useLocation } from 'react-router-dom';
+
+const RESPUESTAS = {
+  home: [
+    { pregunta: '¿Qué es Gourmets Tarragona?', respuesta: 'Una asociación de apasionados de la gastronomía que votan y premian los mejores restaurantes.' },
+    { pregunta: '¿Quién puede formar parte?', respuesta: 'Cualquier persona con gusto refinado puede unirse, mediante invitación de un socio activo.' },
+    { pregunta: '¿Qué funciones tiene esta app?', respuesta: 'Aquí puedes votar restaurantes, consultar rankings y disfrutar del recorrido gastronómico.' },
+    { pregunta: '¿Quién es Gastronia?', respuesta: 'Soy la diosa protectora de esta experiencia culinaria. Te guiaré siempre que lo necesites.' }
+  ],
+  restaurants: [
+    { pregunta: '¿Cómo sé si puedo votar un restaurante?', respuesta: 'Si estás marcado como asistente, verás el botón “Votar” activo en ese restaurante.' },
+    { pregunta: '¿Por qué no puedo votar en algunos?', respuesta: 'Solo pueden votar los socios que hayan asistido a la cena. Es una regla básica de justicia.' },
+    { pregunta: '¿Qué indican los colores laterales?', respuesta: 'Verde: ya votaste. Amarillo: puedes votar. Gris: no asististe, no puedes votar.' },
+    { pregunta: '¿Dónde están las fotos y menús?', respuesta: 'Cada restaurante muestra su carta, minuta y fotos si están disponibles.' }
+  ],
+  voting: [
+    { pregunta: '¿Qué categorías tengo que votar?', respuesta: 'Cocina, servicio, presentación, originalidad, calidad-precio, ambiente y cantidad. A veces hay categoría de vinos.' },
+    { pregunta: '¿Puedo dejar alguna sin votar?', respuesta: 'No. Debes valorar todas las categorías para enviar tu votación.' },
+    { pregunta: '¿Qué valores puedo dar?', respuesta: 'De 1 a 5 estrellas por categoría. Sé justo pero sincero.' },
+    { pregunta: '¿Puedo cambiar mi voto después?', respuesta: 'No. Solo puedes votar una vez por restaurante, sin posibilidad de modificar.' }
+  ],
+  ranking: [
+    { pregunta: '¿Qué es el ranking general?', respuesta: 'Es la media global de cada restaurante según todos los socios que votaron.' },
+    { pregunta: '¿Qué es el ranking por categorías?', respuesta: 'Se muestra qué restaurante destacó más en cada aspecto: cocina, ambiente, etc.' },
+    { pregunta: '¿Qué es el ranking de vinos?', respuesta: 'Recoge las puntuaciones de las categorías extra relacionadas con vinos servidos.' },
+    { pregunta: '¿Puedo ver mis puntuaciones?', respuesta: 'Sí. Verás tus notas personales junto a la media general para comparar.' }
+  ]
+};
 
 function GastroniaChatbot({ modoForzado }) {
   const { user } = useUser();
+  const location = useLocation();
   const [modo, setModo] = useState('publico');
   const [visible, setVisible] = useState(false);
   const [mostrarGaleria, setMostrarGaleria] = useState(false);
   const [galeriaIndex, setGaleriaIndex] = useState(0);
   const touchStartY = useRef(null);
+  const [chat, setChat] = useState([]);
+
+  const ruta = location.pathname.includes('ranking')
+    ? 'ranking'
+    : location.pathname.includes('vote')
+    ? 'voting'
+    : location.pathname.includes('restaurants')
+    ? 'restaurants'
+    : 'home';
+
+  const preguntas = RESPUESTAS[ruta];
 
   useEffect(() => {
     if (modoForzado) {
@@ -45,7 +85,16 @@ function GastroniaChatbot({ modoForzado }) {
     return () => clearInterval(interval);
   }, [mostrarGaleria]);
 
-  const imagenes = [gastroniaCara, gastroniaEntero];
+  useEffect(() => {
+    let index = 0;
+    const texto = 'Gastronia os escucha…';
+    const interval = setInterval(() => {
+      setChat([{ tipo: 'gastronia', texto: texto.slice(0, index + 1) }]);
+      index++;
+      if (index === texto.length) clearInterval(interval);
+    }, 40);
+    return () => clearInterval(interval);
+  }, [ruta]);
 
   const handleTouchStart = (e) => {
     touchStartY.current = e.touches[0].clientY;
@@ -57,6 +106,16 @@ function GastroniaChatbot({ modoForzado }) {
       setMostrarGaleria(true);
     }
   };
+
+  const handlePregunta = (pregunta) => {
+    const respuesta = preguntas.find((p) => p.pregunta === pregunta)?.respuesta || 'Aún no tengo respuesta para eso.';
+    setChat([
+      { tipo: 'usuario', texto: pregunta },
+      { tipo: 'gastronia', texto: respuesta }
+    ]);
+  };
+
+  const imagenes = [gastroniaCara, gastroniaEntero];
 
   return (
     <div style={{ position: 'fixed', bottom: '1.5rem', right: '1.5rem', zIndex: 99 }}>
@@ -107,47 +166,44 @@ function GastroniaChatbot({ modoForzado }) {
             boxShadow: '0 4px 20px rgba(0,0,0,0.2)',
           }}
         >
-          {modo === 'publico' && (
-            <div>
-              <h3 style={{ marginTop: 0 }}>✨ Bienvenido a Gourmets Tarragona</h3>
-              <p>
-                Somos una asociación apasionada por la alta gastronomía. Cada mes visitamos un restaurante
-                diferente, valoramos su propuesta y compartimos nuestras experiencias.
-              </p>
-              <p>
-                Gastronia, nuestra musa simbólica, será tu guía si decides unirte a esta experiencia gourmet.
-              </p>
-              <p>
-                ¿Quieres formar parte? Inicia sesión si ya eres socio, o contáctanos para descubrir cómo participar.
-              </p>
-            </div>
-          )}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+            {chat.map((msg, i) => (
+              <div
+                key={i}
+                style={{
+                  alignSelf: msg.tipo === 'usuario' ? 'flex-end' : 'flex-start',
+                  backgroundColor: '#fff9e6',
+                  padding: '0.6rem 1rem',
+                  borderRadius: '1rem',
+                  maxWidth: '100%',
+                  boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
+                  fontSize: '0.9rem',
+                }}
+              >
+                {msg.texto}
+              </div>
+            ))}
+          </div>
 
-          {modo === 'socio' && (
-            <div>
-              <h3 style={{ marginTop: 0 }}>🍷 Hola socio gourmet</h3>
-              <p>
-                Recuerda valorar tu experiencia tras cada cena. Puedes hacerlo una sola vez, y tus votos ayudan
-                a construir nuestro ranking gourmet.
-              </p>
-              <p>
-                Puedes ver tus votaciones pasadas, explorar restaurantes visitados y disfrutar del ranking actualizado.
-              </p>
-            </div>
-          )}
-
-          {modo === 'admin' && (
-            <div>
-              <h3 style={{ marginTop: 0 }}>🛠️ Bienvenido, administrador</h3>
-              <p>
-                Aquí podrás gestionar las cenas, los socios asistentes, añadir fotos y configurar las categorías especiales
-                de cada restaurante.
-              </p>
-              <p>
-                Gastronia también te recuerda mantener la experiencia tan elegante como deliciosa 🍽️.
-              </p>
-            </div>
-          )}
+          <div style={{ marginTop: '1rem', display: 'grid', gap: '0.5rem' }}>
+            {preguntas.map((item, i) => (
+              <button
+                key={i}
+                onClick={() => handlePregunta(item.pregunta)}
+                style={{
+                  fontSize: '0.85rem',
+                  padding: '0.4rem 0.8rem',
+                  borderRadius: '0.6rem',
+                  backgroundColor: '#fff1c4',
+                  border: 'none',
+                  fontWeight: 'bold',
+                  cursor: 'pointer',
+                }}
+              >
+                {item.pregunta}
+              </button>
+            ))}
+          </div>
         </div>
       )}
 
@@ -207,3 +263,4 @@ function GastroniaChatbot({ modoForzado }) {
 }
 
 export default GastroniaChatbot;
+
