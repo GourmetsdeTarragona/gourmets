@@ -11,7 +11,6 @@ function Home() {
   const [errorMsg, setErrorMsg] = useState('');
 
   useEffect(() => {
-    // Prevención de scroll no deseado
     document.body.style.overflow = 'hidden';
     return () => {
       document.body.style.overflow = 'auto';
@@ -44,6 +43,13 @@ function Home() {
     window.location.reload();
   };
 
+  const explorarComoInvitado = () => {
+    localStorage.removeItem('usuario_id');
+    localStorage.removeItem('usuario_rol');
+    navigate('/ranking');
+    window.location.reload();
+  };
+
   return (
     <div
       style={{
@@ -55,7 +61,6 @@ function Home() {
         padding: '2rem 1rem 0 1rem',
       }}
     >
-      {/* Logo más grande */}
       <img
         src={logo}
         alt="Logo"
@@ -67,7 +72,6 @@ function Home() {
         }}
       />
 
-      {/* Contenedor blanco más bajo */}
       <div
         style={{
           backgroundColor: '#fff',
@@ -111,13 +115,12 @@ function Home() {
           </button>
         </form>
 
-        <button onClick={() => navigate('/ranking')} style={estiloBotonSecundario}>
+        <button onClick={explorarComoInvitado} style={estiloBotonSecundario}>
           Explorar como invitado
         </button>
 
         {errorMsg && <p style={{ color: 'red', marginTop: '1rem' }}>{errorMsg}</p>}
 
-        {/* Chatbot centrado abajo */}
         <div
           style={{
             position: 'absolute',
@@ -137,7 +140,6 @@ function Home() {
   );
 }
 
-// Estilos reutilizables
 const cajaBase = {
   width: '100%',
   height: '48px',
@@ -170,3 +172,4 @@ const estiloBotonSecundario = {
 };
 
 export default Home;
+
