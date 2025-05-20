@@ -9,7 +9,7 @@ export const UserProvider = ({ children }) => {
     const id = localStorage.getItem('usuario_id');
     const rol = localStorage.getItem('usuario_rol');
     if (id && rol) {
-      setUser({ id, rol });
+      setUser({ id: id.trim(), rol: rol.trim() });
     } else {
       setUser(null);
     }
