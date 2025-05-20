@@ -3,11 +3,14 @@ import Home from './pages/Home';
 import Restaurants from './pages/Restaurants';
 import RestaurantVoting from './pages/RestaurantVoting';
 import Ranking from './pages/Ranking';
+import Explore from './pages/Explore'; // ✅ Nueva pantalla para invitados
+
 import AdminDashboard from './pages/AdminDashboard';
 import RegisterUser from './pages/RegisterUser';
 import CreateRestaurant from './pages/CreateRestaurant';
 import AdminRestaurants from './pages/AdminRestaurants';
 import AdminRestaurantDetail from './pages/AdminRestaurantDetail';
+
 import ProtectedRoute from './components/ProtectedRoute';
 import { UserProvider } from './contexts/UserContext';
 
@@ -16,9 +19,12 @@ function App() {
     <UserProvider>
       <Router>
         <Routes>
+          {/* Rutas públicas */}
           <Route path="/" element={<Home />} />
           <Route path="/ranking" element={<Ranking />} />
+          <Route path="/explorar" element={<Explore />} /> {/* ✅ Nueva ruta para invitados */}
 
+          {/* Rutas protegidas para socios */}
           <Route
             path="/restaurants"
             element={
@@ -36,6 +42,7 @@ function App() {
             }
           />
 
+          {/* Rutas protegidas para administradores */}
           <Route
             path="/admin"
             element={
@@ -83,3 +90,4 @@ function App() {
 }
 
 export default App;
+
