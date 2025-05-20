@@ -55,8 +55,10 @@ function GastroniaChatbot({ modoForzado }) {
   useEffect(() => {
     if (modoForzado) {
       setModo(modoForzado);
-    } else if (!user) {
-      setModo('publico');
+    } else if (!user || !user.id) {
+  setModo('publico');
+}
+;
     } else if (user.rol === 'socio') {
       setModo('socio');
     } else if (user.rol === 'admin') {
