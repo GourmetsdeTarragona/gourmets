@@ -3,7 +3,7 @@ import logo from '/logo.png';
 import GastroniaChatbot from '../components/GastroniaChatbot';
 
 const fondoEvento =
-  'https://fortidelrourell.es/wp-content/uploads/2022/07/Los-Gourmets-de-Tarragona-Forti-del-Rourell-4-2048x1365.jpg';
+  https://redojogbxdtqxqzxvyhp.supabase.co/storage/v1/object/public/imagenes/imagenes/forti-evento.jpg';
 
 function Explorar() {
   const navigate = useNavigate();
