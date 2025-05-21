@@ -78,6 +78,5 @@ function Explorar() {
 
 export default Explorar;
 
-export default Explorar;
 
 
