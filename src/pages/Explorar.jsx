@@ -6,7 +6,6 @@ import GastroniaChatbot from '../components/GastroniaChatbot';
 
 function Explorar() {
   const [top3, setTop3] = useState([]);
-
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -14,15 +13,14 @@ function Explorar() {
       const { data, error } = await supabase.rpc('calcular_ranking_general');
       if (!error) setTop3(data);
     };
+
     cargarTop();
   }, []);
 
   return (
     <div className="min-h-screen bg-blue-100 flex flex-col items-center justify-start p-4">
-      {/* Logo arriba */}
       <img src={logo} alt="Logo" className="w-32 mt-4 mb-2" />
 
-      {/* Contenedor principal */}
       <div className="w-full max-w-3xl bg-white/90 rounded-2xl shadow-md p-6 mb-6">
         <h1 className="text-2xl font-bold text-center mb-4">Bienvenido a Gourmets Tarragona</h1>
         <p className="text-center text-gray-700 mb-6">
@@ -45,35 +43,23 @@ function Explorar() {
         </div>
       </div>
 
-      {/* Top 3 Restaurantes */}
       <div className="w-full max-w-3xl bg-white/80 rounded-2xl p-6 shadow-md">
         <h2 className="text-xl font-semibold mb-4 text-center">🏆 Top 3 Restaurantes</h2>
-        <div className="grid md:grid-cols-3 gap-4">
-          {top3.map((restaurante, idx) => (
-            <div key={restaurante.id} className="rounded-xl overflow-hidden bg-white shadow hover:scale-[1.02] transition">
-              <img
-                src={restaurante.imagen || '/placeholder.jpg'}
-                alt={restaurante.nombre}
-                className="w-full h-40 object-cover"
-              />
-              <div className="p-4">
-                <h3 className="text-lg font-bold">{idx + 1}. {restaurante.nombre}</h3>
-                <p className="text-sm text-gray-600">Nota media: <strong>{restaurante.nota_media}</strong></p>
-              </div>
-            </div>
+        <ol className="list-decimal pl-6 space-y-2 text-gray-800">
+          {top3.map((r, i) => (
+            <li key={r.id}>
+              <strong>{r.nombre}</strong> – nota media: <strong>{r.nota_media.toFixed(2)}</strong>
+            </li>
           ))}
-        </div>
+        </ol>
       </div>
 
-      {/* Chatbot discreto */}
       <GastroniaChatbot modo="invitado" />
     </div>
   );
 }
 
 export default Explorar;
-
-
 
 
 
