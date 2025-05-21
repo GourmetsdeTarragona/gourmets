@@ -1,4 +1,6 @@
 import { useNavigate } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { supabase } from '../lib/supabase';
 import logo from '/logo.png';
 import GastroniaChatbot from '../components/GastroniaChatbot';
 
@@ -7,6 +9,15 @@ const fondoEvento =
 
 function Explorar() {
   const navigate = useNavigate();
+  const [topRanking, setTopRanking] = useState([]);
+
+  useEffect(() => {
+    const cargarTop = async () => {
+      const { data, error } = await supabase.rpc('calcular_ranking_general');
+      if (!error) setTopRanking(data);
+    };
+    cargarTop();
+  }, []);
 
   return (
     <div
@@ -20,7 +31,7 @@ function Explorar() {
         overflow: 'hidden',
       }}
     >
-      {/* Capa oscura encima de la imagen */}
+      {/* Filtro oscuro */}
       <div
         style={{
           position: 'absolute',
@@ -31,7 +42,7 @@ function Explorar() {
         }}
       />
 
-      {/* Contenido encima del fondo */}
+      {/* Contenido */}
       <div
         style={{
           position: 'relative',
@@ -54,7 +65,7 @@ function Explorar() {
           }}
         />
 
-        {/* Contenedor blanco sobre fondo */}
+        {/* Contenedor blanco */}
         <div
           style={{
             backgroundColor: '#fff',
@@ -71,12 +82,11 @@ function Explorar() {
             position: 'relative',
           }}
         >
-          {/* Título */}
           <h2 style={{ marginBottom: '1.5rem', fontSize: '1.5rem', fontWeight: '700', color: '#222' }}>
             Bienvenido a Gourmets Tarragona
           </h2>
 
-          {/* Sección: Quiénes somos */}
+          {/* Quiénes somos */}
           <div style={{ marginBottom: '1.5rem', textAlign: 'left', width: '100%' }}>
             <h3 style={{ fontSize: '1.1rem', fontWeight: '600', marginBottom: '0.25rem' }}>¿Quiénes somos?</h3>
             <p style={{ fontSize: '0.95rem', color: '#444' }}>
@@ -84,12 +94,24 @@ function Explorar() {
             </p>
           </div>
 
-          {/* Sección: Ranking */}
+          {/* Ranking destacado */}
           <div style={{ marginBottom: '1.5rem', textAlign: 'left', width: '100%' }}>
             <h3 style={{ fontSize: '1.1rem', fontWeight: '600', marginBottom: '0.25rem' }}>Ranking destacado</h3>
-            <p style={{ fontSize: '0.95rem', color: '#444' }}>
-              Consulta los restaurantes mejor valorados por nuestros socios.
-            </p>
+
+            {topRanking.length > 0 ? (
+              <ul style={{ fontSize: '0.95rem', color: '#444', marginTop: '0.5rem' }}>
+                {topRanking.map((r, i) => (
+                  <li key={r.restaurante_id}>
+                    {i + 1}. <strong>{r.nombre}</strong> – {r.nota_media}/5
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p style={{ fontSize: '0.95rem', color: '#444' }}>
+                Consulta los restaurantes mejor valorados por nuestros socios.
+              </p>
+            )}
+
             <button
               onClick={() => navigate('/ranking')}
               style={estiloBotonPrimario}
@@ -98,7 +120,7 @@ function Explorar() {
             </button>
           </div>
 
-          {/* Sección: Hazte socio */}
+          {/* Hazte socio */}
           <div style={{ marginBottom: '1rem', textAlign: 'left', width: '100%' }}>
             <h3 style={{ fontSize: '1.1rem', fontWeight: '600', marginBottom: '0.25rem' }}>¿Te gustaría unirte?</h3>
             <p style={{ fontSize: '0.95rem', color: '#444' }}>
@@ -159,6 +181,7 @@ const estiloBotonSecundario = {
 };
 
 export default Explorar;
+
 
 
 
