@@ -22,7 +22,7 @@ function App() {
           {/* Rutas públicas */}
           <Route path="/" element={<Home />} />
           <Route path="/ranking" element={<Ranking />} />
-          <Route path="/explorar" element={<Explore />} /> {/* ✅ Nueva ruta para invitados */}
+          <Route path="/explorar" element={<Explorar />} /> {/* ✅ Nueva ruta para invitados */}
 
           {/* Rutas protegidas para socios */}
           <Route
