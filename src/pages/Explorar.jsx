@@ -1,6 +1,4 @@
 import { useNavigate } from 'react-router-dom';
-import { useEffect, useState } from 'react';
-import { supabase } from '../lib/supabase';
 import logo from '/logo.png';
 import GastroniaChatbot from '../components/GastroniaChatbot';
 
@@ -9,15 +7,6 @@ const fondoEvento =
 
 function Explorar() {
   const navigate = useNavigate();
-  const [topRanking, setTopRanking] = useState([]);
-
-  useEffect(() => {
-    const cargarTop = async () => {
-      const { data, error } = await supabase.rpc('calcular_ranking_general');
-      if (!error) setTopRanking(data);
-    };
-    cargarTop();
-  }, []);
 
   return (
     <div
@@ -42,7 +31,6 @@ function Explorar() {
         }}
       />
 
-      {/* Contenido */}
       <div
         style={{
           position: 'relative',
@@ -53,7 +41,6 @@ function Explorar() {
           padding: '2rem 1rem 0 1rem',
         }}
       >
-        {/* Logo */}
         <img
           src={logo}
           alt="Logo"
@@ -65,7 +52,6 @@ function Explorar() {
           }}
         />
 
-        {/* Contenedor blanco */}
         <div
           style={{
             backgroundColor: '#fff',
@@ -77,64 +63,35 @@ function Explorar() {
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
-            justifyContent: 'flex-start',
             boxShadow: '0 -4px 20px rgba(0,0,0,0.15)',
             position: 'relative',
           }}
         >
-          <h2 style={{ marginBottom: '1.5rem', fontSize: '1.5rem', fontWeight: '700', color: '#222' }}>
-            Bienvenido a Gourmets Tarragona
+          <h2 style={{ fontSize: '1.5rem', fontWeight: '700', color: '#222', marginBottom: '2rem' }}>
+            Explora nuestra comunidad gourmet
           </h2>
 
-          {/* Quiénes somos */}
-          <div style={{ marginBottom: '1.5rem', textAlign: 'left', width: '100%' }}>
-            <h3 style={{ fontSize: '1.1rem', fontWeight: '600', marginBottom: '0.25rem' }}>¿Quiénes somos?</h3>
-            <p style={{ fontSize: '0.95rem', color: '#444' }}>
-              Somos una comunidad que celebra la gastronomía en cenas únicas, donde se valora la cocina con elegancia y amistad.
-            </p>
-          </div>
+          <button
+            onClick={() => navigate('/ranking')}
+            style={estiloBotonPrimario}
+          >
+            Ver cenas destacadas
+          </button>
 
-          {/* Ranking destacado */}
-          <div style={{ marginBottom: '1.5rem', textAlign: 'left', width: '100%' }}>
-            <h3 style={{ fontSize: '1.1rem', fontWeight: '600', marginBottom: '0.25rem' }}>Ranking destacado</h3>
+          <button
+            onClick={() => navigate('/restaurants')}
+            style={estiloBotonPrimario}
+          >
+            Ver todos los restaurantes
+          </button>
 
-            {topRanking.length > 0 ? (
-              <ul style={{ fontSize: '0.95rem', color: '#444', marginTop: '0.5rem' }}>
-                {topRanking.map((r, i) => (
-                  <li key={r.restaurante_id}>
-                    {i + 1}. <strong>{r.nombre}</strong> – {r.nota_media}/5
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <p style={{ fontSize: '0.95rem', color: '#444' }}>
-                Consulta los restaurantes mejor valorados por nuestros socios.
-              </p>
-            )}
+          <button
+            onClick={() => navigate('/contacto')}
+            style={estiloBotonSecundario}
+          >
+            Quiero ser socio
+          </button>
 
-            <button
-              onClick={() => navigate('/ranking')}
-              style={estiloBotonPrimario}
-            >
-              Ver ranking completo
-            </button>
-          </div>
-
-          {/* Hazte socio */}
-          <div style={{ marginBottom: '1rem', textAlign: 'left', width: '100%' }}>
-            <h3 style={{ fontSize: '1.1rem', fontWeight: '600', marginBottom: '0.25rem' }}>¿Te gustaría unirte?</h3>
-            <p style={{ fontSize: '0.95rem', color: '#444' }}>
-              Si compartes nuestra pasión por la alta cocina, estás a un paso de formar parte.
-            </p>
-            <button
-              onClick={() => navigate('/contacto')}
-              style={estiloBotonSecundario}
-            >
-              Hazte socio
-            </button>
-          </div>
-
-          {/* Chatbot */}
           <div
             style={{
               position: 'absolute',
@@ -181,6 +138,7 @@ const estiloBotonSecundario = {
 };
 
 export default Explorar;
+
 
 
 
