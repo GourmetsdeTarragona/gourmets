@@ -2,8 +2,7 @@ import { useNavigate } from 'react-router-dom';
 import logo from '/logo.png';
 import GastroniaChatbot from '../components/GastroniaChatbot';
 
-const fondoEvento =
-  https://redojogbxdtqxqzxvyhp.supabase.co/storage/v1/object/public/imagenes/imagenes/forti-evento.jpg';
+const fondoEvento =  https://redojogbxdtqxqzxvyhp.supabase.co/storage/v1/object/public/imagenes/imagenes/forti-evento.jpg';
 
 function Explorar() {
   const navigate = useNavigate();
