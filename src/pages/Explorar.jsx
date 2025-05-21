@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
@@ -7,14 +6,13 @@ import GastroniaChatbot from '../components/GastroniaChatbot';
 
 function Explorar() {
   const navigate = useNavigate();
-  const [top3, setTop3] = useState([]);
+  const [topRestaurantes, setTopRestaurantes] = useState([]);
 
   useEffect(() => {
     const cargarTop = async () => {
       const { data, error } = await supabase.rpc('calcular_ranking_general');
-      if (!error) setTop3(data.slice(0, 3));
+      if (data) setTopRestaurantes(data);
     };
-
     cargarTop();
   }, []);
 
@@ -71,19 +69,20 @@ function Explorar() {
           </p>
         </div>
 
-        {/* Sección: Ranking */}
+        {/* Sección: Ranking Top 3 */}
         <div style={{ marginBottom: '1.5rem', textAlign: 'left', width: '100%' }}>
-          <h3 style={{ fontSize: '1.1rem', fontWeight: '600', marginBottom: '0.25rem' }}>Ranking destacado</h3>
-          <p style={{ fontSize: '0.95rem', color: '#444', marginBottom: '0.5rem' }}>
-            Consulta los restaurantes mejor valorados por nuestros socios:
-          </p>
-          <ol style={{ paddingLeft: '1.25rem', marginBottom: '1rem', fontSize: '0.95rem', color: '#333' }}>
-            {top3.map((r, i) => (
-              <li key={r.id}>
-                <strong>{r.nombre}</strong> – nota media: {r.nota_media.toFixed(2)}
-              </li>
-            ))}
-          </ol>
+          <h3 style={{ fontSize: '1.1rem', fontWeight: '600', marginBottom: '0.5rem' }}>Top 3 restaurantes</h3>
+          {topRestaurantes.length === 0 ? (
+            <p style={{ fontSize: '0.95rem', color: '#888' }}>Cargando ranking...</p>
+          ) : (
+            <ul style={{ paddingLeft: '1rem', marginBottom: '1rem' }}>
+              {topRestaurantes.map((rest, index) => (
+                <li key={rest.restaurante_id} style={{ fontSize: '0.95rem', color: '#333', marginBottom: '0.25rem' }}>
+                  <strong>{index + 1}.</strong> {rest.nombre} — <span style={{ color: '#0070b8' }}>{rest.nota_media.toFixed(2)}</span>
+                </li>
+              ))}
+            </ul>
+          )}
           <button
             onClick={() => navigate('/ranking')}
             style={estiloBotonPrimario}
@@ -152,6 +151,7 @@ const estiloBotonSecundario = {
 };
 
 export default Explorar;
+
 
 
 
