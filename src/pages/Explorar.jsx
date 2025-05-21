@@ -1,19 +1,19 @@
-import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
 import logo from '/logo.png';
 import GastroniaChatbot from '../components/GastroniaChatbot';
 
 function Explorar() {
   const navigate = useNavigate();
-  const [topRestaurantes, setTopRestaurantes] = useState([]);
+  const [vinos, setVinos] = useState([]);
 
   useEffect(() => {
-    const cargarTop = async () => {
-      const { data, error } = await supabase.rpc('calcular_ranking_general');
-      if (data) setTopRestaurantes(data);
+    const cargarVinos = async () => {
+      const { data, error } = await supabase.rpc('calcular_ranking_vinos');
+      if (!error && data) setVinos(data.slice(0, 3));
     };
-    cargarTop();
+    cargarVinos();
   }, []);
 
   return (
@@ -69,26 +69,39 @@ function Explorar() {
           </p>
         </div>
 
-        {/* Sección: Ranking Top 3 */}
+        {/* Sección: Ranking */}
         <div style={{ marginBottom: '1.5rem', textAlign: 'left', width: '100%' }}>
-          <h3 style={{ fontSize: '1.1rem', fontWeight: '600', marginBottom: '0.5rem' }}>Top 3 restaurantes</h3>
-          {topRestaurantes.length === 0 ? (
-            <p style={{ fontSize: '0.95rem', color: '#888' }}>Cargando ranking...</p>
-          ) : (
-            <ul style={{ paddingLeft: '1rem', marginBottom: '1rem' }}>
-              {topRestaurantes.map((rest, index) => (
-                <li key={rest.restaurante_id} style={{ fontSize: '0.95rem', color: '#333', marginBottom: '0.25rem' }}>
-                  <strong>{index + 1}.</strong> {rest.nombre} — <span style={{ color: '#0070b8' }}>{rest.nota_media.toFixed(2)}</span>
-                </li>
-              ))}
-            </ul>
-          )}
+          <h3 style={{ fontSize: '1.1rem', fontWeight: '600', marginBottom: '0.25rem' }}>Ranking destacado</h3>
+          <p style={{ fontSize: '0.95rem', color: '#444' }}>
+            Consulta los restaurantes mejor valorados por nuestros socios.
+          </p>
           <button
             onClick={() => navigate('/ranking')}
             style={estiloBotonPrimario}
           >
             Ver ranking completo
           </button>
+        </div>
+
+        {/* Sección: Top Vinos */}
+        <div style={{ marginBottom: '1.5rem', textAlign: 'left', width: '100%' }}>
+          <h3 style={{ fontSize: '1.1rem', fontWeight: '600', marginBottom: '0.25rem' }}>
+            Top 3 vinos servidos
+          </h3>
+          <p style={{ fontSize: '0.95rem', color: '#444', marginBottom: '0.75rem' }}>
+            Las mejores valoraciones en catas de nuestros socios.
+          </p>
+          {vinos.length > 0 ? (
+            <ol style={{ paddingLeft: '1.2rem', margin: 0 }}>
+              {vinos.map((vino, index) => (
+                <li key={index} style={{ marginBottom: '0.5rem' }}>
+                  <strong>{vino.nombre_categoria}</strong> – {vino.nombre_restaurante} · ⭐ {vino.media}
+                </li>
+              ))}
+            </ol>
+          ) : (
+            <p style={{ fontSize: '0.9rem', color: '#777' }}>Cargando vinos destacados...</p>
+          )}
         </div>
 
         {/* Sección: Hazte socio */}
@@ -151,6 +164,7 @@ const estiloBotonSecundario = {
 };
 
 export default Explorar;
+
 
 
 
