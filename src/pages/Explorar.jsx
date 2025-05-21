@@ -2,81 +2,137 @@ import { useNavigate } from 'react-router-dom';
 import logo from '/logo.png';
 import GastroniaChatbot from '../components/GastroniaChatbot';
 
-const fondoEvento =
-  'https://redojogbxdtqxqzxvyhp.supabase.co/storage/v1/object/public/imagenes/imagenes/forti-evento.jpg';
-
 function Explorar() {
   const navigate = useNavigate();
 
   return (
     <div
-      className="min-h-screen w-full flex flex-col items-center justify-start bg-cover bg-center relative"
-      style={{ backgroundImage: `url(${fondoEvento})` }}
+      style={{
+        minHeight: '100dvh',
+        backgroundColor: '#0070b8',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        padding: '2rem 1rem 0 1rem',
+      }}
     >
-      {/* Filtro oscuro y difuminado para fondo */}
-      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
+      {/* Logo centrado */}
+      <img
+        src={logo}
+        alt="Logo"
+        style={{
+          width: '140px',
+          marginTop: '1rem',
+          marginBottom: '1.5rem',
+          objectFit: 'contain',
+        }}
+      />
 
-      {/* Contenido principal centrado */}
-      <div className="relative z-10 w-full max-w-md mx-auto p-6 pt-8">
-        {/* Contenedor blanco con estilo Dami */}
-        <div className="bg-white rounded-3xl shadow-xl p-6 space-y-6 text-center">
-          {/* Logo */}
-          <img src={logo} alt="Logo" className="w-24 mx-auto" />
+      {/* Contenedor blanco */}
+      <div
+        style={{
+          backgroundColor: '#fff',
+          width: '100%',
+          maxWidth: '400px',
+          borderTopLeftRadius: '2rem',
+          borderTopRightRadius: '2rem',
+          padding: '2rem 1.5rem',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'flex-start',
+          boxShadow: '0 -4px 20px rgba(0,0,0,0.15)',
+          position: 'relative',
+        }}
+      >
+        {/* Título */}
+        <h2 style={{ marginBottom: '1.5rem', fontSize: '1.5rem', fontWeight: '700', color: '#222' }}>
+          Bienvenido a Gourmets Tarragona
+        </h2>
 
-          {/* Encabezado */}
-          <h1 className="text-2xl font-bold text-gray-800">GOURMETS TARRAGONA</h1>
-          <p className="text-base text-gray-600 italic">
-            Una asociación única donde cada cena es una experiencia
+        {/* Sección: Quiénes somos */}
+        <div style={{ marginBottom: '1.5rem', textAlign: 'left', width: '100%' }}>
+          <h3 style={{ fontSize: '1.1rem', fontWeight: '600', marginBottom: '0.25rem' }}>¿Quiénes somos?</h3>
+          <p style={{ fontSize: '0.95rem', color: '#444' }}>
+            Somos una comunidad que celebra la gastronomía en cenas únicas, donde se valora la cocina con elegancia y amistad.
           </p>
-
-          {/* Sección: Quiénes somos */}
-          <div className="text-left space-y-1">
-            <h2 className="text-lg font-semibold text-gray-800">¿Quiénes somos?</h2>
-            <p className="text-sm text-gray-700">
-              Somos una comunidad de amantes de la buena mesa que visitan restaurantes selectos,
-              votan con criterio y celebran la gastronomía con elegancia y amistad.
-            </p>
-          </div>
-
-          {/* Sección: Ranking */}
-          <div className="text-left space-y-1">
-            <h2 className="text-lg font-semibold text-gray-800">Ranking destacado</h2>
-            <p className="text-sm text-gray-700">
-              Consulta los restaurantes mejor valorados por nuestros socios en cenas inolvidables.
-            </p>
-            <button
-              onClick={() => navigate('/ranking')}
-              className="w-full mt-2 bg-blue-800 text-white py-2 rounded-xl hover:bg-blue-700 transition"
-            >
-              Ver ranking completo
-            </button>
-          </div>
-
-          {/* Sección: Hazte socio */}
-          <div className="text-left space-y-1">
-            <h2 className="text-lg font-semibold text-gray-800">¿Te gustaría unirte?</h2>
-            <p className="text-sm text-gray-700">
-              Si compartes nuestra pasión por la alta cocina y el buen gusto, estás a un paso de formar parte.
-            </p>
-            <button
-              onClick={() => navigate('/contacto')}
-              className="w-full mt-2 bg-blue-800 text-white py-2 rounded-xl hover:bg-blue-700 transition"
-            >
-              Hazte socio
-            </button>
-          </div>
         </div>
-      </div>
 
-      {/* Chatbot Gastronia */}
-      <div className="absolute bottom-4 right-4 z-20">
-        <GastroniaChatbot modo="invitado" />
+        {/* Sección: Ranking */}
+        <div style={{ marginBottom: '1.5rem', textAlign: 'left', width: '100%' }}>
+          <h3 style={{ fontSize: '1.1rem', fontWeight: '600', marginBottom: '0.25rem' }}>Ranking destacado</h3>
+          <p style={{ fontSize: '0.95rem', color: '#444' }}>
+            Consulta los restaurantes mejor valorados por nuestros socios.
+          </p>
+          <button
+            onClick={() => navigate('/ranking')}
+            style={estiloBotonPrimario}
+          >
+            Ver ranking completo
+          </button>
+        </div>
+
+        {/* Sección: Hazte socio */}
+        <div style={{ marginBottom: '1rem', textAlign: 'left', width: '100%' }}>
+          <h3 style={{ fontSize: '1.1rem', fontWeight: '600', marginBottom: '0.25rem' }}>¿Te gustaría unirte?</h3>
+          <p style={{ fontSize: '0.95rem', color: '#444' }}>
+            Si compartes nuestra pasión por la alta cocina, estás a un paso de formar parte.
+          </p>
+          <button
+            onClick={() => navigate('/contacto')}
+            style={estiloBotonSecundario}
+          >
+            Hazte socio
+          </button>
+        </div>
+
+        {/* Chatbot */}
+        <div
+          style={{
+            position: 'absolute',
+            bottom: '1rem',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            width: '90%',
+            maxWidth: '320px',
+            display: 'flex',
+            justifyContent: 'center',
+          }}
+        >
+          <GastroniaChatbot modo="invitado" />
+        </div>
       </div>
     </div>
   );
 }
 
+const cajaBase = {
+  width: '100%',
+  height: '48px',
+  boxSizing: 'border-box',
+  padding: '0 0.75rem',
+  marginBottom: '1rem',
+  borderRadius: '0.5rem',
+  fontSize: '1rem',
+};
+
+const estiloBotonPrimario = {
+  ...cajaBase,
+  backgroundColor: '#0070b8',
+  color: '#fff',
+  border: 'none',
+  cursor: 'pointer',
+};
+
+const estiloBotonSecundario = {
+  ...cajaBase,
+  backgroundColor: '#f1f1f1',
+  border: '1px solid #ccc',
+  cursor: 'pointer',
+};
+
 export default Explorar;
+
 
 
 
