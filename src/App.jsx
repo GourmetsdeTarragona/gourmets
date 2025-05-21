@@ -3,7 +3,7 @@ import Home from './pages/Home';
 import Restaurants from './pages/Restaurants';
 import RestaurantVoting from './pages/RestaurantVoting';
 import Ranking from './pages/Ranking';
-import Explore from './pages/Explore'; // ✅ Nueva pantalla para invitados
+import Explorar from './pages/Explorar'; // ✅ Nueva pantalla para invitados
 
 import AdminDashboard from './pages/AdminDashboard';
 import RegisterUser from './pages/RegisterUser';
