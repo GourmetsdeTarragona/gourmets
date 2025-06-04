@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
@@ -103,6 +102,9 @@ function RestaurantVoting() {
       categoria_extra_id: cat.tipo === 'extra' ? cat.id : null,
       valor: puntuaciones[cat.id],
     }));
+
+    console.log('auth.uid():', user.id);
+    console.log('usuario_id en votos:', votos[0].usuario_id);
 
     try {
       const aplausos = new Audio('/aplausos-final.mp3');
