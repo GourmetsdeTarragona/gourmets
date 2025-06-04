@@ -111,14 +111,18 @@ function RestaurantVoting() {
       console.log('No se pudo reproducir aplausos:', e);
     }
 
-    const { error } = await supabase.from('votaciones').insert(votos);
+    const { error } = await supabase.from('votaciones').insert(votos, { returning: 'minimal' });
 
     if (!error) {
       setConfirmacion('¡Gracias por votar! Redirigiendo al ranking...');
       setTimeout(() => navigate('/ranking'), 2000);
     } else {
       console.error('Error al insertar votos:', error);
-      setConfirmacion(`Error al votar: ${error.message || 'desconocido'}`);
+      if (error.code === '42501') {
+        setConfirmacion('Error: No tienes permiso para insertar votos. Asegúrate de que el RLS permita que los socios voten.');
+      } else {
+        setConfirmacion(`Error al votar: ${error.message || 'desconocido'}`);
+      }
     }
   };
 
@@ -288,6 +292,7 @@ const miniBoton = {
 };
 
 export default RestaurantVoting;
+
 
 
 
