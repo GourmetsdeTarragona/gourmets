@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
@@ -96,6 +95,18 @@ function RestaurantVoting() {
       return;
     }
 
+    // 🚫 Doble comprobación frontend: ¿ya ha votado?
+    const { count: votosAntes } = await supabase
+      .from('votaciones')
+      .select('*', { count: 'exact', head: true })
+      .eq('usuario_id', user.id)
+      .eq('restaurante_id', restaurantId);
+
+    if (votosAntes > 0) {
+      setConfirmacion('Ya has votado previamente para este restaurante.');
+      return;
+    }
+
     const votos = categorias.map((cat) => ({
       usuario_id: user.id,
       restaurante_id: restaurantId,
@@ -103,9 +114,6 @@ function RestaurantVoting() {
       categoria_extra_id: cat.tipo === 'extra' ? cat.id : null,
       valor: puntuaciones[cat.id],
     }));
-
-    console.log('auth.uid():', user.id);
-    console.log('usuario_id en votos:', votos[0].usuario_id);
 
     try {
       const aplausos = new Audio('/aplausos-final.mp3');
@@ -122,11 +130,7 @@ function RestaurantVoting() {
       setTimeout(() => navigate('/ranking'), 2000);
     } else {
       console.error('Error al insertar votos:', error);
-      if (error.code === '42501') {
-        setConfirmacion('Error: No tienes permiso para insertar votos. Asegúrate de que el RLS permita que los socios voten.');
-      } else {
-        setConfirmacion(`Error al votar: ${error.message || 'desconocido'}`);
-      }
+      setConfirmacion(`Error al votar: ${error.message || 'desconocido'}`);
     }
   };
 
@@ -218,8 +222,7 @@ function RestaurantVoting() {
                         color: puntuaciones[categoria.id] >= valor ? '#FFD700' : '#ccc',
                         cursor: 'pointer',
                         display: 'inline-block',
-                        transform:
-                          puntuaciones[categoria.id] === valor ? 'scale(1.3)' : 'scale(1)',
+                        transform: puntuaciones[categoria.id] === valor ? 'scale(1.3)' : 'scale(1)',
                         transition: 'transform 0.2s ease',
                       }}
                     >
@@ -296,6 +299,7 @@ const miniBoton = {
 };
 
 export default RestaurantVoting;
+
 
 
 
