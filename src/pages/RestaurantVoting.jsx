@@ -117,7 +117,8 @@ function RestaurantVoting() {
       setConfirmacion('¡Gracias por votar! Redirigiendo al ranking...');
       setTimeout(() => navigate('/ranking'), 2000);
     } else {
-      setConfirmacion('Ya has votado o ha ocurrido un error.');
+      console.error('Error al insertar votos:', error);
+      setConfirmacion(`Error al votar: ${error.message || 'desconocido'}`);
     }
   };
 
@@ -287,5 +288,6 @@ const miniBoton = {
 };
 
 export default RestaurantVoting;
+
 
 
