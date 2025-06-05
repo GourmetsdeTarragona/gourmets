@@ -49,21 +49,13 @@ function RestaurantVoting() {
         .select('id, nombre_extra')
         .eq('restaurante_id', restaurantId);
 
-      const { data: votosAnteriores } = await supabase
+      const { data: votosPrevios } = await supabase
         .from('votaciones')
-        .select('categoria_fija_id, categoria_extra_id, valor')
+        .select('id')
         .eq('usuario_id', user.id)
         .eq('restaurante_id', restaurantId);
 
-      if (votosAnteriores && votosAnteriores.length > 0) {
-        setYaVotado(true);
-        const puntuacionesPrevias = {};
-        votosAnteriores.forEach((v) => {
-          const id = v.categoria_fija_id || v.categoria_extra_id;
-          puntuacionesPrevias[id] = v.valor;
-        });
-        setPuntuaciones(puntuacionesPrevias);
-      }
+      if (votosPrevios?.length > 0) setYaVotado(true);
 
       const todas = [
         ...(fijas || []).map((cat) => ({ ...cat, tipo: 'fija', nombre: cat.nombre_categoria })),
@@ -79,7 +71,6 @@ function RestaurantVoting() {
   }, [restaurantId, user]);
 
   const handleVoteChange = async (categoriaId, valor) => {
-    if (yaVotado) return; // evitar cambiar si ya ha votado
     setPuntuaciones((prev) => ({ ...prev, [categoriaId]: valor }));
     try {
       const audio = new Audio('/ding-voto.mp3');
@@ -93,11 +84,6 @@ function RestaurantVoting() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (yaVotado) {
-      setConfirmacion('Ya has votado anteriormente.');
-      return;
-    }
-
     if (categorias.length === 0) {
       setConfirmacion('Error: No hay categorías definidas para votar.');
       return;
@@ -106,6 +92,17 @@ function RestaurantVoting() {
     const faltan = categorias.some((cat) => !puntuaciones[cat.id]);
     if (faltan) {
       setConfirmacion('Debes puntuar todas las categorías.');
+      return;
+    }
+
+    const { data: votosAntes } = await supabase
+      .from('votaciones')
+      .select('id')
+      .eq('usuario_id', user.id)
+      .eq('restaurante_id', restaurantId);
+
+    if (votosAntes?.length > 0) {
+      setConfirmacion('Ya has votado previamente para este restaurante.');
       return;
     }
 
@@ -138,6 +135,7 @@ function RestaurantVoting() {
 
   if (!restaurant) return <Cargando texto="Cargando datos del restaurante..." />;
   if (!asiste) return <Cargando texto="Solo los asistentes pueden votar en este restaurante." />;
+  if (yaVotado) return <Cargando texto="Ya has votado. Puedes ver los resultados en el ranking." />;
 
   return (
     <div
@@ -215,14 +213,13 @@ function RestaurantVoting() {
                       value={valor}
                       checked={puntuaciones[categoria.id] === valor}
                       onChange={() => handleVoteChange(categoria.id, valor)}
-                      disabled={yaVotado}
                       style={{ display: 'none' }}
                     />
                     <span
                       style={{
                         fontSize: '2rem',
                         color: puntuaciones[categoria.id] >= valor ? '#FFD700' : '#ccc',
-                        cursor: yaVotado ? 'default' : 'pointer',
+                        cursor: 'pointer',
                         display: 'inline-block',
                         transform: puntuaciones[categoria.id] === valor ? 'scale(1.3)' : 'scale(1)',
                         transition: 'transform 0.2s ease',
@@ -237,25 +234,23 @@ function RestaurantVoting() {
             </div>
           ))}
 
-          {!yaVotado && (
-            <button
-              type="submit"
-              style={{
-                width: '100%',
-                height: '48px',
-                backgroundColor: '#0070b8',
-                color: '#fff',
-                fontWeight: 'bold',
-                borderRadius: '0.5rem',
-                border: 'none',
-                fontSize: '1rem',
-                cursor: 'pointer',
-                marginTop: '1rem',
-              }}
-            >
-              Enviar votación
-            </button>
-          )}
+          <button
+            type="submit"
+            style={{
+              width: '100%',
+              height: '48px',
+              backgroundColor: '#0070b8',
+              color: '#fff',
+              fontWeight: 'bold',
+              borderRadius: '0.5rem',
+              border: 'none',
+              fontSize: '1rem',
+              cursor: 'pointer',
+              marginTop: '1rem',
+            }}
+          >
+            Enviar votación
+          </button>
         </form>
 
         {confirmacion && (
@@ -303,8 +298,6 @@ const miniBoton = {
 };
 
 export default RestaurantVoting;
-
-
 
 
 
