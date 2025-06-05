@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
@@ -33,6 +32,8 @@ function RestaurantVoting() {
     if (!user) return;
 
     const cargarDatos = async () => {
+      console.log('Usuario cargado:', user);
+
       const { data: restaurante } = await supabase
         .from('restaurantes')
         .select('id, nombre, asistentes, carta_url, minuta_url')
@@ -50,13 +51,13 @@ function RestaurantVoting() {
         .select('id, nombre_extra')
         .eq('restaurante_id', restaurantId);
 
-      const { data: votosPrevios } = await supabase
+      const { count: votosPrevios } = await supabase
         .from('votaciones')
-        .select('id')
+        .select('*', { count: 'exact', head: true })
         .eq('usuario_id', user.id)
         .eq('restaurante_id', restaurantId);
 
-      if (votosPrevios?.length > 0) setYaVotado(true);
+      if (votosPrevios > 0) setYaVotado(true);
 
       const todas = [
         ...(fijas || []).map((cat) => ({ ...cat, tipo: 'fija', nombre: cat.nombre_categoria })),
@@ -96,13 +97,13 @@ function RestaurantVoting() {
       return;
     }
 
-    const { data: votosAntes } = await supabase
+    const { count: votosAntes } = await supabase
       .from('votaciones')
-      .select('id')
+      .select('*', { count: 'exact', head: true })
       .eq('usuario_id', user.id)
       .eq('restaurante_id', restaurantId);
 
-    if (votosAntes?.length > 0) {
+    if (votosAntes > 0) {
       setConfirmacion('Ya has votado previamente para este restaurante.');
       return;
     }
