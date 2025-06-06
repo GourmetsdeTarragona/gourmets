@@ -29,11 +29,9 @@ function RestaurantVoting() {
   }, []);
 
   useEffect(() => {
-    if (!user) return;
+    if (!user || !user.id) return;
 
     const cargarDatos = async () => {
-      console.log('Usuario cargado:', user);
-
       const { data: restaurante } = await supabase
         .from('restaurantes')
         .select('id, nombre, asistentes, carta_url, minuta_url')
@@ -135,6 +133,7 @@ function RestaurantVoting() {
     }
   };
 
+  if (!user || !user.id) return <Cargando texto="Inicia sesión para votar." />;
   if (!restaurant) return <Cargando texto="Cargando datos del restaurante..." />;
   if (!asiste) return <Cargando texto="Solo los asistentes pueden votar en este restaurante." />;
   if (yaVotado) return <Cargando texto="Ya has votado. Puedes ver los resultados en el ranking." />;
