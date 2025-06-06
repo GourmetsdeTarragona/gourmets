@@ -29,7 +29,9 @@ function RestaurantVoting() {
   }, []);
 
   useEffect(() => {
-    if (!user || !user.id) return;
+    if (!user) return;
+
+    console.log('🔍 Usuario detectado:', user);
 
     const cargarDatos = async () => {
       const { data: restaurante } = await supabase
@@ -133,7 +135,6 @@ function RestaurantVoting() {
     }
   };
 
-  if (!user || !user.id) return <Cargando texto="Inicia sesión para votar." />;
   if (!restaurant) return <Cargando texto="Cargando datos del restaurante..." />;
   if (!asiste) return <Cargando texto="Solo los asistentes pueden votar en este restaurante." />;
   if (yaVotado) return <Cargando texto="Ya has votado. Puedes ver los resultados en el ranking." />;
@@ -299,6 +300,7 @@ const miniBoton = {
 };
 
 export default RestaurantVoting;
+
 
 
 
