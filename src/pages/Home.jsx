@@ -73,6 +73,7 @@ function Home() {
       />
 
       <div
+      className="home-login-anim"
         style={{
           backgroundColor: '#fff',
           height: '55vh',
