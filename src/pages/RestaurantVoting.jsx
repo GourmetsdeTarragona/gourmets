@@ -18,6 +18,8 @@ function RestaurantVoting() {
   const [asiste, setAsiste] = useState(false);
   const [confirmacion, setConfirmacion] = useState('');
   const [imagenes, setImagenes] = useState([]);
+  const [mostrarModal, setMostrarModal] = useState(false);
+  const [fotoSeleccionada, setFotoSeleccionada] = useState(null);
 
   useEffect(() => {
     const desbloquearSonido = () => {
@@ -30,8 +32,6 @@ function RestaurantVoting() {
 
   useEffect(() => {
     if (!user) return;
-
-    console.log('🔍 Usuario detectado:', user);
 
     const cargarDatos = async () => {
       const { data: restaurante } = await supabase
@@ -140,95 +140,29 @@ function RestaurantVoting() {
   if (yaVotado) return <Cargando texto="Ya has votado. Puedes ver los resultados en el ranking." />;
 
   return (
-    <div
-      style={{
-        minHeight: '100dvh',
-        backgroundColor: '#0070b8',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        padding: '2rem 1rem 0 1rem',
-      }}
-    >
+    <div style={{ minHeight: '100dvh', backgroundColor: '#0070b8', display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '2rem 1rem 0 1rem' }}>
       <img src={logo} alt="Logo" style={{ width: '140px', marginBottom: '1.5rem' }} />
 
-      <div
-        style={{
-          backgroundColor: '#fff',
-          width: '100%',
-          maxWidth: '420px',
-          borderTopLeftRadius: '2rem',
-          borderTopRightRadius: '2rem',
-          padding: '2rem 1.5rem',
-          boxShadow: '0 -4px 20px rgba(0,0,0,0.15)',
-          flexGrow: 1,
-          overflowY: 'auto',
-        }}
-      >
+      <div style={{ backgroundColor: '#fff', width: '100%', maxWidth: '420px', borderTopLeftRadius: '2rem', borderTopRightRadius: '2rem', padding: '2rem 1.5rem', boxShadow: '0 -4px 20px rgba(0,0,0,0.15)', flexGrow: 1, overflowY: 'auto' }}>
         <h2 style={{ marginBottom: '1rem', fontSize: '1.4rem', fontWeight: '700' }}>
           Votación: {restaurant.nombre}
         </h2>
 
         <div style={{ display: 'flex', gap: '0.75rem', marginBottom: '1.25rem', flexWrap: 'wrap' }}>
-          {restaurant.carta_url && (
-            <a href={restaurant.carta_url} target="_blank" rel="noreferrer" style={miniBoton}>
-              Carta
-            </a>
-          )}
-          {restaurant.minuta_url && (
-            <a href={restaurant.minuta_url} target="_blank" rel="noreferrer" style={miniBoton}>
-              Minuta
-            </a>
-          )}
+          {restaurant.carta_url && <a href={restaurant.carta_url} target="_blank" rel="noreferrer" style={miniBoton}>Carta</a>}
+          {restaurant.minuta_url && <a href={restaurant.minuta_url} target="_blank" rel="noreferrer" style={miniBoton}>Minuta</a>}
+          {imagenes.length > 0 && <button onClick={() => setMostrarModal(true)} style={miniBoton}>Ver fotos</button>}
         </div>
-
-        {imagenes.length > 0 && (
-          <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginBottom: '1.5rem' }}>
-            {imagenes.slice(0, 4).map((img) => (
-              <img
-                key={img.name}
-                src={`https://redojogbxdtqxqzxvyhp.supabase.co/storage/v1/object/public/imagenes/${restaurantId}/${img.name}`}
-                alt={img.name}
-                style={{
-                  width: '90px',
-                  height: '60px',
-                  objectFit: 'cover',
-                  borderRadius: '0.5rem',
-                }}
-              />
-            ))}
-          </div>
-        )}
 
         <form onSubmit={handleSubmit}>
           {categorias.map((categoria) => (
             <div key={categoria.id} style={{ marginBottom: '2rem' }}>
-              <h4 style={{ marginBottom: '1rem', fontSize: '1rem', fontWeight: '600' }}>
-                {categoria.nombre}
-              </h4>
+              <h4 style={{ marginBottom: '1rem', fontSize: '1rem', fontWeight: '600' }}>{categoria.nombre}</h4>
               <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'center' }}>
                 {[1, 2, 3, 4, 5].map((valor) => (
                   <label key={valor} style={{ textAlign: 'center' }}>
-                    <input
-                      type="radio"
-                      name={`categoria-${categoria.id}`}
-                      value={valor}
-                      checked={puntuaciones[categoria.id] === valor}
-                      onChange={() => handleVoteChange(categoria.id, valor)}
-                      style={{ display: 'none' }}
-                    />
-                    <span
-                      style={{
-                        fontSize: '2rem',
-                        color: puntuaciones[categoria.id] >= valor ? '#FFD700' : '#ccc',
-                        cursor: 'pointer',
-                        display: 'inline-block',
-                        transform: puntuaciones[categoria.id] === valor ? 'scale(1.3)' : 'scale(1)',
-                        transition: 'transform 0.2s ease',
-                      }}
-                    >
-                      ★
-                    </span>
+                    <input type="radio" name={`categoria-${categoria.id}`} value={valor} checked={puntuaciones[categoria.id] === valor} onChange={() => handleVoteChange(categoria.id, valor)} style={{ display: 'none' }} />
+                    <span style={{ fontSize: '2rem', color: puntuaciones[categoria.id] >= valor ? '#FFD700' : '#ccc', cursor: 'pointer', display: 'inline-block', transform: puntuaciones[categoria.id] === valor ? 'scale(1.3)' : 'scale(1)', transition: 'transform 0.2s ease' }}>★</span>
                     <div style={{ fontSize: '0.8rem' }}>{valor}</div>
                   </label>
                 ))}
@@ -236,54 +170,50 @@ function RestaurantVoting() {
             </div>
           ))}
 
-          <button
-            type="submit"
-            style={{
-              width: '100%',
-              height: '48px',
-              backgroundColor: '#0070b8',
-              color: '#fff',
-              fontWeight: 'bold',
-              borderRadius: '0.5rem',
-              border: 'none',
-              fontSize: '1rem',
-              cursor: 'pointer',
-              marginTop: '1rem',
-            }}
-          >
+          <button type="submit" style={{ width: '100%', height: '48px', backgroundColor: '#0070b8', color: '#fff', fontWeight: 'bold', borderRadius: '0.5rem', border: 'none', fontSize: '1rem', cursor: 'pointer', marginTop: '1rem' }}>
             Enviar votación
           </button>
         </form>
 
-        {confirmacion && (
-          <div style={{ marginTop: '1.5rem' }}>
-            <ConfirmationMessage message={confirmacion} />
-          </div>
-        )}
-
-        <div style={{ marginTop: '2rem' }}>
-          <GastroniaChatbot />
-        </div>
+        {confirmacion && <div style={{ marginTop: '1.5rem' }}><ConfirmationMessage message={confirmacion} /></div>}
+        <div style={{ marginTop: '2rem' }}><GastroniaChatbot /></div>
       </div>
+
+      {mostrarModal && (
+        <div style={modalOverlay}>
+          <div style={modalContenido}>
+            <button onClick={() => setMostrarModal(false)} style={botonCerrar}>✕</button>
+            <div style={galeriaMiniaturas}>
+              {imagenes.map((img) => (
+                <img
+                  key={img.name}
+                  src={`https://redojogbxdtqxqzxvyhp.supabase.co/storage/v1/object/public/imagenes/${restaurantId}/${img.name}`}
+                  alt={img.name}
+                  style={miniatura}
+                  onClick={() => setFotoSeleccionada(img.name)}
+                />
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {fotoSeleccionada && (
+        <div style={fullscreenOverlay} onClick={() => setFotoSeleccionada(null)}>
+          <img
+            src={`https://redojogbxdtqxqzxvyhp.supabase.co/storage/v1/object/public/imagenes/${restaurantId}/${fotoSeleccionada}`}
+            alt="foto"
+            style={imagenGrande}
+          />
+        </div>
+      )}
     </div>
   );
 }
 
 function Cargando({ texto }) {
   return (
-    <div
-      style={{
-        minHeight: '100vh',
-        backgroundColor: '#0070b8',
-        color: '#fff',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        fontSize: '1.2rem',
-        padding: '2rem',
-        textAlign: 'center',
-      }}
-    >
+    <div style={{ minHeight: '100vh', backgroundColor: '#0070b8', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.2rem', padding: '2rem', textAlign: 'center' }}>
       {texto}
     </div>
   );
@@ -297,6 +227,67 @@ const miniBoton = {
   textDecoration: 'none',
   fontWeight: 'bold',
   fontSize: '0.9rem',
+};
+
+const modalOverlay = {
+  position: 'fixed',
+  top: 0, left: 0, right: 0, bottom: 0,
+  backgroundColor: 'rgba(0,0,0,0.7)',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  zIndex: 1000,
+};
+
+const modalContenido = {
+  backgroundColor: '#fff',
+  padding: '1rem',
+  borderRadius: '1rem',
+  maxWidth: '90vw',
+  maxHeight: '80vh',
+  overflowY: 'auto',
+  position: 'relative',
+};
+
+const botonCerrar = {
+  position: 'absolute',
+  top: '0.5rem',
+  right: '0.5rem',
+  background: 'none',
+  border: 'none',
+  fontSize: '1.5rem',
+  cursor: 'pointer',
+};
+
+const galeriaMiniaturas = {
+  display: 'flex',
+  flexWrap: 'wrap',
+  gap: '0.5rem',
+  justifyContent: 'center',
+};
+
+const miniatura = {
+  width: '90px',
+  height: '60px',
+  objectFit: 'cover',
+  borderRadius: '0.5rem',
+  cursor: 'pointer',
+};
+
+const fullscreenOverlay = {
+  position: 'fixed',
+  top: 0, left: 0, right: 0, bottom: 0,
+  backgroundColor: 'rgba(0,0,0,0.9)',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  zIndex: 1100,
+};
+
+const imagenGrande = {
+  maxWidth: '95%',
+  maxHeight: '90%',
+  borderRadius: '1rem',
 };
 
 export default RestaurantVoting;
