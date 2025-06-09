@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { useUser } from '../contexts/UserContext';
 import logo from '/logo.png';
-import GastroniaChatbot from '../components/GastroniaChatbot'; // ⬅️ NUEVO
+import GastroniaChatbot from '../components/GastroniaChatbot';
 
 function Restaurants() {
   const { user } = useUser();
@@ -12,6 +12,8 @@ function Restaurants() {
   const [votaciones, setVotaciones] = useState([]);
   const [loading, setLoading] = useState(true);
   const [imagenes, setImagenes] = useState({});
+  const [modalVisible, setModalVisible] = useState(false);
+  const [imagenesModal, setImagenesModal] = useState([]);
 
   useEffect(() => {
     if (!user) return;
@@ -54,6 +56,11 @@ function Restaurants() {
 
   const handleVote = (id) => navigate(`/vote/${id}`);
   const handleRanking = () => navigate('/ranking');
+
+  const abrirModalImagenes = (id) => {
+    setImagenesModal(imagenes[id] || []);
+    setModalVisible(true);
+  };
 
   return (
     <div
@@ -136,8 +143,8 @@ function Restaurants() {
                     Fecha: {r.fecha ? new Date(r.fecha).toLocaleDateString() : 'Sin asignar'}
                   </p>
 
-                  {(r.carta_url || r.minuta_url) && (
-                    <div style={{ display: 'flex', gap: '0.8rem', marginBottom: '0.8rem' }}>
+                  {(r.carta_url || r.minuta_url || imagenesRest.length > 0) && (
+                    <div style={{ display: 'flex', gap: '0.8rem', marginBottom: '0.8rem', flexWrap: 'wrap' }}>
                       {r.carta_url && (
                         <a href={r.carta_url} target="_blank" rel="noopener noreferrer" style={miniBoton}>
                           Carta
@@ -148,24 +155,11 @@ function Restaurants() {
                           Minuta
                         </a>
                       )}
-                    </div>
-                  )}
-
-                  {imagenesRest.length > 0 && (
-                    <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.8rem' }}>
-                      {imagenesRest.slice(0, 3).map((img) => (
-                        <img
-                          key={img.name}
-                          src={`https://redojogbxdtqxqzxvyhp.supabase.co/storage/v1/object/public/imagenes/${r.id}/${img.name}`}
-                          alt={img.name}
-                          style={{
-                            width: '70px',
-                            height: '55px',
-                            objectFit: 'cover',
-                            borderRadius: '0.4rem',
-                          }}
-                        />
-                      ))}
+                      {imagenesRest.length > 0 && (
+                        <button onClick={() => abrirModalImagenes(r.id)} style={miniBoton}>
+                          Ver fotos
+                        </button>
+                      )}
                     </div>
                   )}
 
@@ -198,7 +192,24 @@ function Restaurants() {
           )}
         </div>
 
-        {/* ⬇️ Chatbot insertado aquí */}
+        {modalVisible && (
+          <div style={modalOverlay} onClick={() => setModalVisible(false)}>
+            <div style={modalContenido} onClick={(e) => e.stopPropagation()}>
+              <button onClick={() => setModalVisible(false)} style={botonCerrar}>✕</button>
+              <div style={galeriaMiniaturas}>
+                {imagenesModal.map((img) => (
+                  <img
+                    key={img.name}
+                    src={`https://redojogbxdtqxqzxvyhp.supabase.co/storage/v1/object/public/imagenes/${img.name.includes('/') ? img.name.split('/')[0] : ''}/${img.name}`}
+                    alt={img.name}
+                    style={miniatura}
+                  />
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
         <div style={{ marginTop: '2rem' }}>
           <GastroniaChatbot />
         </div>
@@ -217,6 +228,54 @@ const miniBoton = {
   fontSize: '0.9rem',
 };
 
+const modalOverlay = {
+  position: 'fixed',
+  top: 0,
+  left: 0,
+  right: 0,
+  bottom: 0,
+  backgroundColor: 'rgba(0,0,0,0.7)',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  zIndex: 1000,
+};
+
+const modalContenido = {
+  backgroundColor: '#fff',
+  padding: '1rem',
+  borderRadius: '1rem',
+  maxWidth: '90vw',
+  maxHeight: '80vh',
+  overflowY: 'auto',
+  position: 'relative',
+};
+
+const botonCerrar = {
+  position: 'absolute',
+  top: '0.5rem',
+  right: '0.5rem',
+  background: 'none',
+  border: 'none',
+  fontSize: '1.5rem',
+  cursor: 'pointer',
+};
+
+const galeriaMiniaturas = {
+  display: 'flex',
+  flexWrap: 'wrap',
+  gap: '0.5rem',
+  justifyContent: 'center',
+};
+
+const miniatura = {
+  width: '90px',
+  height: '60px',
+  objectFit: 'cover',
+  borderRadius: '0.5rem',
+};
+
 export default Restaurants;
+
 
 
