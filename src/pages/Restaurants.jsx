@@ -1,3 +1,4 @@
+// Archivo: Restaurants.jsx
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
@@ -47,7 +48,9 @@ function Restaurants() {
       const nuevoEstado = {};
       for (const r of restaurantes) {
         const { data } = await supabase.storage.from('imagenes').list(`${r.id}`);
-        nuevoEstado[r.id] = data || [];
+        if (data) {
+          nuevoEstado[r.id] = data.map((img) => `${r.id}/${img.name}`);
+        }
       }
       setImagenes(nuevoEstado);
     };
@@ -64,40 +67,12 @@ function Restaurants() {
   };
 
   return (
-    <div
-      style={{
-        minHeight: '100dvh',
-        backgroundColor: '#0070b8',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        padding: '2rem 1rem 0 1rem',
-      }}
-    >
-      <img
-        src={logo}
-        alt="Logo"
-        style={{ width: '140px', marginBottom: '1.5rem', objectFit: 'contain' }}
-      />
+    <div style={{ minHeight: '100dvh', backgroundColor: '#0070b8', display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '2rem 1rem 0 1rem' }}>
+      <img src={logo} alt="Logo" style={{ width: '140px', marginBottom: '1.5rem', objectFit: 'contain' }} />
 
-      <div
-        style={{
-          backgroundColor: '#fff',
-          height: 'auto',
-          width: '100%',
-          maxWidth: '420px',
-          borderTopLeftRadius: '2rem',
-          borderTopRightRadius: '2rem',
-          padding: '2rem 1.5rem',
-          boxShadow: '0 -4px 20px rgba(0,0,0,0.15)',
-          display: 'flex',
-          flexDirection: 'column',
-        }}
-      >
+      <div style={{ backgroundColor: '#fff', height: 'auto', width: '100%', maxWidth: '420px', borderTopLeftRadius: '2rem', borderTopRightRadius: '2rem', padding: '2rem 1.5rem', boxShadow: '0 -4px 20px rgba(0,0,0,0.15)', display: 'flex', flexDirection: 'column' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <h2 style={{ fontSize: '1.4rem', fontWeight: '700', color: '#222' }}>
-            Restaurantes
-          </h2>
+          <h2 style={{ fontSize: '1.4rem', fontWeight: '700', color: '#222' }}>Restaurantes</h2>
           <button onClick={handleRanking} style={miniBoton}>Ver ranking</button>
         </div>
 
@@ -111,54 +86,19 @@ function Restaurants() {
               const imagenesRest = imagenes[r.id] || [];
 
               return (
-                <div
-                  key={r.id}
-                  style={{
-                    backgroundColor: '#f9f9f9',
-                    borderRadius: '1rem',
-                    padding: '1rem',
-                    boxShadow: '0 1px 4px rgba(0,0,0,0.1)',
-                    borderLeft: `5px solid ${yaVotado ? '#28a745' : puedeVotar ? '#ffc107' : '#ccc'}`,
-                  }}
-                >
+                <div key={r.id} style={{ backgroundColor: '#f9f9f9', borderRadius: '1rem', padding: '1rem', boxShadow: '0 1px 4px rgba(0,0,0,0.1)', borderLeft: `5px solid ${yaVotado ? '#28a745' : puedeVotar ? '#ffc107' : '#ccc'}` }}>
                   <h3 style={{ marginBottom: '0.5rem', fontSize: '1.1rem', fontWeight: '600' }}>{r.nombre}</h3>
-                  <p style={{ fontSize: '0.95rem', marginBottom: '0.5rem' }}>
-                    Fecha: {r.fecha ? new Date(r.fecha).toLocaleDateString() : 'Sin asignar'}
-                  </p>
+                  <p style={{ fontSize: '0.95rem', marginBottom: '0.5rem' }}>Fecha: {r.fecha ? new Date(r.fecha).toLocaleDateString() : 'Sin asignar'}</p>
 
                   {(r.carta_url || r.minuta_url || imagenesRest.length > 0) && (
                     <div style={{ display: 'flex', gap: '0.8rem', marginBottom: '0.8rem', flexWrap: 'wrap' }}>
-                      {r.carta_url && (
-                        <a href={r.carta_url} target="_blank" rel="noopener noreferrer" style={miniBoton}>Carta</a>
-                      )}
-                      {r.minuta_url && (
-                        <a href={r.minuta_url} target="_blank" rel="noopener noreferrer" style={miniBoton}>Minuta</a>
-                      )}
-                      {imagenesRest.length > 0 && (
-                        <button onClick={() => abrirModalImagenes(r.id)} style={miniBoton}>Ver fotos</button>
-                      )}
+                      {r.carta_url && <a href={r.carta_url} target="_blank" rel="noopener noreferrer" style={miniBoton}>Carta</a>}
+                      {r.minuta_url && <a href={r.minuta_url} target="_blank" rel="noopener noreferrer" style={miniBoton}>Minuta</a>}
+                      {imagenesRest.length > 0 && <button onClick={() => abrirModalImagenes(r.id)} style={miniBoton}>Ver fotos</button>}
                     </div>
                   )}
 
-                  <button
-                    onClick={() => !yaVotado && puedeVotar && handleVote(r.id)}
-                    disabled={yaVotado || !puedeVotar}
-                    style={{
-                      width: '100%',
-                      height: '48px',
-                      backgroundColor: yaVotado ? '#6c757d' : puedeVotar ? '#0070b8' : '#ccc',
-                      color: '#fff',
-                      fontWeight: 'bold',
-                      fontSize: '1rem',
-                      border: 'none',
-                      borderRadius: '0.5rem',
-                      cursor: yaVotado || !puedeVotar ? 'not-allowed' : 'pointer',
-                      opacity: yaVotado || !puedeVotar ? 0.6 : 1,
-                      transition: 'all 0.3s',
-                    }}
-                  >
-                    {yaVotado ? 'Ya votado' : puedeVotar ? 'Votar' : 'No asististe'}
-                  </button>
+                  <button onClick={() => !yaVotado && puedeVotar && handleVote(r.id)} disabled={yaVotado || !puedeVotar} style={{ width: '100%', height: '48px', backgroundColor: yaVotado ? '#6c757d' : puedeVotar ? '#0070b8' : '#ccc', color: '#fff', fontWeight: 'bold', fontSize: '1rem', border: 'none', borderRadius: '0.5rem', cursor: yaVotado || !puedeVotar ? 'not-allowed' : 'pointer', opacity: yaVotado || !puedeVotar ? 0.6 : 1, transition: 'all 0.3s' }}>{yaVotado ? 'Ya votado' : puedeVotar ? 'Votar' : 'No asististe'}</button>
                 </div>
               );
             })
@@ -170,13 +110,13 @@ function Restaurants() {
             <div style={modalContenido} onClick={(e) => e.stopPropagation()}>
               <button onClick={() => setModalVisible(false)} style={botonCerrar}>✕</button>
               <div style={galeriaMiniaturas}>
-                {imagenesModal.map((img) => (
+                {imagenesModal.map((rutaCompleta) => (
                   <img
-                    key={img.name}
-                    src={`https://redojogbxdtqxqzxvyhp.supabase.co/storage/v1/object/public/imagenes/${img.name.includes('/') ? img.name.split('/')[0] : ''}/${img.name}`}
-                    alt={img.name}
+                    key={rutaCompleta}
+                    src={`https://redojogbxdtqxqzxvyhp.supabase.co/storage/v1/object/public/imagenes/${rutaCompleta}`}
+                    alt={rutaCompleta}
                     style={miniatura}
-                    onClick={() => setFotoSeleccionada(img.name)}
+                    onClick={() => setFotoSeleccionada(rutaCompleta)}
                   />
                 ))}
               </div>
@@ -187,7 +127,7 @@ function Restaurants() {
         {fotoSeleccionada && (
           <div style={fullscreenOverlay} onClick={() => setFotoSeleccionada(null)}>
             <img
-              src={`https://redojogbxdtqxqzxvyhp.supabase.co/storage/v1/object/public/imagenes/${fotoSeleccionada.includes('/') ? fotoSeleccionada.split('/')[0] : ''}/${fotoSeleccionada}`}
+              src={`https://redojogbxdtqxqzxvyhp.supabase.co/storage/v1/object/public/imagenes/${fotoSeleccionada}`}
               alt="foto"
               style={imagenGrande}
             />
@@ -277,6 +217,7 @@ const imagenGrande = {
 };
 
 export default Restaurants;
+
 
 
 
