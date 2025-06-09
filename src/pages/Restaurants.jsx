@@ -14,6 +14,7 @@ function Restaurants() {
   const [imagenes, setImagenes] = useState({});
   const [modalVisible, setModalVisible] = useState(false);
   const [imagenesModal, setImagenesModal] = useState([]);
+  const [fotoSeleccionada, setFotoSeleccionada] = useState(null);
 
   useEffect(() => {
     if (!user) return;
@@ -97,21 +98,7 @@ function Restaurants() {
           <h2 style={{ fontSize: '1.4rem', fontWeight: '700', color: '#222' }}>
             Restaurantes
           </h2>
-          <button
-            onClick={handleRanking}
-            style={{
-              backgroundColor: '#B48C59',
-              padding: '0.4rem 0.9rem',
-              borderRadius: '0.5rem',
-              border: 'none',
-              fontWeight: 'bold',
-              color: '#fff',
-              cursor: 'pointer',
-              fontSize: '0.9rem',
-            }}
-          >
-            Ver ranking
-          </button>
+          <button onClick={handleRanking} style={miniBoton}>Ver ranking</button>
         </div>
 
         <div style={{ marginTop: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
@@ -131,14 +118,10 @@ function Restaurants() {
                     borderRadius: '1rem',
                     padding: '1rem',
                     boxShadow: '0 1px 4px rgba(0,0,0,0.1)',
-                    borderLeft: `5px solid ${
-                      yaVotado ? '#28a745' : puedeVotar ? '#ffc107' : '#ccc'
-                    }`,
+                    borderLeft: `5px solid ${yaVotado ? '#28a745' : puedeVotar ? '#ffc107' : '#ccc'}`,
                   }}
                 >
-                  <h3 style={{ marginBottom: '0.5rem', fontSize: '1.1rem', fontWeight: '600' }}>
-                    {r.nombre}
-                  </h3>
+                  <h3 style={{ marginBottom: '0.5rem', fontSize: '1.1rem', fontWeight: '600' }}>{r.nombre}</h3>
                   <p style={{ fontSize: '0.95rem', marginBottom: '0.5rem' }}>
                     Fecha: {r.fecha ? new Date(r.fecha).toLocaleDateString() : 'Sin asignar'}
                   </p>
@@ -146,19 +129,13 @@ function Restaurants() {
                   {(r.carta_url || r.minuta_url || imagenesRest.length > 0) && (
                     <div style={{ display: 'flex', gap: '0.8rem', marginBottom: '0.8rem', flexWrap: 'wrap' }}>
                       {r.carta_url && (
-                        <a href={r.carta_url} target="_blank" rel="noopener noreferrer" style={miniBoton}>
-                          Carta
-                        </a>
+                        <a href={r.carta_url} target="_blank" rel="noopener noreferrer" style={miniBoton}>Carta</a>
                       )}
                       {r.minuta_url && (
-                        <a href={r.minuta_url} target="_blank" rel="noopener noreferrer" style={miniBoton}>
-                          Minuta
-                        </a>
+                        <a href={r.minuta_url} target="_blank" rel="noopener noreferrer" style={miniBoton}>Minuta</a>
                       )}
                       {imagenesRest.length > 0 && (
-                        <button onClick={() => abrirModalImagenes(r.id)} style={miniBoton}>
-                          Ver fotos
-                        </button>
+                        <button onClick={() => abrirModalImagenes(r.id)} style={miniBoton}>Ver fotos</button>
                       )}
                     </div>
                   )}
@@ -169,11 +146,7 @@ function Restaurants() {
                     style={{
                       width: '100%',
                       height: '48px',
-                      backgroundColor: yaVotado
-                        ? '#6c757d'
-                        : puedeVotar
-                        ? '#0070b8'
-                        : '#ccc',
+                      backgroundColor: yaVotado ? '#6c757d' : puedeVotar ? '#0070b8' : '#ccc',
                       color: '#fff',
                       fontWeight: 'bold',
                       fontSize: '1rem',
@@ -203,10 +176,21 @@ function Restaurants() {
                     src={`https://redojogbxdtqxqzxvyhp.supabase.co/storage/v1/object/public/imagenes/${img.name.includes('/') ? img.name.split('/')[0] : ''}/${img.name}`}
                     alt={img.name}
                     style={miniatura}
+                    onClick={() => setFotoSeleccionada(img.name)}
                   />
                 ))}
               </div>
             </div>
+          </div>
+        )}
+
+        {fotoSeleccionada && (
+          <div style={fullscreenOverlay} onClick={() => setFotoSeleccionada(null)}>
+            <img
+              src={`https://redojogbxdtqxqzxvyhp.supabase.co/storage/v1/object/public/imagenes/${fotoSeleccionada.includes('/') ? fotoSeleccionada.split('/')[0] : ''}/${fotoSeleccionada}`}
+              alt="foto"
+              style={imagenGrande}
+            />
           </div>
         )}
 
@@ -273,9 +257,27 @@ const miniatura = {
   height: '60px',
   objectFit: 'cover',
   borderRadius: '0.5rem',
+  cursor: 'pointer',
+};
+
+const fullscreenOverlay = {
+  position: 'fixed',
+  top: 0, left: 0, right: 0, bottom: 0,
+  backgroundColor: 'rgba(0,0,0,0.9)',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  zIndex: 1100,
+};
+
+const imagenGrande = {
+  maxWidth: '95%',
+  maxHeight: '90%',
+  borderRadius: '1rem',
 };
 
 export default Restaurants;
+
 
 
 
