@@ -1,4 +1,5 @@
-// Archivo: Restaurants.jsx
+// Archivo completo: Restaurants.jsx con scroll lateral en fotos ampliadas y funcionalidad completa
+
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
@@ -15,7 +16,7 @@ function Restaurants() {
   const [imagenes, setImagenes] = useState({});
   const [modalVisible, setModalVisible] = useState(false);
   const [imagenesModal, setImagenesModal] = useState([]);
-  const [fotoSeleccionada, setFotoSeleccionada] = useState(null);
+  const [fotoSeleccionadaIndex, setFotoSeleccionadaIndex] = useState(null);
 
   useEffect(() => {
     if (!user) return;
@@ -64,13 +65,23 @@ function Restaurants() {
   const abrirModalImagenes = (id) => {
     setImagenesModal(imagenes[id] || []);
     setModalVisible(true);
+    setFotoSeleccionadaIndex(null);
+  };
+
+  const cambiarImagen = (direccion) => {
+    setFotoSeleccionadaIndex((prev) => {
+      if (prev === null) return 0;
+      const nuevo = prev + direccion;
+      if (nuevo < 0 || nuevo >= imagenesModal.length) return prev;
+      return nuevo;
+    });
   };
 
   return (
     <div style={{ minHeight: '100dvh', backgroundColor: '#0070b8', display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '2rem 1rem 0 1rem' }}>
       <img src={logo} alt="Logo" style={{ width: '140px', marginBottom: '1.5rem', objectFit: 'contain' }} />
 
-      <div style={{ backgroundColor: '#fff', height: 'auto', width: '100%', maxWidth: '420px', borderTopLeftRadius: '2rem', borderTopRightRadius: '2rem', padding: '2rem 1.5rem', boxShadow: '0 -4px 20px rgba(0,0,0,0.15)', display: 'flex', flexDirection: 'column' }}>
+      <div style={{ backgroundColor: '#fff', width: '100%', maxWidth: '420px', borderTopLeftRadius: '2rem', borderTopRightRadius: '2rem', padding: '2rem 1.5rem', boxShadow: '0 -4px 20px rgba(0,0,0,0.15)', display: 'flex', flexDirection: 'column' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <h2 style={{ fontSize: '1.4rem', fontWeight: '700', color: '#222' }}>Restaurantes</h2>
           <button onClick={handleRanking} style={miniBoton}>Ver ranking</button>
@@ -110,13 +121,13 @@ function Restaurants() {
             <div style={modalContenido} onClick={(e) => e.stopPropagation()}>
               <button onClick={() => setModalVisible(false)} style={botonCerrar}>✕</button>
               <div style={galeriaMiniaturas}>
-                {imagenesModal.map((rutaCompleta) => (
+                {imagenesModal.map((rutaCompleta, index) => (
                   <img
                     key={rutaCompleta}
                     src={`https://redojogbxdtqxqzxvyhp.supabase.co/storage/v1/object/public/imagenes/${rutaCompleta}`}
                     alt={rutaCompleta}
                     style={miniatura}
-                    onClick={() => setFotoSeleccionada(rutaCompleta)}
+                    onClick={() => setFotoSeleccionadaIndex(index)}
                   />
                 ))}
               </div>
@@ -124,13 +135,15 @@ function Restaurants() {
           </div>
         )}
 
-        {fotoSeleccionada && (
-          <div style={fullscreenOverlay} onClick={() => setFotoSeleccionada(null)}>
+        {fotoSeleccionadaIndex !== null && (
+          <div style={fullscreenOverlay} onClick={() => setFotoSeleccionadaIndex(null)}>
+            <button onClick={(e) => { e.stopPropagation(); cambiarImagen(-1); }} style={navButtonLeft}>‹</button>
             <img
-              src={`https://redojogbxdtqxqzxvyhp.supabase.co/storage/v1/object/public/imagenes/${fotoSeleccionada}`}
+              src={`https://redojogbxdtqxqzxvyhp.supabase.co/storage/v1/object/public/imagenes/${imagenesModal[fotoSeleccionadaIndex]}`}
               alt="foto"
               style={imagenGrande}
             />
+            <button onClick={(e) => { e.stopPropagation(); cambiarImagen(1); }} style={navButtonRight}>›</button>
           </div>
         )}
 
@@ -153,67 +166,41 @@ const miniBoton = {
 };
 
 const modalOverlay = {
-  position: 'fixed',
-  top: 0,
-  left: 0,
-  right: 0,
-  bottom: 0,
-  backgroundColor: 'rgba(0,0,0,0.7)',
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  zIndex: 1000,
+  position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+  backgroundColor: 'rgba(0,0,0,0.7)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000,
 };
 
 const modalContenido = {
-  backgroundColor: '#fff',
-  padding: '1rem',
-  borderRadius: '1rem',
-  maxWidth: '90vw',
-  maxHeight: '80vh',
-  overflowY: 'auto',
-  position: 'relative',
+  backgroundColor: '#fff', padding: '1rem', borderRadius: '1rem', maxWidth: '90vw', maxHeight: '80vh', overflowY: 'auto', position: 'relative',
 };
 
 const botonCerrar = {
-  position: 'absolute',
-  top: '0.5rem',
-  right: '0.5rem',
-  background: 'none',
-  border: 'none',
-  fontSize: '1.5rem',
-  cursor: 'pointer',
+  position: 'absolute', top: '0.5rem', right: '0.5rem', background: 'none', border: 'none', fontSize: '1.5rem', cursor: 'pointer',
 };
 
 const galeriaMiniaturas = {
-  display: 'flex',
-  flexWrap: 'wrap',
-  gap: '0.5rem',
-  justifyContent: 'center',
+  display: 'flex', flexWrap: 'wrap', gap: '0.5rem', justifyContent: 'center',
 };
 
 const miniatura = {
-  width: '90px',
-  height: '60px',
-  objectFit: 'cover',
-  borderRadius: '0.5rem',
-  cursor: 'pointer',
+  width: '90px', height: '60px', objectFit: 'cover', borderRadius: '0.5rem', cursor: 'pointer',
 };
 
 const fullscreenOverlay = {
-  position: 'fixed',
-  top: 0, left: 0, right: 0, bottom: 0,
-  backgroundColor: 'rgba(0,0,0,0.9)',
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  zIndex: 1100,
+  position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+  backgroundColor: 'rgba(0,0,0,0.9)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1100,
 };
 
 const imagenGrande = {
-  maxWidth: '95%',
-  maxHeight: '90%',
-  borderRadius: '1rem',
+  maxWidth: '95%', maxHeight: '90%', borderRadius: '1rem',
+};
+
+const navButtonLeft = {
+  position: 'absolute', left: '1rem', fontSize: '2rem', color: '#fff', background: 'none', border: 'none', cursor: 'pointer', zIndex: 1200,
+};
+
+const navButtonRight = {
+  position: 'absolute', right: '1rem', fontSize: '2rem', color: '#fff', background: 'none', border: 'none', cursor: 'pointer', zIndex: 1200,
 };
 
 export default Restaurants;
